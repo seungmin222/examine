@@ -1,0 +1,678 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #ffcfea; /*#ffc0cb*/
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0    ;
+    color: gray;
+    padding-top: 70px; /* ✅ 상단바 공간 확보 */
+
+  }
+
+  h1 {
+      font-size: 2em;       /* 약 32px (보통 브라우저 기본) */
+      font-weight: bold;
+      margin: 0.67em 0;
+    }
+
+  h2 {
+      font-size: 1.5em;     /* 약 24px */
+      font-weight: bold;
+      margin: 0.75em 0;
+    }
+
+  h3 {
+      font-size: 1.17em;    /* 약 18.72px */
+      font-weight: bold;
+      margin: 0.83em 0;
+    }
+
+  h4 {
+      font-size: 1em;       /* 16px */
+      font-weight: bold;
+      margin: 1.12em 0;
+    }
+
+  h5 {
+      font-size: 0.83em;    /* 약 13.28px */
+      font-weight: bold;
+      margin: 1.5em 0;
+    }
+
+  h6 {
+      font-size: 0.67em;    /* 약 10.72px */
+      font-weight: bold;
+      margin: 1.67em 0;
+    }
+
+  li,
+  input,
+  select,
+  button,
+  textarea
+   {
+    color: gray;
+    width: 80px;
+    height: 36px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ff6a9c;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  select {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+
+  span.border{
+     height: 36px;
+     padding: 8px;
+     border-radius: 6px;
+     border: 1px solid #ff6a9c;
+     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+     font-family: inherit;
+     box-sizing: border-box;
+     line-height: 1.2;
+  }
+
+  li {
+     cursor: pointer;
+  }
+
+  h2{
+    color: #ff00ff;
+    scroll-margin-top:70px;
+    border-bottom: 2px solid #ccc;
+  }
+
+
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    background-color: #ffcfea;
+    padding: 2rem;
+    gap: 0rem;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .modal-inner {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-direction: row-reverse; /* ✅ 순서 반전 */
+    border: 2px solid #ff6a9c;
+    border-radius: 12px;
+    padding: 8px;
+    text-align: left;
+    background-color:white;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .modal-inner select {
+     position: static;
+     width: 26px;
+     appearance: none;
+     -webkit-appearance: none; /* Safari */
+     -moz-appearance: none;    /* Firefox */
+      padding-top: 0;
+      line-height: 2.0;
+      height: 30px;
+      display: inline-block;
+      vertical-align: middle;
+      margin:0;
+      top:auto;/* .modal top이 덮어씌워짐*/
+      left:auto;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    z-index: 1000;
+  }
+
+  .menu{
+    position: absolute;
+    background-color:white;
+    margin-top:0;
+    align-items: center;
+    border: 2px solid #ff6a9c;
+    border-radius: 12px;
+    border-color: rgb(206 212 218 / var(--tw-border-opacity, 1));
+    border-width: 1px;
+    padding: 8px;
+    text-align: left;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .menu a{
+    color: #ff00ff;
+  }
+
+  .checkbox {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 0.3rem;
+       width:100%;
+       overflow: hidden;
+  }
+  .checkbox label{
+       width : 200px;
+  }
+
+  table {
+    width: 100%;
+    border: 2px solid #ff6a9c;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    background-color:white;
+  }
+
+
+  th, td {
+    background-color: white;
+    border: 1px solid #ff6a9c;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #ffe4ec;
+  }
+
+  tbody tr:hover td, tr:hover td span {
+    background-color: #ffe4ec;
+  }
+
+  input[type="checkbox"], input[type="radio"]{
+    appearance: none;               /* 브라우저 기본 스타일 제거 */
+    -webkit-appearance: none;       /* Safari용 */
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ff6a9c;      /* ✅ 분홍색 테두리 */
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    margin: 0px 6px 0 0;
+  }
+
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked
+  {
+    background-color: #ff6a9c;
+  }
+
+  label input[type="checkbox"]:checked + span,
+  label input[type="radio"]:checked + span
+  {
+    color: #ff00ff;
+  }
+
+
+  .modal-inner span {
+    flex: 1;               /* 남은 공간 차지 */
+    text-align: center;    /* 가운데 정렬 */
+  }
+
+  input:focus,textarea:focus {
+    outline: none;
+    border: 2px solid #ff8fb1;
+    background-color: #fff0f5;
+  }
+
+  .long, textarea{
+    width: 200px;
+  }
+
+  textarea{
+  height: 300px;
+  }
+
+  textarea.content{
+    width: auto;
+    height: auto;
+  }
+
+  .xl{
+    width: 1000px;
+  }
+
+  textarea.xl{
+    height:400px;
+  }
+
+  button,
+  [type='button'],
+  [type='submit'],
+  [type='reset'] {
+    background-color: hotpink;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    line-height: 1.2;
+  }
+  button:hover {
+    background-color: #ff6a9c;
+  }
+
+  button:toggle {
+    background-color: red;
+  }
+
+  .mini {
+    width:50px;
+  }
+
+
+  .gray {
+
+    color: gray;
+
+  }
+
+  button.dropdown {
+    width:auto;
+    height:40px;
+    text-align: left;
+    background-color:white;
+    box-shadow: none;
+    color: hotpink;
+    font-size: 1.3rem;
+    font-weight: bold;
+    display: flex;
+    margin-top:0;
+    margin-bottom:10px;
+  }
+
+
+  button.dropdown:hover{
+    background-color:white;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+  }
+
+  ul {
+   display: grid;
+    background-color: #ffcfea;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
+
+  ul.detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* 간격 */
+  }
+
+  li{
+   width : 160px;
+   background-color: white;
+   text-align: center;
+   padding : 0.4rem;
+   margin-bottom: 0px;
+  }
+
+  li:hover {
+    background-color: #ffe4ec;
+    cursor: pointer;
+  }
+  li.selected {
+    background-color: #DDA0DD; /* 연한 빨강핑크 */
+    font-weight: bold;
+    color: #333;
+  }
+  li.detail{
+     width:auto;
+  }
+
+
+  span {
+    scroll-margin-top:70px;
+    background-color: white;
+    width: auto;
+    height: auto;
+  }
+
+
+  p {
+    display: block;
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 12px;
+    line-height: 1.6;
+    width: 100%;
+    word-break: break-word;
+    text-align:left;
+    margin: 0 auto;
+  }
+  a {
+    text-decoration: none;      /* 밑줄 제거 */
+    color: #ff00ff;             /* 분홍색 (HotPink) */
+    font-weight: bold;          /* 선택 사항: 강조 */
+  }
+
+  a.note{
+      font-size: 0.7em;           /* 작게 */
+      vertical-align: super;      /* 위첨자 위치로 */
+  }
+
+  a:hover {
+    color: #ff1493;             /* 더 진한 분홍 (DeepPink) */
+    text-decoration: underline; /* 마우스 오버 시 밑줄 다시 표시하고 싶다면 */
+  }
+
+  a.index {
+     display: flex;             /* ✅ 핵심 */
+     align-items: center;       /* 세로 가운데 */
+     justify-content: center;   /* (옵션) 가로 가운데 */
+     height: 40px;
+     font: inherit;
+     background-color: transparent;
+     cursor: pointer;
+     box-shadow: none;
+     text-align: center;
+  }
+
+  a.logo {
+     display: block;
+     font-size: 1.3rem;
+     font-weight: bold;
+     color: hotpink;
+     text-decoration: none;
+   }
+
+  .edit-group {
+    display: flex;
+    flex-direction: column; /* ✅ 세로 정렬 */
+    align-items: center;    /* ✅ 버튼들을 가운데로 모음 */
+  }
+
+  .edit-group button{
+    margin-bottom: 6px;
+  }
+
+  .edit-group button:last-child{
+    margin-bottom: 0;
+  }
+
+  .center{
+     text-align: center;
+     align-items: center;
+  }
+  /* 툴팁 박스 */
+
+  .tooltip {
+    position: relative;
+  }
+
+  .tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    z-index: 9999;
+    background-color: #ffcfea;
+    font-size: 13px;
+    border-radius: 6px;
+    display: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: max-content;
+    height: auto;
+    overflow-wrap: break-word;
+    padding: 5px;
+    white-space: pre-wrap;
+  }
+
+  /* 위치: 위 (기본) */
+  .tooltip[data-position="top"]::after {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+  }
+
+  /* 위치: 오른쪽 */
+  .tooltip[data-position="right"]::after {
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%) translateX(0);
+  }
+  /* 꼬리 (삼각형) */
+  .tooltip::before {
+    content: "";
+    position: absolute;
+    border-style: solid;
+    z-index: 10000;
+    display: none;
+  }
+
+  /* 꼬리: 본문 아래에, 아래 방향 삼각형 (▼) */
+  .tooltip[data-position="top"]::before {
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-1px);
+    border-width: 10px 10px 0 10px;
+    border-color: #ffcfea transparent transparent transparent;
+  }
+
+
+  .tooltip[data-position="right"]::before {
+     top: 50%;
+     left: 100%;  /* ❗️ 툴팁 본문 왼쪽에 붙이기 */
+     transform: translateY(-50%) translateX(-100%); /* 꼬리가 왼쪽으로 튀어나오도록 */
+     border-width: 10px 10px 10px 0;
+     border-color: transparent #ffcfea transparent transparent;
+  }
+
+
+  /* 마우스 올릴 때 둘 다 보이게 */
+  .tooltip:hover::after,
+  .tooltip:hover::before {
+    display: block;
+  }
+
+  /* 툴팁이 잘리지 않도록 조정 */
+  table,
+  thead,
+  tbody,
+  tr,
+  td,
+  th {
+    overflow: visible;
+  }
+
+  nav.navbar {
+      display: flex;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: white;
+      border-bottom: 2px solid #eee;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+      z-index: 999;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+
+  .navbar-left {
+    display: flex;
+    gap : 1.5rem;
+  }
+
+  .navbar-right {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: 2rem;
+
+    flex-wrap: wrap;    /* 줄바꿈 허용 시 유연하게 줄바꿈되도록 */
+  }
+
+  nav.sidebar {
+    position: fixed;       /* 화면에 고정 */
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    height: 100vh;         /* 전체 높이 */
+    width: 10%;          /* 너비 */
+    background-color: #f8f8f8;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column; /* 수직 정렬 */
+    gap: 1rem;              /* 항목 간 간격 */
+    overflow-y: auto;
+  }
+
+
+
+   .logo-icon {
+     width: 24px;
+     height: 24px;
+     object-fit: contain;
+     vertical-align: middle;
+     margin-right: 4px;
+     margin-top: 3px;
+   }
+
+  .flex-end{
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .column {
+    flex-direction: column;
+  }
+
+  .hide{
+   display: none !important;
+  }
+
+  .auto{
+     width:auto;
+     height:auto;
+  }
+
+
+  .jump {
+    margin-top:1.5rem;
+    margin-bottom:1.5rem;
+  }
+
+  .text{
+   background-color: white;
+   width:100%;
+   height: auto;
+   border-radius:12px;
+   margin: 0 auto;
+   padding: 3rem;
+   box-sizing: border-box;
+  }
+
+  .A{
+  color:blue;
+  }
+
+  .B{
+  color:red;
+  }
+
+  .C{
+  color: magenta;
+  }
+
+  .D{
+  color: green;
+  }
+
+  .F, .null {
+  color:gray;
+  }
+
+  .scroll {
+    position: fixed;       /* 화면 우측 하단 고정 */
+    bottom: 2rem;
+    right: 2%;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column; /* ✅ 수직 정렬 */
+    gap: 0.5rem;              /* 버튼 사이 간격 */
+   }
+
+   .scroll button{
+      width: 40px;
+      height: 40px;
+      background-color: rgba(186, 104, 200, 0.5); /* 연보라, 50% 투명도 */
+   }
+
+  .scroll button .icon-wrapper {
+    position: relative;   /* ✅ 내부 SVG용 기준 */
+  }
+
+  .reverse{
+      transform: rotate(180deg);
+  }
+
+  div.line{
+    border-top: 1px solid #777;
+    margin: 1.5em 0;
+    padding: 0.5em 0;
+  }
+
+  div.side-box{
+    display:flex;
+    gap:2rem;
+  }
+
+  img{
+    object-fit: contain;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  form.left-form {
+    align-items: start;
+  }
+
+  .grid-4{
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+  }
+
+
+}
+
+

@@ -28,19 +28,13 @@ public class EffectTag {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setName(String name) { this.name = name; }
 
     @OneToMany(mappedBy = "effectTag", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<SupplementEffect> supplementMappings = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "effect_pubmed",
-            joinColumns = @JoinColumn(name = "effect_tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "pubmed_id")
-    )
-    @JsonIgnore
-    private List<Pubmed> pubmeds = new ArrayList<>();
+    public List<SupplementEffect> getSupplementMappings(){ return supplementMappings; }
+
+    public void setSupplementMappings(List<SupplementEffect> supplementMappings) { this.supplementMappings = supplementMappings; }
 }

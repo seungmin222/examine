@@ -4,13 +4,14 @@
     <meta charset="UTF-8"/>
     <title id="title"></title>
     <link rel="stylesheet" href="/style.css" />
-    <link rel="icon" type="image/png" href="/image/icon3.png" />
+    <link rel="icon" type="image/png" href="/image/icon.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
 <!--네비게이션 바-->
-<div id="navbar"></div>
-
+<div id="load-basic"></div>
+<div id="main-content">
 <h1 id="name"></h1>
 <div class="section-header">
     <ul class="detail" id="supplement-info">
@@ -54,6 +55,7 @@
 <ul id="product-list" class="long">
     <!--브랜드, 비용, 링크 나열-->
 </ul>
-<script src="/detail.js"></script>
+</div>
+<script type="module" src="/detail.js"></script>
 </body>
 </html>

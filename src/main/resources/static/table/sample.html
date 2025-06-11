@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>목록 관리</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" type="image/png" href="../image/icon.png" />
+
+</head>
+<body>
+
+<!--기초 로딩-->
+<div id="load-basic"></div>
+<div id="background">
+<div id="main-content">
+    <div class="section-header">
+        <h2 id="index-1">리스트</h2>
+        <!-- 검색 폼 -->
+        <form id="search-form" class="wide-form">
+            <input name="input" id="search-input" type="text" class="long" placeholder="검색" />
+            <button type="submit">검색</button>
+            <button id="toggle-change">수정</button>
+            <button id="toggle-delete">삭제</button>
+            <button id="toggle-fold">접기</button>
+            <select name="typeId" id="list-sort">
+                <option value="title">제목순</option>
+                <option value="date">최신순</option>
+            </select>
+        </form>
+    </div>
+    <!--리스트 테이블-->
+    <table id="content-1">
+        <thead>
+        <tr>
+            <th></th>
+        </tr>
+        </thead>
+        <!--js로 랜더링-->
+        <tbody id="journal-body"></tbody>
+    </table>
+
+    <!-- 리스트 추가, 태그 목록 -->
+    <div name="journal-container" class="container">
+        <!-- 리스트 추가 폼-->
+        <form id="insert-form">
+            <h2 id="index-2" class="center">추가</h2>
+            <input name="" placeholder="" class="long"/>
+            <select name="">
+                <option value=""></option>
+            </select>
+            <button type="button" id="modal-open">태그 선택</button>
+            <button type="submit">추가</button>
+        </form>
+
+        <!--태그 목록-->
+        <div class="list">
+            <h2 class="center"></h2>
+            <ul id="-list" class="tag"></ul>
+        </div>
+        <div id="tag-controller"></div>
+    </div>
+</div>
+
+<!--모달-->
+<div id="modal" class="modal" >
+    <div class="modal-content">
+        <div>
+            <h3 class="center"></h3>
+            <select id="" class="long"></select>
+        </div>
+        <div>
+            <h3 class="center"></h3>
+            <div id="-checkboxes" class="checkbox"></div>
+        </div>
+        <div id="modal-controller"></div>
+    </div>
+</div>
+</div>
+<script type="module" src="sample.js"></script>
+</body>
+</html>

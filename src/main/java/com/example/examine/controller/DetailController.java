@@ -62,10 +62,10 @@ public class DetailController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}/pubmeds")
-    public List<Pubmed> getPubmedsForSupplement(@PathVariable Long id) {
+    @GetMapping("/{id}/journals")
+    public List<Journal> getJournals(@PathVariable Long id) {
         Optional<Supplement> opt = supplementRepo.findById(id);
-        return opt.map(Supplement::getPubmeds).orElse(List.of());
+        return opt.map(Supplement::getJournals).orElse(List.of());
     }
 
 }

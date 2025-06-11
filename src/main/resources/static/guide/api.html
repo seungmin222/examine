@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>api 설명</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" type="image/png" href="../image/icon.png" />
+
+</head>
+<body>
+<div id="load-basic"></div>
+<div id="background">
+    <div id="main-content">
+        <div class="section-header">
+
+        </div>
+        <div class="text">
+            <div class="jump">
+                <h2 id="index-1" class="head">
+                    근거수준이란?
+                </h2>
+                <div id="content-1" class="side-box">
+                    <div>
+                        <p>
+                            근거 수준은 근거중심의학에서 의료적인 판단을 내릴 때 사용하는 근거의 신뢰도를 의미한다.
+                        </p>
+                        <p>
+                            흔히 근거 기반 피라미드라는 그림으로 설명되며 현대 의학에서 매우 중요한 기준으로 사용되지만
+                            당연히 연구 규모(참가자, 기간 등) 등 다른 기준도 고려해야 한다.
+                        </p>
+                        <p>
+                            다만 보충제 연구는 마이너한 분야이기 때문에 근거 수준이 높은 연구들이 적다.
+                            따라서 근거 수준이 낮은 연구들도 여전히 일정한 가치를 가진다.  (ex) ITP 쥐 수명 증가 실험
+                        </p>
+                    </div>
+                    <img src="../image/pyramid4.png"  style="width:250px;">
+                </div>
+
+            </div>
+            <div class="jump">
+                <h2 id="index-2" class="head">
+                    문헌 고찰
+                </h2>
+                <div id="content-2">
+                    <p><span class="A">문헌 고찰</span>은 직접적으로 실험을 하지 않고 각종 연구 자료들을 취합해 분석 및 고찰하는 것이다.</p>
+                    <p>여러 연구들의 상충을 없애 단일한 결론을 낼 수 있으며 표본의 수가 비약적으로 늘어나기에 통계적 신뢰도가 매우 높다.</p>
+                    <p>다만 연구들을 확증편향에 따라 취사선택할 위험이 있기에 고르는 명확한 기준이 있어야 하며 또 이 기준이 지나치게 높으면 일반화가 어렵고 낮으면 신뢰도가 낮아지기에 적절한 조절이 필요하다.</p>
+                    <p>대표적으로 <span class="A">체계적 고찰(Systematic Review)</span>이 이에 해당하며 여기서 한단계 나아가 보다 구체적으로 수치화한 결론을 낸게 <span class="A">메타분석(Meta-analysis)</span>이다.</p>
+                    <p>이 사이트에서도 간단한 공식<span id="inote-1" class="tooltip"><a class="note" href="#note-1">[1]</a></span>으로 대략적인 티어를 논문별로 나누고 그것들을 산술 평균내서 성분별로 티어를 만들었지만 실제로 문헌을 분석하는 과정은 훨씬 복잡하고 공식화 할 수 없기에(편향 등 수치화 하기 어려운 것도 고려해야함) 이건 재미로만 보고 메타분석 논문이나 examine.com의 Grade, 혹은 본인이 직접 분석하는 것이 훨씬 정확하다.</p>
+                </div>
+                <div class="jump">
+                    <h2 id="index-3" class="head">
+                        임상시험
+                    </h2>
+                    <div id="content-3">
+                        <p><span class="B">임상시험</span>은 연구자가 개입하여 특정한 치료나 약물을 피험자에게 할당하고, 그 효과를 비교하는 연구 방식이다.</p>
+                        <p>가장 대표적인 방식은 <span class="B">무작위 대조 시험(Randomized Controlled Trial, RCT)</span>으로, 연구 대상자들을 무작위로 분류해 실험군과 대조군에 배정하며, 치료 효과의 인과관계를 가장 신뢰도 높게 입증할 수 있다. 이와 달리, <span class="B">비무작위 시험(Non-RCT)</span>은 연구자가 개입은 하지만 피험자 배정이 무작위가 아니라 연구자의 판단이나 환자 선택에 따라 이뤄지므로, 편향 가능성이 상대적으로 더 크다.</p>
+                        <p>RCT(Non-RCT 포함)는 단일 연구 설계 중 근거 수준이 가장 높은 것으로 간주되며, 다양한 설계 특성을 갖는다. 예를 들어, 맹검(blinding) 여부에 따라 다음과 같이 나뉜다.</p>
+                        <p>오픈 라벨(Open-label): 피험자와 연구자 모두 어떤 처치를 받는지 알고 있음</p>
+                        <p><span class="B">단일 맹검(Single-blind)</span>: 피험자는 모르고, 연구자는 알고 있음</p>
+                        <p><span class="A">이중 맹검(Double-blind)</span>: 피험자와 연구자 모두 모름</p>
+                        <p>맹검 수준이 높을수록 편향이 적고, 연구 결과의 신뢰도가 높아진다. 또한 대부분의 RCT는 평행집단(Parallel-group) 설계로 진행되며, 피험자들은 무작위로 하나의 군에 배정된 후, 그 상태를 끝까지 유지한다.</p>
+                        <p>또한 대부분의 RCT는 평행집단(Parallel-group) 설계로 진행되며, 피험자들은 무작위로 하나의 군에 배정된 후, 그 상태를 끝까지 유지한다.</p>
+                        <p>이에 비해 교차 실험(Cross-over)은 한 피험자가 두 가지 이상의 실험을 순차적으로 모두 받는 방식으로, 같은 사람과의 비교가 가능하다. 따라서 이 사이트에서는 RCT 논문에 Cross-over 태그가 없으면, 기본적으로 평행집단 연구로 간주한다.</p>
+                        <p>잘 설계된 RCT는 외부 요인의 영향을 최소화하여, 약물이나 치료의 순수한 효과만을 평가할 수 있게 한다. 다만 윤리적·비용적 제약이 크기 때문에 대규모로 수행되기 어렵고, 보충제처럼 시장 규모가 작거나 마진이 낮은 분야에서는 드물다.</p>
+                    </div>
+
+                </div>
+                <div class="jump">
+                    <h2 id="index-4" class="head">
+                        관찰 연구
+                    </h2>
+                    <div id="content-4">
+                        <p><span class="C">관찰 연구</span>는 연구자가 치료나 개입을 직접 수행하지 않고, 대상자의 상태나 행동을 그대로 추적하면서 결과를 관찰하는 방식이다.</p>
+                        <p><span class="C">코호트 연구(cohort study)</span>는 특정 노출 집단을 일정 기간 추적하여 결과 발생 여부를 관찰하는 전향적 연구이다. 관찰 연구 중에선 인과관계 추론이 가장 정확하지만 비용과 시간 또한 가장 많이 든다.</p>
+                        <p><span class="C">사례-대조군 연구(case-control study)</span>는 이미 결과(ex: 질병)가 발생한 집단과 발생하지 않은 집단을 비교해 과거의 노출을 찾아가는 후향적 방식이다. 코호트 연구보다 빠르고 비용이 적지만 기억 편향이나 선택 편향이 발생하기 쉽다.</p>
+                        <p><span class="C">단면 연구(cross-sectional study)</span>는 오랜 시간에 걸쳐 관찰하는 위 연구들과 달리 한 시점만을 관찰하기에 가장 간단하지만 그만큼 편향도 가장 크다.</p>
+                        <p>관찰 연구는 개입이 없기 때문에 보다 현실적인 상황에서 데이터를 얻을 수 있으며 참가자 수십만 명을 대상으로 수십 년 이상 추적 관찰하는 연구도 종종 있을 정도로 대규모로 시행 가능하지만, 변수 통제가 거의 없기 때문에 혼란변수(confounder)의 영향이 크다는 한계가 있다.</p>
+                    </div>
+
+                </div>
+                <div class="jump">
+                    <h2 id="index-5" class="head">
+                        사례 연구
+                    </h2>
+                    <div id="content-5">
+                        <p><span class="D">사례 연구</span>는 아주 적은 수의 사례(case)에 대해 깊이 있게 분석하는 방식으로, 대표적으로는 한두 명의 환자에 대해 다룬 <span class="D">케이스 리포트(case report)</span>와 여러 사례를 모은 <span class="D">케이스 시리즈(case series)</span>가 있다.</p>
+                        <p>매우 낮은 근거 수준으로 평가되지만, 새로운 질병이나 치료 반응, 부작용을 최초로 발견하는 데 유용하다.</p>
+                        <p>특히 드문 현상이나 예외적인 반응을 관찰할 때 중요한 역할을 하며, 다른 유형의 연구로 확장될 수 있는 실마리를 제공하기도 한다.</p>
+                        <p>다만 이 사이트에선 거의 안 다룬다.</p>
+                    </div>
+                </div>
+                <div class="jump">
+                    <h2 id="index-6" class="head">
+                        전임상시험
+                    </h2>
+                    <div id="content-6">
+                        <p>전임상시험은 인간을 대상으로 하기 전 단계에서 수행되는 실험으로, 동물 실험(Animal Study)이나 시험관 내 세포 실험(In-vitro Study)을 통해 특정 물질의 효과, 안전성, 작용 기전을 탐색하는 데에 사용된다.</p>
+                        <p>인간에게 적용하기 전 기초적 근거를 마련하는 단계이며, 과학적 탐색의 출발점으로 중요하지만 인간 대상 연구가 아니기 때문에 근거 수준은 가장 낮다.</p>
+                        <p>또한 동물과 인간의 생리적 차이로 인해, 전임상에서 효과가 있더라도 임상에서 그대로 재현되지 않는 경우도 흔하다.</p>
+                        <p>특히 보충제 시장에선 이런 연구들을 근거로 과대광고하는 경우가 매우 흔하기에 주의가 필요하다.</p>
+                    </div>
+                </div>
+                <div class="line"></div>
+            </div>
+            <div id="note">
+                <a href="#inote-1">[1]</a><span id="note-1">
+    연구 설계(메타분석: 100, 체계적 고찰:80, RCT: 50, Non-RCT: 20, 기타: 1) * 참가자 * 실험 기간(연 단위로 올림)으로 계산
+  </span>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="module" src="guide.js"></script>
+</body>
+</html>

@@ -1,12 +1,11 @@
 package com.example.examine.repository;
 
-import java.util.List;
-import java.util.Optional;
 import com.example.examine.entity.TrialDesign;
-import org.springframework.data.domain.Sort;
+import com.example.examine.entity.TypeTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 
 public interface TrialDesignRepository extends JpaRepository<TrialDesign, Long> {
     Optional<TrialDesign> findByName(String name);
-    List<TrialDesign> findByNameContainingIgnoreCase(String name, Sort sort);
 }

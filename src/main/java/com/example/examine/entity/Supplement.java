@@ -2,6 +2,7 @@ package com.example.examine.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,6 +25,8 @@ public class Supplement {
 
     private BigDecimal cost;
 
+    private LocalDateTime date;
+
     @ManyToMany
     @JoinTable(
             name = "supplement_type",
@@ -33,29 +36,29 @@ public class Supplement {
     private List<TypeTag> types = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SupplementEffect> effectMappings = new ArrayList<>();
+    private List<SupplementEffect> effects = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SupplementSideEffect> sideEffectMappings = new ArrayList<>();
+    private List<SupplementSideEffect> sideEffects = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
-            name = "supplement_pubmed",
+            name = "supplement_journal",
             joinColumns = @JoinColumn(name = "supplement_id"),
-            inverseJoinColumns = @JoinColumn(name = "pubmed_id")
+            inverseJoinColumns = @JoinColumn(name = "journal_id")
     )
     @JsonIgnore
-    private List<Pubmed> pubmeds = new ArrayList<>();
+    private List<Journal> journals = new ArrayList<>();
 
  // detail 클래스를 supplement 엔티티에 직접 추가하면 자원낭비
  // detail에서 id 받는게 적절
 
-    public List<Pubmed> getPubmeds() {
-        return pubmeds;
+    public List<Journal> getJournals() {
+        return journals;
     }
 
-    public void setPubmeds(List<Pubmed> pubmeds) {
-        this.pubmeds = pubmeds;
+    public void setJournals(List<Journal> journals) {
+        this.journals = journals;
     }
     public Long getId() {
         return id;
@@ -106,16 +109,24 @@ public class Supplement {
     }
 
     public List<SupplementEffect> getEffects() {
-        return effectMappings;
+        return effects;
     }
 
     public void setEffects(List<SupplementEffect> effectMappings) {
-        this.effectMappings = effectMappings;
+        this.effects = effectMappings;
     }
 
     public List<SupplementSideEffect> getSideEffects() {
-        return sideEffectMappings;
+        return sideEffects;
     }
 
-    public void setSideEffects(List<SupplementSideEffect> sideEffectMappings) {this.sideEffectMappings = sideEffectMappings;}
+    public void setSideEffects(List<SupplementSideEffect> sideEffectMappings) {this.sideEffects = sideEffectMappings;}
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 }

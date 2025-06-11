@@ -1,9 +1,6 @@
 package com.example.examine.entity;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
@@ -25,14 +22,14 @@ public class SupplementSideEffect {
     @JoinColumn(name = "side_effect_tag_id")
     private SideEffectTag sideEffectTag;
 
-    private String grade;
+    private String tier;
 
     public SupplementSideEffect() {}
 
-    public SupplementSideEffect(Supplement supplement, SideEffectTag sideEffectTag, String grade) {
+    public SupplementSideEffect(Supplement supplement, SideEffectTag sideEffectTag, String tier) {
         this.supplement = supplement;
         this.sideEffectTag = sideEffectTag;
-        this.grade = grade;
+        this.tier = this.tier;
         this.id = new SupplementSideEffectId(supplement.getId(), sideEffectTag.getId());
     }
 
@@ -62,12 +59,12 @@ public class SupplementSideEffect {
         this.sideEffectTag = sideEffectTag;
     }
 
-    public String getGrade() {
-        return grade;
+    public String getTier() {
+        return tier;
     }
 
-    public void setGrade(String grade) {
-        this.grade = grade;
+    public void setTier(String tier) {
+        this.tier = tier;
     }
 }
 

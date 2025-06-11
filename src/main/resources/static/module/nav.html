@@ -1,0 +1,48 @@
+<nav class="navbar">
+  <div class="navbar-left">
+    <div class="nav" >
+    <a href="/">
+      <button class="dropdown">
+      <img src="/image/icon.png" alt="로고" class="logo-icon">
+        Examine
+      </button>
+    </a>
+    </div>
+    <div class="nav">
+      <button id="table-dropdown-toggle" class="dropdown">
+        목록 관리
+      </button>
+      <div id="table-dropdown" class="menu hide">
+        <a href="/table/supplement.html" target="_blank" class="logo">성분 목록</a>
+        <a href="/table/journal.html" target="_blank" class="logo">논문 목록</a>
+        <a href="/table/effect.html" target="_blank" class="logo">기대 효과</a>
+        <a href="/table/side-effect.html" target="_blank" class="logo">부작용</a>
+        <a href="/table/brand.html" target="_blank" class="logo">브랜드 목록</a>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="flex">
+      <button id="guide-dropdown-toggle" class="dropdown">
+        용어 설명
+      </button>
+      </div>
+      <div id="guide-dropdown" class="menu hide">
+        <a href="/guide/ebm.html" target="_blank" class="logo">근거 수준</a>
+        <a href="/guide/shop.html" target="_blank" class="logo">쇼핑몰</a>
+        <a href="/guide/diet.html" target="_blank" class="logo">식단 가이드</a>
+        <a href="/guide/api.html" target="_blank" class="logo">api 사용법</a>
+      </div>
+    </div>
+
+
+  </div>
+  <div class="navbar-right">
+    <form id="all-search-form" class="flex-row">
+      <input id="all-search-input" class="long" placeholder="통합검색">
+      <button>검색</button>
+    </form>
+    <button id="open-category">카테고리</button>
+    <!-- 필요하면 로그인/검색 버튼도 여기에 추가 -->
+  </div>
+</nav>

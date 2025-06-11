@@ -12,6 +12,8 @@ public class TrialDesign {
     @Column(unique = true)
     private String name;
 
+    private String tier;
+
     // Getter, Setter
     public Long getId() {
         return id;
@@ -27,5 +29,13 @@ public class TrialDesign {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(String tier) {
+        this.tier = tier;
     }
 }

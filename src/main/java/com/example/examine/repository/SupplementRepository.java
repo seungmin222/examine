@@ -19,14 +19,14 @@ public interface SupplementRepository extends JpaRepository<Supplement, Long> { 
     @Query("""
         SELECT DISTINCT s FROM Supplement s
         LEFT JOIN s.types t
-        LEFT JOIN s.effectMappings e
-        LEFT JOIN s.sideEffectMappings se
-        WHERE (:typeIds IS NULL OR t.id IN :typeIds)
+        LEFT JOIN s.effects e
+        LEFT JOIN s.sideEffects se
+        WHERE (:types IS NULL OR t.id IN :types)
           AND (:effectIds IS NULL OR e.effectTag.id IN :effectIds)
           AND (:sideEffectIds IS NULL OR se.sideEffectTag.id IN :sideEffectIds)
         """)
     List<Supplement> findFiltered(
-            @Param("typeIds") List<Long> typeIds,
+            @Param("types") List<Long> typeIds,
             @Param("effectIds") List<Long> effectIds,
             @Param("sideEffectIds") List<Long> sideEffectIds,
             Sort sort // 명시 안해도 자동정렬

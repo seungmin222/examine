@@ -32,12 +32,13 @@ public class SideEffectTag {
         this.name = name;
     }
 
-    @ManyToMany
-    @JoinTable(
-            name = "side_effect_pubmed",
-            joinColumns = @JoinColumn(name = "side_effect_tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "pubmed_id")
-    )
+    @OneToMany(mappedBy = "sideEffectTag", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Pubmed> pubmeds = new ArrayList<>();
+    private List<SupplementSideEffect> supplementMappings = new ArrayList<>();
+
+    public List<SupplementSideEffect> getSupplementMappings(){ return supplementMappings; }
+
+    public void setSupplementMappings(List<SupplementSideEffect> supplementMappings) {
+        this.supplementMappings = supplementMappings;
+    }
 }

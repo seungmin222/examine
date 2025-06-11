@@ -25,14 +25,14 @@ public class SupplementEffect {
     @JoinColumn(name = "effect_tag_id")
     private EffectTag effectTag;
 
-    private String grade;
+    private String tier;
 
     public SupplementEffect() {}
 
-    public SupplementEffect(Supplement supplement, EffectTag effectTag, String grade) {
+    public SupplementEffect(Supplement supplement, EffectTag effectTag, String tier) {
         this.supplement = supplement;
         this.effectTag = effectTag;
-        this.grade = grade;
+        this.tier = tier;
         this.id = new SupplementEffectId(supplement.getId(), effectTag.getId());
     }
 
@@ -62,12 +62,12 @@ public class SupplementEffect {
         this.effectTag = effectTag;
     }
 
-    public String getGrade() {
-        return grade;
+    public String getTier() {
+        return tier;
     }
 
-    public void setGrade(String grade) {
-        this.grade = grade;
+    public void setTier(String tier) {
+        this.tier = tier;
     }
 }
 
