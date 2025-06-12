@@ -27,6 +27,7 @@
         <select name="typeId" id="list-sort">
             <option value="title">제목순</option>
             <option value="date">최신순</option>
+            <option value="participants">표본순</option>
         </select>
     </div>
 </div>
@@ -50,11 +51,11 @@
 
 <!-- 태그 목록 -->
 
-<div name="journal-container" class="flex justify-between items-start mb-4 flex-wrap gap-[2%]"> <!--container-->
+<div name="journal-container" class="flex justify-between items-start mb-4 flex-wrap gap-5"> <!--container-->
     <!-- 논문 추가 -->
     <div>
-        <h2 id="index-2" class="center">논문 추가</h2>
-    <form id="insert-form" class="left-form gap-2">
+        <h2 id="index-2" class="text-center">논문 추가</h2>
+    <form id="insert-form" class="items-start gap-2">
         <input name="link" placeholder="링크" class="w-48"/>
         <div class="flex">
         <input type="number" name="duration-value" placeholder="기간"/>
@@ -95,8 +96,8 @@
         <ul id="trialDesign-list"></ul>
         <h2 class="line"></h2>
         <ul id="blind-list">
-            <li data-id="2" data-type="blind">Double-blind</li>
-            <li data-id="1" data-type="blind">Single-blind</li>
+            <li data-id="2" data-type="blind" class="A">Double-blind</li>
+            <li data-id="1" data-type="blind" class="B">Single-blind</li>
             <li data-id="0" data-type="blind">Open-label</li>
         </ul>
         <ul id="parallel-list">
@@ -127,23 +128,23 @@
 <div id="modal" class="modal">
     <div class="modal-content">
     <div id="modal-controller" class="flex-end"></div>
-    <div class="flex justify-center gap-5">
+    <div class="flex justify-between gap-5">
         <div>
-            <h3 class="text-center">성분 선택</h3>
+            <h2 class="text-center">성분 선택</h2>
             <div id="supplement-checkboxes" class="checkbox"></div>
         </div>
         <div>
-            <h3 class="text-center">기대효과 선택</h3>
+            <h2 class="text-center">기대효과 선택</h2>
             <div id="positive-checkboxes" class="checkbox"></div>
         </div>
         <div>
-            <h3 class="text-center">부작용 선택</h3>
+            <h2 class="text-center">부작용 선택</h2>
             <div id="negative-checkboxes" class="checkbox"></div>
         </div>
         <div class="w-1/3 flex flex-col items-center">
             <!--현재 선택된 성분-효과-효과 강도 출력-->
-            <div class="flex items-center gap-2">
-            <h3 class="text-center">효과 강도</h3>
+            <div class="w-full flex items-center justify-end gap-2">
+            <h2 class="text-center">효과</h2>
                    <button id="cash-insert">추가</button>
                    <button id="cash-toggle-delete">삭제</button>
             </div>

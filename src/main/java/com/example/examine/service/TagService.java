@@ -1,9 +1,12 @@
 package com.example.examine.service;
 
+import com.example.examine.controller.DetailController;
 import com.example.examine.dto.TagRequest;
 import com.example.examine.dto.TierTagRequest;
 import com.example.examine.entity.*;
 import com.example.examine.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,8 @@ import java.util.List;
 
 @Service
 public class TagService {
+    private static final Logger log = LoggerFactory.getLogger(DetailController.class);
+
     private final SupplementRepository supplementRepo;
     private final TypeTagRepository typeRepo;
     private final EffectTagRepository effectRepo;
@@ -102,7 +107,7 @@ public class TagService {
 
     public List<TierTagRequest> get(List<String> type){
         List<TierTagRequest> tag = new ArrayList<>();
-        Sort sorting = Sort.by(Sort.Direction.ASC, "tier");
+        Sort sorting = Sort.by(Sort.Direction.ASC, "id");
 
         for (String t : type) {
 

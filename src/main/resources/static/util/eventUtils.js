@@ -134,11 +134,11 @@ function hideHoverButton(btnId, boxId) {
         return; // 요소 못 찾음 → break 시그널
       }
   function show() {
-    box.classList.remove('hide');
+    box.classList.remove('hidden');
   }
 
   function hide() {
-    box.classList.add('hide');
+    box.classList.add('hidden');
   }
 
   button.addEventListener('mouseenter', show);
@@ -160,8 +160,8 @@ function hideClickButton(btnId, boxId){
         return false; // 요소 못 찾음 → break 시그널
       }
     button.addEventListener('click', e=>{
-       hidden.classList.toggle('hide');
-       button.classList.toggle('gray');
+       hidden.classList.toggle('hidden');
+       button.classList.toggle('text-gray-300');
     });
     return true;
 }
@@ -244,6 +244,15 @@ function selectList(types, filterFn) {
   });
 }
 
+function selectChange(boxId){
+    document.getElementById(boxId).addEventListener('change', (e) => {
+      if (e.target.tagName === 'SELECT') {
+        const selected = e.target.options[e.target.selectedIndex];
+        e.target.className = selected.className;
+      }
+    });
+}
+
 
 export {
   setupFoldToggle,
@@ -259,5 +268,6 @@ export {
   pageScroll,
   noteLink,
   onlyOneCheckboxes,
-  selectList
+  selectList,
+  selectChange
 };

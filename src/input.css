@@ -3,50 +3,74 @@
 @tailwind utilities;
 
 @layer base {
+
+  :root {
+    --navbar-height: 60px;
+    --sidebar-width: 10%;
+  }
+
   body {
     background-color: #ffcfea; /*#ffc0cb*/
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     padding: 0    ;
     color: gray;
-    padding-top: 70px; /* ✅ 상단바 공간 확보 */
-
+    padding-top: calc(10px+var(--navbar-height)); /* ✅ 상단바 공간 확보 */
+    padding-left: var(--sidebar-width);
   }
 
   h1 {
       font-size: 2em;       /* 약 32px (보통 브라우저 기본) */
       font-weight: bold;
       margin: 0.67em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   h2 {
       font-size: 1.5em;     /* 약 24px */
       font-weight: bold;
       margin: 0.75em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   h3 {
       font-size: 1.17em;    /* 약 18.72px */
       font-weight: bold;
       margin: 0.83em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   h4 {
       font-size: 1em;       /* 16px */
       font-weight: bold;
       margin: 1.12em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   h5 {
       font-size: 0.83em;    /* 약 13.28px */
       font-weight: bold;
       margin: 1.5em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   h6 {
       font-size: 0.67em;    /* 약 10.72px */
       font-weight: bold;
       margin: 1.67em 0;
+      color: #ff00ff;
+      scroll-margin-top:70px;
+      border-bottom: 2px solid #ccc;
     }
 
   li,
@@ -85,12 +109,6 @@
 
   li {
      cursor: pointer;
-  }
-
-  h2{
-    color: #ff00ff;
-    scroll-margin-top:70px;
-    border-bottom: 2px solid #ccc;
   }
 
 
@@ -137,10 +155,10 @@
   .modal {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-
+    top: var(--navbar-height);
+    left: var(--sidebar-width);
+    width: calc(100vw - var(--sidebar-width));
+    height: calc(100vh - var(--navbar-height));
     z-index: 1000;
   }
 
@@ -196,6 +214,7 @@
   }
 
   th {
+    white-space: nowrap;
     background-color: #ffe4ec;
   }
 
@@ -229,7 +248,6 @@
     color: #ff00ff;
   }
 
-
   .modal-inner span {
     flex: 1;               /* 남은 공간 차지 */
     text-align: center;    /* 가운데 정렬 */
@@ -241,25 +259,9 @@
     background-color: #fff0f5;
   }
 
-  .long, textarea{
-    width: 200px;
-  }
-
   textarea{
-  height: 300px;
-  }
-
-  textarea.content{
-    width: auto;
-    height: auto;
-  }
-
-  .xl{
-    width: 1000px;
-  }
-
-  textarea.xl{
-    height:400px;
+   width: 200px;
+   height: 300px;
   }
 
   button,
@@ -274,23 +276,13 @@
     transition: background-color 0.2s ease;
     line-height: 1.2;
   }
+
   button:hover {
     background-color: #ff6a9c;
   }
 
   button:toggle {
     background-color: red;
-  }
-
-  .mini {
-    width:50px;
-  }
-
-
-  .gray {
-
-    color: gray;
-
   }
 
   button.dropdown {
@@ -303,8 +295,7 @@
     font-size: 1.3rem;
     font-weight: bold;
     display: flex;
-    margin-top:0;
-    margin-bottom:10px;
+
   }
 
 
@@ -410,24 +401,6 @@
      text-decoration: none;
    }
 
-  .edit-group {
-    display: flex;
-    flex-direction: column; /* ✅ 세로 정렬 */
-    align-items: center;    /* ✅ 버튼들을 가운데로 모음 */
-  }
-
-  .edit-group button{
-    margin-bottom: 6px;
-  }
-
-  .edit-group button:last-child{
-    margin-bottom: 0;
-  }
-
-  .center{
-     text-align: center;
-     align-items: center;
-  }
   /* 툴팁 박스 */
 
   .tooltip {
@@ -514,7 +487,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 60px;
+      height: var(--navbar-height);
       background-color: white;
       border-bottom: 2px solid #eee;
       justify-content: space-between;
@@ -524,27 +497,13 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
-
-  .navbar-left {
-    display: flex;
-    gap : 1.5rem;
-  }
-
-  .navbar-right {
-    display: flex;
-    gap: 0.5rem;
-    margin-right: 2rem;
-
-    flex-wrap: wrap;    /* 줄바꿈 허용 시 유연하게 줄바꿈되도록 */
-  }
-
   nav.sidebar {
     position: fixed;       /* 화면에 고정 */
     top: 60px;
     bottom: 0;
     left: 0;
     height: 100vh;         /* 전체 높이 */
-    width: 10%;          /* 너비 */
+    width: var(--sidebar-width);          /* 너비 */
     background-color: #f8f8f8;
     border-right: 1px solid #ddd;
     display: flex;
@@ -552,8 +511,6 @@
     gap: 1rem;              /* 항목 간 간격 */
     overflow-y: auto;
   }
-
-
 
    .logo-icon {
      width: 24px;
@@ -563,30 +520,6 @@
      margin-right: 4px;
      margin-top: 3px;
    }
-
-  .flex-end{
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .column {
-    flex-direction: column;
-  }
-
-  .hide{
-   display: none !important;
-  }
-
-  .auto{
-     width:auto;
-     height:auto;
-  }
-
-
-  .jump {
-    margin-top:1.5rem;
-    margin-bottom:1.5rem;
-  }
 
   .text{
    background-color: white;
@@ -638,19 +571,10 @@
     position: relative;   /* ✅ 내부 SVG용 기준 */
   }
 
-  .reverse{
-      transform: rotate(180deg);
-  }
-
   div.line{
     border-top: 1px solid #777;
     margin: 1.5em 0;
     padding: 0.5em 0;
-  }
-
-  div.side-box{
-    display:flex;
-    gap:2rem;
   }
 
   img{
@@ -662,16 +586,6 @@
     flex-direction: column;
     align-items: center;
   }
-
-  form.left-form {
-    align-items: start;
-  }
-
-  .grid-4{
-   display: grid;
-   grid-template-columns: repeat(4, 1fr);
-  }
-
 
 }
 

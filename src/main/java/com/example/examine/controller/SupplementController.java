@@ -1,8 +1,6 @@
 package com.example.examine.controller;
 
-import com.example.examine.dto.JournalRequest;
 import com.example.examine.dto.SupplementRequest;
-import com.example.examine.entity.*;
 import com.example.examine.repository.*;
 import com.example.examine.service.*;
 import org.springframework.data.domain.Sort;
@@ -13,19 +11,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/supplements")
-public class SupplementRestController {
+public class SupplementController {
 
-    private static final Logger log = LoggerFactory.getLogger(SupplementRestController.class);
+    private static final Logger log = LoggerFactory.getLogger(SupplementController.class);
 
     private final SupplementRepository supplementRepo;
     private final SupplementService supplementService;
 
-    public SupplementRestController(SupplementRepository supplementRepo,
-                                    SupplementService supplementService) {
+    public SupplementController(SupplementRepository supplementRepo,
+                                SupplementService supplementService) {
         this.supplementRepo = supplementRepo;
         this.supplementService = supplementService;
     }
@@ -35,6 +32,7 @@ public class SupplementRestController {
        log.info("📥 받은 데이터: {}", dto);
        return supplementService.create(dto);
     }
+
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SupplementRequest dto) {
@@ -45,7 +43,7 @@ public class SupplementRestController {
 
 
     @GetMapping
-    public List<SupplementRequest> sortBy(@RequestParam(defaultValue = "engName") String sort,
+    public List<SupplementRequest> findAll(@RequestParam(defaultValue = "engName") String sort,
                                    @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
         return supplementService.findAll(sorting);
@@ -73,19 +71,14 @@ public class SupplementRestController {
         return supplementService.findFiltered(typeIds, effectIds, sideEffectIds, sorting);
     }
 
+    @GetMapping("/{id}")
+    public SupplementRequest findOne(@PathVariable Long id) {
+        return supplementService.findOne(id);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return supplementService.delete(id);
     }
 
-    @GetMapping("/{id}/journals")
-    public List<JournalRequest> getjournalsForSupplement(@PathVariable Long id) {
-        return supplementService.journals(id);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Supplement> findOne(@PathVariable Long id) {
-        return supplementService.findOne(id);
-    }
 }

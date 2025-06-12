@@ -8,9 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface SupplementEffectRepository extends JpaRepository<SupplementEffect, SupplementEffectId> {
 
     @Modifying
     @Query("DELETE FROM SupplementEffect se WHERE se.supplement.id = :supplementId")
     void deleteBySupplementId(@Param("supplementId") Long supplementId);
+
+    Optional<SupplementEffect> findBySupplementIdAndEffectTagId(Long supplementId, Long effectTagId);
 }

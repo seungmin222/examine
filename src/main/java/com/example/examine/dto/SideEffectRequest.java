@@ -14,8 +14,6 @@ public record SideEffectRequest(
                 sideEffect.getTier()
         );
     }
-    public SupplementSideEffect toEntity(Supplement supplement, SideEffectTag sideEffectTag) {
-        return new SupplementSideEffect(supplement, sideEffectTag, tier);
-    }
+
 
 }

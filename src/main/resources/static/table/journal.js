@@ -18,8 +18,15 @@ import {
     setupSearchForm,
     resetButton,
     selectList,
-    onlyOneCheckboxes
+    onlyOneCheckboxes,
+    selectChange
 } from '/util/eventUtils.js';
+
+import {
+    renderJournals,
+    renderTags,
+    renderModal
+} from '/util/render.js';
 
 import {
     loadBasic
@@ -61,119 +68,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSearchForm("journals", "search-form", "list-sort", null, renderJournals);
 
     selectList(["trialDesign", "blind", "parallel", "supplement", "positive", "negative"],filterByTag);
+    selectChange('journal-body');
 });
 
 async function loadJournals() {
     const sort = document.getElementById('list-sort').value;
-    const res = await fetch(`/api/journals?sort=${sort}&direction=asc`);
+    let dir = 'desc';
+    if (sort==='title'){
+       dir = 'asc';
+    }
+    const res = await fetch(`/api/journals?sort=${sort}&direction=${dir}`);
     const allJournals = await res.json();
     renderJournals(allJournals);
-}
-
-function renderJournals(list) {
-    const tbody = document.getElementById('journal-body');
-    tbody.innerHTML = '';
-    journalMap.clear();
-    const folded = document.getElementById('fold-toggle')?.classList.contains('folded');
-    const shown = folded ? list.slice(0, 5) : list;
-    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
-    const deleteMode = document.getElementById('toggle-delete')?.classList.contains('execute');
-
-    const trialDesignOptions = [ // 추후 하드코딩 말고 api로 받아서 전역 map으로 설정하기
-      { value: '1', label: 'Meta-analysis', tier: 'A' },
-      { value: '20', label: 'Systematic Review', tier: 'A' },
-      { value: '21', label: 'RCT', tier: 'B' },
-      { value: '22', label: 'Non-RCT', tier: 'B' },
-      { value: '23', label: 'Cohort', tier: 'C' },
-      { value: '24', label: 'Case-control', tier: 'C' },
-      { value: '25', label: 'Cross-sectional', tier: 'C' },
-      { value: '26', label: 'Case Report', tier: 'D' },
-      { value: '27', label: 'Animal Study', tier: 'F' },
-      { value: '28', label: 'In-vitro Study', tier: 'F' }
-    ];
-
-
-
-    shown.forEach(item => {
-        journalMap.set(item.id, item);
-        const row = document.createElement('tr');
-        row.dataset.id = item.id; // ✅ 여기 추가
-
-        const supplementSet = new Set([
-          ...(item.effects?.map(e => e.supplementName) || []),
-          ...(item.sideEffects?.map(e => e.supplementName) || [])
-        ]);
-        const supplements = [...supplementSet].join(', ');
-        const effects = item.effects?.map(e => `${e.effectName} (${e.size}%)`).join(', ') || '';
-        const sideEffects = item.sideEffects?.map(e => `${e.sideEffectName} (${e.size}%)`).join(', ') || '';
-
-        const trialDesignSelectOptions = trialDesignOptions.map(opt => `
-              <option value="${opt.value}" class="${opt.tier}" ${item.trialDesign?.id === opt.value ? 'selected' : ''}>
-                ${opt.label}
-              </option>
-            `).join('');
-
-        row.innerHTML = `
-          <td class="tooltip" data-position="right" data-tooltip="${item.summary}">
-              <a target="_blank" rel="noopener noreferrer" href="${item.link}"> ${item.title}</a>
-          </td>
-          <td class="${item.trialDesign?.tier[0]}">
-            ${editMode
-               ? `<select name="trialDesign" class="w-32">
-                      ${trialDesignSelectOptions}
-                   </select>`
-               : `${item.trialDesign?.name}`
-             }
-          </td>
-          <td>
-            ${editMode
-               ? `<select name="blind" class="w-32">
-                     <option value="open-label" ${item.blind === 'open-label' ? 'selected' : ''}>open-label</option>
-                     <option value="single-blind" ${item.blind === 'single-blind' ? 'selected' : ''}>single-blind</option>
-                     <option value="double-blind" ${item.blind === 'double-blind' ? 'selected' : ''}>double-blind</option>
-                  </select>`
-               : `${item.blind}`
-             }
-          </td>
-          <td>
-             ${editMode
-                ? `<select name="parallel" class="w-20">
-                      <option value="true" ${item.parallel === 'true' ? 'selected' : ''}>parallel</option>
-                      <option value="false" ${item.parallel === 'false' ? 'selected' : ''}>cross-over</option>
-                   </select>`
-                : `${item.parallel}`
-              }
-          </td>
-          <td>
-            ${editMode
-              ? `<input name="duration-value" value="${item.duration.value}"/>
-                 <select name="duration-unit">
-                    <option value="day" ${item.duration.unit === 'day' ? 'selected' : ''}>day</option>
-                    <option value="month" ${item.duration.unit === 'month' ? 'selected' : ''}>month</option>
-                    <option value="year" ${item.duration.unit === 'year' ? 'selected' : ''}>year</option>
-                 </select>`
-              : `${item.duration.value} ${item.duration.unit}`
-            }
-          </td>
-          <td>
-            ${editMode
-              ? `<input type="number" value="${item.participants}" class="w-24" name="participants"/>`
-              : item.participants}
-          </td>
-          <td>${supplements}</td>
-          <td>${effects}</td>
-          <td>${sideEffects}</td>
-          <td>${item.date}</td>
-          ${editMode ? `<td>
-             <div class="edit-group">
-                <button class="modal-btn" data-id="${item.id}">태그</button>
-                <button class="save-btn" data-id="${item.id}">저장</button>
-             </div>
-          </td>` : ''}
-        `;
-
-        tbody.appendChild(row);
-    });
 }
 
 document.getElementById('journal-body').addEventListener('click', async e => {
@@ -296,37 +202,7 @@ async function loadTags() {
      document.getElementById('mapping-cash').innerHTML = '';
 }
 
-function renderTags(type, list) {
-    let tagList = document.getElementById(`${type}-list`);
-    if (!tagList) {
-        console.warn(`❌ 알 수 없는 type: ${type}`);
-        return;
-    }
-    tagList.innerHTML = '';
 
-    const folded = document.getElementById('tag-toggle-fold')?.classList.contains('folded');
-    const shown = folded ? list.slice(0, 5) : list;
-
-    const items = createTagList(type, shown);
-    items.forEach(li => tagList.appendChild(li));
-
-}
-
-
-function renderModal(type, list) {
-    const sort = document.getElementById('modal-sort').value;
-    const container = document.getElementById(`${type}-checkboxes`);
-    if (container) {
-        container.innerHTML = '';
-        list.forEach(tag => {
-            const item = createModalInner(tag, type);
-            container.appendChild(item);
-        });
-    } else {
-        console.warn(`❌ 알 수 없는 type: ${type}`);
-        return;
-    }
-}
 
 // 태그 필터링
 async function filterByTag() {

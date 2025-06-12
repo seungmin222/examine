@@ -1,5 +1,5 @@
 <nav class="navbar">
-  <div class="navbar-left">
+  <div class="flex gap-8">
     <div class="nav" >
     <a href="/">
       <button class="dropdown">
@@ -12,7 +12,7 @@
       <button id="table-dropdown-toggle" class="dropdown">
         목록 관리
       </button>
-      <div id="table-dropdown" class="menu hide">
+      <div id="table-dropdown" class="menu hidden">
         <a href="/table/supplement.html" target="_blank" class="logo">성분 목록</a>
         <a href="/table/journal.html" target="_blank" class="logo">논문 목록</a>
         <a href="/table/effect.html" target="_blank" class="logo">기대 효과</a>
@@ -27,19 +27,17 @@
         용어 설명
       </button>
       </div>
-      <div id="guide-dropdown" class="menu hide">
+      <div id="guide-dropdown" class="menu hidden">
         <a href="/guide/ebm.html" target="_blank" class="logo">근거 수준</a>
         <a href="/guide/shop.html" target="_blank" class="logo">쇼핑몰</a>
         <a href="/guide/diet.html" target="_blank" class="logo">식단 가이드</a>
         <a href="/guide/api.html" target="_blank" class="logo">api 사용법</a>
       </div>
     </div>
-
-
   </div>
-  <div class="navbar-right">
+  <div class="flex gap-2 mr-8">
     <form id="all-search-form" class="flex-row">
-      <input id="all-search-input" class="long" placeholder="통합검색">
+      <input id="all-search-input" class="w-48" placeholder="통합검색">
       <button>검색</button>
     </form>
     <button id="open-category">카테고리</button>

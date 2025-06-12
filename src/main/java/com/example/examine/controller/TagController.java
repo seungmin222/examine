@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/tags")
 public class TagController {
 
-    private static final Logger log = LoggerFactory.getLogger(SupplementRestController.class);
+    private static final Logger log = LoggerFactory.getLogger(SupplementController.class);
 
     private final TagService tagService;
 

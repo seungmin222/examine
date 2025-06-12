@@ -16,7 +16,4 @@ public record EffectRequest(
                 effect.getTier()
         );
     }
-    public SupplementEffect toEntity(Supplement supplement, EffectTag effectTag) {
-        return new SupplementEffect(supplement, effectTag, tier);
-    }
 }

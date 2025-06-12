@@ -16,6 +16,12 @@ import {
 } from '/util/eventUtils.js';
 
 import {
+    renderSupplements,
+    renderTags,
+    renderModal
+} from '/util/render.js';
+
+import {
     loadBasic
 } from '/util/load.js';
 
@@ -58,60 +64,7 @@ async function loadSupplements() {
     renderSupplements(allSupplements);
 }
 
-function renderSupplements(list) {
-    const tbody = document.getElementById('supplement-body');
-    tbody.innerHTML = '';
-    const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
-    const shown = isFolded ? list.slice(0, 5) : list;
-    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
-    const deleteMode = document.getElementById('toggle-delete')?.classList.contains('execute');
 
-    shown.forEach(item => {
-        const row = document.createElement('tr');
-        row.dataset.id = item.id;
-        const types = item.types?.map(e => e.name).join(', ') || '';
-        const effects = item.effects?.map(e => `<span class="${e.tier}">${e.effectName} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.sideEffectName} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const link = `http://localhost:8080/detail.html?id=${item.id}`;
-
-        row.innerHTML = `
-      <td>
-      ${editMode
-      ? `<input name="korName" value="${item.korName}" class="long"/>`
-      : `<a href = ${link}>${item.korName}</a>`
-      }
-      </td>
-      <td>
-      ${editMode
-      ? `<input name="engName" value="${item.engName}" class="long"/>`
-      : `<a href = ${link}>${item.engName}</a>`
-      }
-      </td>
-      <td>${types}</td>
-      <td>
-      ${editMode
-      ? `<input name="dosage" value="${item.dosage}"/>`
-      : item.dosage
-      }
-      </td>
-      <td>
-       ${editMode
-       ? `<input type="number" step="0.01" name="cost" value="${item.cost}"/>`
-       : item.cost
-       }
-       </td>
-      <td>${effects}</td>
-      <td>${sideEffects}</td>
-      ${editMode ? `<td>
-      <div class="edit-group">
-      <button class="modal-btn">태그</button>
-      <button class="save-btn">저장</button>
-      </div>
-      </td>` : ''}
-    `;
-        tbody.appendChild(row);
-    });
-}
 
 document.getElementById('supplement-body').addEventListener('click', async e => {
     const row = e.target.closest('tr');
@@ -178,53 +131,6 @@ async function loadTags() {
         renderModal(type, list);
     }
 }
-
-function renderTags(type, list) {
-    const deleteMode = document.getElementById('toggle-delete').classList.contains('execute');
-    let tagList = document.getElementById(`${type}-list`);
-    if (!tagList) {
-        console.warn(`❌ 알 수 없는 type: ${type}`);
-        return;
-    }
-    tagList.innerHTML = '';
-    const isFolded = document.getElementById('tag-toggle-fold')?.classList.contains('folded');
-    const shown = isFolded ? list.slice(0, 5) : list;
-    createTagList(type, shown).forEach(li => tagList.appendChild(li));
-    tagList.replaceWith(tagList.cloneNode(true)); // 기존 이벤트 제거
-    tagList = document.getElementById(tagList.id); // 새로 참조
-    tagList.addEventListener('click', async e => {
-        if (e.target.tagName === 'LI') {
-            if (deleteMode) {
-                if (confirm(`'${e.target.textContent}' 을 삭제할까요?`)) {
-                    await fetch(`/api/tags/${e.target.dataset.type}/${e.target.dataset.id}`, {
-                        method: 'DELETE'
-                    });
-                    await loadTags();
-                }
-                return;
-            } else {
-                e.target.classList.toggle('selected');
-                filterByTag();
-            }
-        }
-    });
-}
-// 모달 랜더링
-
-function renderModal(type, list) {
-
-    const container = document.getElementById(`${type}-checkboxes`);
-    if (!container) {
-        console.warn(`❌ 알 수 없는 type: ${type}`);
-        return;
-    }
-    container.innerHTML = '';
-    list.forEach(tag => {
-        const item = createModalInner(tag, type);
-        container.appendChild(item);
-    });
-}
-
 
 // 태그 필터링
 async function filterByTag() {

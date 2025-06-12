@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 @Entity
@@ -95,7 +96,7 @@ public class JournalSupplementEffect {
         return score;
     }
 
-    public void setScore() {
+    public void setScore(SupplementEffect agg, int oldParticipants) {
         if (this.journal == null || this.size == null) {
             this.score = null;
             return;
@@ -103,19 +104,43 @@ public class JournalSupplementEffect {
 
         Integer participants = this.journal.getParticipants();
         Integer duration = this.journal.getDuration_days();
-
         if (participants == null || duration == null) {
             this.score = null;
             return;
         }
 
-
-        BigDecimal strength = this.size;
-        String design = this.getJournal().getTrial_design().getName();
+        String design = this.getJournal().getTrial_design() != null
+                ? this.getJournal().getTrial_design().getName()
+                : "unknown";
         Integer blind = this.getJournal().getBlind();
 
-        this.score = calculateScore.calculateScore(strength, participants, duration, design, blind); // 정밀도 조절
+        BigDecimal strength = this.size;
+        BigDecimal newScore = calculateScore.calculateJournalScore(strength, participants, duration, design, blind)
+                .setScale(4, RoundingMode.HALF_UP);
+
+        // 기존 점수가 있었으면 제거
+        if (this.score != null) {
+            BigDecimal oldContribution = this.score.multiply(BigDecimal.valueOf(oldParticipants));
+            agg.setTotalScore(agg.getTotalScore().subtract(oldContribution));
+            agg.setTotalParticipants(agg.getTotalParticipants() - oldParticipants);
+        }
+        ///  totalscore null일때걍 0으로 처리
+
+        // 새 점수 반영
+        BigDecimal newContribution = newScore.multiply(BigDecimal.valueOf(participants));
+        agg.setTotalScore(agg.getTotalScore().add(newContribution));
+        agg.setTotalParticipants(agg.getTotalParticipants() + participants);
+
+        if (agg.getTotalParticipants() > 0) {
+            agg.setFinalScore(agg.getTotalScore()
+                    .divide(BigDecimal.valueOf(agg.getTotalParticipants()), 4, RoundingMode.HALF_UP));
+        } else {
+            agg.setFinalScore(BigDecimal.ZERO);
+        }
+
+        this.score = newScore;
     }
+
 
 }
 

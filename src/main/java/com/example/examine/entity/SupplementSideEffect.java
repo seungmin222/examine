@@ -2,6 +2,9 @@ package com.example.examine.entity;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.examine.service.util.calculateScore;
+
+import java.math.BigDecimal;
 
 
 @Entity
@@ -24,13 +27,20 @@ public class SupplementSideEffect {
 
     private String tier;
 
+    private BigDecimal totalScore;      // ∑(score × participants)
+    private Integer totalParticipants;     // ∑(participants)
+    private BigDecimal finalScore;         // totalScoreSum / totalParticipants
+
+
     public SupplementSideEffect() {}
 
-    public SupplementSideEffect(Supplement supplement, SideEffectTag sideEffectTag, String tier) {
+    public SupplementSideEffect(Supplement supplement, SideEffectTag sideEffectTag) {
         this.supplement = supplement;
         this.sideEffectTag = sideEffectTag;
-        this.tier = this.tier;
         this.id = new SupplementSideEffectId(supplement.getId(), sideEffectTag.getId());
+        this.totalScore = BigDecimal.ZERO;
+        this.finalScore = BigDecimal.ZERO;
+        this.totalParticipants = 0;
     }
 
     // getter/setter
@@ -65,6 +75,31 @@ public class SupplementSideEffect {
 
     public void setTier(String tier) {
         this.tier = tier;
+    }
+
+    public BigDecimal getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(BigDecimal totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public Integer getTotalParticipants() {
+        return totalParticipants;
+    }
+
+    public void setTotalParticipants(Integer totalParticipants) {
+        this.totalParticipants = totalParticipants;
+    }
+
+    public BigDecimal getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(BigDecimal finalScore) {
+        this.finalScore = finalScore;
+        this.tier = calculateScore.calculateTier(finalScore);
     }
 }
 

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface JournalSupplementEffectRepository extends JpaRepository<JournalSupplementEffect, JournalSupplementEffectId> {
@@ -19,4 +20,7 @@ public interface JournalSupplementEffectRepository extends JpaRepository<Journal
 
     // 혹은 존재 여부만 빠르게 확인할 수도 있어
     boolean existsById(JournalSupplementEffectId id);
+
+    List<JournalSupplementEffect> findAllByJournalId(Long journalId);
+    List<JournalSupplementEffect> findAllBySupplementId(Long supplementId);
 }
