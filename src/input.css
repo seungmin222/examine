@@ -7,16 +7,24 @@
   :root {
     --navbar-height: 60px;
     --sidebar-width: 10%;
+    --color-primary: #ffcfea;
+    --color-secondary: #ffe4ec;
+    --color-text: #333;
+    --color-border: #ff6a9c;
+    --color-tier-s: magenta;
+    --color-tier-a: blue;
+    --color-tier-b: red;
+    --color-tier-c: gold;
+    --color-tier-d: green;
   }
 
   body {
     background-color: #ffcfea; /*#ffc0cb*/
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
-    padding: 0    ;
+    padding: 0;
     color: gray;
-    padding-top: calc(10px+var(--navbar-height)); /* ✅ 상단바 공간 확보 */
-    padding-left: var(--sidebar-width);
+    padding-top: 70px; /* ✅ 상단바 공간 확보 */
   }
 
   h1 {
@@ -178,7 +186,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
 
-  .menu a{
+  .menu a.logo{
     color: #ff00ff;
   }
 
@@ -207,6 +215,7 @@
 
 
   th, td {
+    position: relative;
     background-color: white;
     border: 1px solid #ff6a9c;
     padding: 8px;
@@ -347,6 +356,7 @@
 
 
   span {
+    position : relative;
     scroll-margin-top:70px;
     background-color: white;
     width: auto;
@@ -366,6 +376,7 @@
     margin: 0 auto;
   }
   a {
+
     text-decoration: none;      /* 밑줄 제거 */
     color: #ff00ff;             /* 분홍색 (HotPink) */
     font-weight: bold;          /* 선택 사항: 강조 */
@@ -403,66 +414,82 @@
 
   /* 툴팁 박스 */
 
-  .tooltip {
-    position: relative;
-  }
+.tooltip-box {
+  width: 800px;
+  position: absolute;
+  top: 100%;       /* 아래로 붙임 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffe4ec;
+  padding: 6px;
+  border: 1px solid #ff6a9c;
+  border-radius: 4px;
+  z-index: 9000;
+}
 
-  .tooltip::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    z-index: 9999;
-    background-color: #ffcfea;
-    font-size: 13px;
-    border-radius: 6px;
-    display: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: max-content;
-    height: auto;
-    overflow-wrap: break-word;
-    padding: 5px;
-    white-space: pre-wrap;
-  }
+.tooltip-tail {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 9999;
+}
 
-  /* 위치: 위 (기본) */
-  .tooltip[data-position="top"]::after {
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-6px);
-  }
+.tooltip-tail-border {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 8000;
+}
 
-  /* 위치: 오른쪽 */
-  .tooltip[data-position="right"]::after {
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%) translateX(0);
-  }
-  /* 꼬리 (삼각형) */
-  .tooltip::before {
-    content: "";
-    position: absolute;
-    border-style: solid;
-    z-index: 10000;
-    display: none;
-  }
+/* 위치 top */
+.tooltip-box[data-position="top"] {
+   top: -50%;
+   left: 50%;
+   transform: translateY(-100%) translateX(-50%);
+}
+.tooltip-box[data-position="top"] .tooltip-tail {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: #ffe4ec transparent transparent transparent;
+}
 
-  /* 꼬리: 본문 아래에, 아래 방향 삼각형 (▼) */
-  .tooltip[data-position="top"]::before {
-    top: -6px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-1px);
-    border-width: 10px 10px 0 10px;
-    border-color: #ffcfea transparent transparent transparent;
-  }
+.tooltip-box[data-position="top"] .tooltip-tail-border {
+  bottom: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 11px 11px 0 11px;
+  border-style: solid;
+  border-color: #ff6a9c transparent transparent transparent;
+}
 
+/* 위치 right */
+.tooltip-box[data-position="right"] {
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%) translateX(0);
+}
 
-  .tooltip[data-position="right"]::before {
-     top: 50%;
-     left: 100%;  /* ❗️ 툴팁 본문 왼쪽에 붙이기 */
-     transform: translateY(-50%) translateX(-100%); /* 꼬리가 왼쪽으로 튀어나오도록 */
-     border-width: 10px 10px 10px 0;
-     border-color: transparent #ffcfea transparent transparent;
-  }
+.tooltip-box[data-position="right"] .tooltip-tail {
+  left: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 10px 10px 0;
+  border-style: solid;
+  border-color: transparent #ffe4ec transparent transparent;
+}
+
+.tooltip-box[data-position="right"] .tooltip-tail-border {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 11px 11px 11px 0;
+  border-style: solid;
+  border-color: transparent #ff6a9c transparent transparent;
+}
+
 
 
   /* 마우스 올릴 때 둘 다 보이게 */
@@ -531,7 +558,12 @@
    box-sizing: border-box;
   }
 
-  .A{
+  .S{
+   color: magenta;
+   font-weight: bold;
+  }
+
+  .A {
   color:blue;
   }
 
@@ -540,7 +572,7 @@
   }
 
   .C{
-  color: magenta;
+  color:#B8860B
   }
 
   .D{
@@ -548,14 +580,14 @@
   }
 
   .F, .null {
-  color:gray;
+  color: gray;
   }
 
   .scroll {
     position: fixed;       /* 화면 우측 하단 고정 */
     bottom: 2rem;
     right: 2%;
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     flex-direction: column; /* ✅ 수직 정렬 */
     gap: 0.5rem;              /* 버튼 사이 간격 */

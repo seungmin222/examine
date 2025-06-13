@@ -71,6 +71,42 @@ function createModalInner(tag, type) {
   return wrapper;
 }
 
+function createTooltip(anchorId, text, position = 'top') {
+  const anchor = document.getElementById(`${anchorId}`);
+  if (!anchor) {
+    console.warn(`Tooltip anchor not found: ${anchorId}`);
+    return;
+  }
+  const box = document.createElement('div');
+  box.classList.add('tooltip-box');
+  box.classList.add('hidden');
+  box.dataset.position = position;
+
+  const body = document.createElement('div');
+  body.className = 'tooltip-body';
+  body.innerHTML = text;
+
+  const tail = document.createElement('div');
+  tail.className = 'tooltip-tail';
+
+  const tailBorder = document.createElement('div');
+  tailBorder.className = 'tooltip-tail-border';
+
+  box.appendChild(body);
+  box.appendChild(tail);
+  box.appendChild(tailBorder);
+  anchor.appendChild(box);
+
+  anchor.addEventListener("mouseenter", () => {
+      box.classList.remove('hidden');
+  });
+  anchor.addEventListener("mouseleave",() => {
+      box.classList.add('hidden');
+  });
+}
+
+
+
 
 function checkCheckboxesById(type, tags = [], idField = 'id') {
   if(tags == null){
@@ -127,5 +163,6 @@ export {
   ArrayCheckboxesById,
   ObjectCheckboxesById,
   ArrayCheckboxesByName,
-  resetModal
+  resetModal,
+  createTooltip
 };

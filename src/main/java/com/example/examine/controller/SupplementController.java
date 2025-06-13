@@ -72,7 +72,7 @@ public class SupplementController {
     }
 
     @GetMapping("/{id}")
-    public SupplementRequest findOne(@PathVariable Long id) {
+    public List<SupplementRequest> findOne(@PathVariable Long id) {
         return supplementService.findOne(id);
     }
 

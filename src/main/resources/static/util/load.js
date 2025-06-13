@@ -100,6 +100,7 @@ function renderNote(){
     }
 }
 
+
 async function loadBasic(){
    await loadNav(); // 네비게이션바
    await loadIndexNav(); // 사이드바
@@ -110,5 +111,6 @@ async function loadBasic(){
    renderNote();
 }
 export{
-   loadBasic
+   loadBasic,
+   renderIndex
 };

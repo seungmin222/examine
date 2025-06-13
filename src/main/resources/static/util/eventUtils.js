@@ -1,3 +1,7 @@
+import {
+  createTooltip
+} from '/util/utils.js';
+
 function setupFoldToggle(buttonId, targetFn) {
   const btn = document.getElementById(buttonId);
   if (!btn) return;
@@ -161,7 +165,7 @@ function hideClickButton(btnId, boxId){
       }
     button.addEventListener('click', e=>{
        hidden.classList.toggle('hidden');
-       button.classList.toggle('text-gray-300');
+       button.classList.toggle('text-gray-500');
     });
     return true;
 }
@@ -206,8 +210,7 @@ function noteLink(id, rid){
    if(!link||!rlink){
      return false;
    }
-   link.dataset.tooltip = rlink.textContent;
-   link.dataset.position = 'top';
+   createTooltip(id,rlink.innerHTML);
    return true;
 }
 
@@ -253,6 +256,154 @@ function selectChange(boxId){
     });
 }
 
+function journalEvent(journalMap){
+    document.getElementById('journal-body').addEventListener('click', async e => {
+        const row = e.target.closest('tr');
+        const itemId = Number(row?.dataset.id);
+        const item = journalMap.get(itemId);
+        const modal = document.getElementById('modal');
+        const modalId = modal?.dataset.id;
+        if (!row||!itemId) return;
+
+        // 삭제 모드
+        if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
+            e.preventDefault();
+            const title = row.querySelector('a')?.textContent.trim();
+            if (confirm(`'${title}' 논문을 삭제할까요?`)) {
+                await fetch(`/api/journals/${itemId}`, {
+                    method: 'DELETE'
+                });
+                await loadJournals();
+            }
+            return;
+        }
+        // 태그 모달
+        if (e.target.classList.contains('modal-btn')) {
+            if (itemId != modalId) {
+               modal.dataset.id = itemId;
+               renderAllEffectCache(item);
+            }
+            modal.style.display = 'block';
+        }
+
+        // 저장 버튼
+        if (e.target.classList.contains('save-btn')) {
+            let effects, sideEffects;
+
+        if (itemId != modalId) {
+            effects = item.effects;
+            sideEffects = item.sideEffects;
+        } else {
+            effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
+                supplementId: parseInt(e.dataset.supplementId),
+                effectId: parseInt(e.dataset.effectId),
+                size: parseFloat(e.querySelector('input[name="size"]').value)
+            }));
+
+            sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
+                supplementId: parseInt(e.dataset.supplementId),
+                sideEffectId: parseInt(e.dataset.effectId),
+                size: parseFloat(e.querySelector('input[name="size"]').value)
+            }));
+        }
+
+        const trialDesign = {
+            id: parseInt(row.querySelector('[name="trialDesign"]').value)
+        };
+
+        const duration = {
+            value: parseInt(row.querySelector('[name="duration-value"]').value),
+            unit: row.querySelector('[name="duration-unit"]').value
+        };
+
+        const updated = {
+            title: item.title,
+            link: item.link,
+            trialDesign,
+            blind: row.querySelector('[name="blind"]').value,
+            parallel: row.querySelector('[name="parallel"]').value,
+            duration,
+            participants: parseInt(row.querySelector('[name="participants"]').value),
+            effects,
+            sideEffects,
+            summary: item.summary,
+            date: item.date
+        };
+
+        const res = await fetch(`/api/journals/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updated)
+        });
+
+        if (res.ok) {
+            alert("논문이 수정되었습니다.");
+            //모달 초기화 및 테이블 재랜더링
+            loadTags();
+            loadJournals();
+            modal.dataset.id = "0";
+        } else {
+            alert("수정 실패");
+        }
+    }
+    });
+}
+function supplementEvent(){
+   document.getElementById('supplement-body').addEventListener('click', async e => {
+       const row = e.target.closest('tr');
+       if (!row) return;
+
+       const itemId = e.target.dataset.id;
+
+       // 삭제 모드
+       if (document.getElementById('toggle-delete') ?.classList.contains('execute')) {
+           e.preventDefault(); // 링크 이동 방지
+           if (confirm(`'${item.korName}' 을 삭제할까요?`)) {
+              await fetch(`/api/supplements/${itemId}`, {
+              method: 'DELETE'
+              });
+              await loadSupplements();
+           }
+            return;
+       }
+
+       // 저장 버튼
+       if (e.target.classList.contains('save-btn')) {
+           const types = ArrayCheckboxesById('type');
+           const updated = {
+                 id: itemId,
+                 korName: row.querySelector('[name="korName"]').value,
+                 engName: row.querySelector('[name="engName"]').value,
+                 dosage: row.querySelector('[name="dosage"]').value,
+                 cost: parseFloat(row.querySelector('[name="cost"]').value),
+                 types
+           };
+
+           const res = await fetch(`/api/supplements/${item.id}`, {
+                 method: 'PUT',
+                 headers: {
+                 'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify(updated)
+           });
+
+           if (res.ok) {
+                 alert('저장되었습니다');
+                 await loadSupplements();
+                 document.getElementById('list-sort')?.dispatchEvent(new Event('change'));
+           } else {
+                 alert('저장 실패');
+           }
+       }
+       // 태그 모달
+       if (e.target.classList.contains('modal-btn')) {
+           //checkCheckboxesById('type', e.taget.types);
+           document.getElementById('modal').style.display = 'block';
+       }
+   });
+}
 
 export {
   setupFoldToggle,
@@ -269,5 +420,7 @@ export {
   noteLink,
   onlyOneCheckboxes,
   selectList,
-  selectChange
+  selectChange,
+  journalEvent,
+  supplementEvent
 };

@@ -16,7 +16,15 @@
     <!--background-->
     <div class="w-[95%] mx-auto">
         <!--main-content-->
-        <h1 id="name"></h1>
+        <div class="w-full flex justify-between items-center flex-wrap gap-2">
+        <!--section-header-->
+           <h1 id="index-1"></h1>
+           <div class="flex gap-2">
+               <button id="toggle-delete">삭제</button>
+               <button id="toggle-change">수정</button>
+               <button id="save-button">저장</button>
+           </div>
+        </div>
         <table id="content-1">
             <thead>
             <tr>
@@ -31,38 +39,35 @@
             </thead>
             <tbody id="supplement-body"></tbody>
         </table>
-        <div class="w-full flex justify-between items-center flex-wrap gap-2">
-            <!--section-header-->
-            <button id="toggle-change">수정</button>
-        </div>
 
-        <h3>상세 소개</h3>
-        <div class="content">
+
+        <h3 id="index-2">상세 소개</h3>
+        <div id="content-2" class="content">
             <p id="intro" class="editable" contenteditable="false" data-field="intro">성분 소개 내용을 입력하세요.</p>
         </div>
 
-        <h3>기대효과</h3>
-        <div class="content">
+        <h3 id="index-3">기대효과</h3>
+        <div id="content-3" class="content">
             <p id="positive" class="editable" contenteditable="false" data-field="positive">기대효과 내용을 입력하세요.</p>
         </div>
 
-        <h3>부작용</h3>
-        <div class="content">
+        <h3 id="index-4">부작용</h3>
+        <div id="content-4" class="content">
             <p id="negative" class="editable" contenteditable="false" data-field="negative">부작용 내용을 입력하세요.</p>
         </div>
 
-        <h3>작용기전</h3>
-        <div class="content">
+        <h3 id="index-5">작용기전</h3>
+        <div id="content-5" class="content">
             <p id="mechanism" class="editable" contenteditable="false" data-field="mechanism">작용기전 설명을 입력하세요.</p>
         </div>
 
-        <h3>복용량</h3>
-        <div class="content">
+        <h3 id="index-6">복용량</h3>
+        <div id="content-6" class="content">
             <p id="dosage" class="editable" contenteditable="false" data-field="dosage">복용량 정보를 입력하세요.</p>
         </div>
 
-        <h3>연관 논문</h3>
-        <table id="content-3">
+        <h3 id="index-7">연관 논문</h3>
+        <table id="content-7">
             <thead>
             <tr>
                 <th>제목</th>
@@ -79,7 +84,7 @@
             </thead>
             <tbody id="journal-body"></tbody>
         </table>
-        <h3>추천 제품</h3>
+        <h3 id="index-8">추천 제품</h3>
         <ul id="product-list" class="w-48">
             <!--브랜드, 비용, 링크 나열-->
         </ul>

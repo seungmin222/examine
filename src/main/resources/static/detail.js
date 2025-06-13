@@ -1,6 +1,14 @@
 import {
-    loadBasic
+    loadBasic,
+    renderIndex
 } from '/util/load.js';
+
+import {
+    setupPairToggleButton,
+    journalEvent,
+    supplementEvent
+} from '/util/eventUtils.js';
+
 
 import {
     renderSupplements,
@@ -8,22 +16,40 @@ import {
     renderDetails
 } from '/util/render.js';
 
+const params = new URLSearchParams(window.location.search);
+const supplementId = params.get('id');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const supplementId = params.get('id');
     if (!supplementId) {
         return;
     }
     try {
-        loadSupplements(supplementId);
-        loadDetails(supplementId);
-        loadJournals(supplementId);
-        loadBasic();
+        await loadAll();
+        await loadBasic();
+        supplementEvent();
+        journalEvent();
+        setupPairToggleButton('toggle-delete', 'toggle-change', loadAll);
     } catch (err) {
         document.getElementById('title').textContent = '성분을 불러올 수 없습니다';
         console.error(err);
     }
+});
+
+document.getElementById('toggle-change').addEventListener('click',e=> {
+    const editMode = e.target.classList.contains('execute');
+    if(editMode) {
+       disableEditMode();
+    }
+    else {
+       enableEditMode();
+    }
+});
+
+document.getElementById('save-button').addEventListener('click',e=>{
+   const editMode = document.getElementById('toggle-change').classList.contains('execute');
+   if(editMode) {
+      saveDetail();
+   }
 });
 
 // 🟢 수정모드 진입: p 태그 contenteditable 활성화 + 스타일 변경
@@ -39,8 +65,6 @@ async function disableEditMode() {
         el.setAttribute('contenteditable', 'false');
         el.classList.remove('editing');
     });
-    const params = new URLSearchParams(window.location.search);
-    const supplementId = params.get('id');
     const res = await fetch(`/api/details/${supplementId}`);
     const details = await res.json();
     renderDetails(details);
@@ -48,8 +72,6 @@ async function disableEditMode() {
 
 // 🟣 수정 완료: 내용 수집 후 저장 요청
 async function saveDetail() {
-    const params = new URLSearchParams(window.location.search);
-    const supplementId = params.get('id');
     const data = {};
     document.querySelectorAll('.editable').forEach(el => {
         const key = el.dataset.field;
@@ -76,20 +98,32 @@ async function saveDetail() {
     }
 }
 
-async function loadJournals(supplementId){
+async function loadJournals(){
     const res = await fetch(`/api/details/${supplementId}/journals`);
     const journals = await res.json();
-    renderJournals(journals);
+    const journalMap = new Map(); // 그냥 매개변수 채우는 용
+    renderJournals(journals, journalMap);
 }
 
-async function loadSupplements(supplementId){
+async function loadSupplements(){
     const res = await fetch(`/api/supplements/${supplementId}`);
     const supplements = await res.json();
     renderSupplements(supplements);
+    const title = document.getElementById('title');
+    const subTitle = document.getElementById('index-1');
+    title.innerHTML = `${supplements[0].korName}`;
+    subTitle.innerHTML = `${supplements[0].korName}`;
+    setTimeout(renderIndex, 0);
 }
 
-async function loadDetails(supplementId){
+async function loadDetails(){
     const res = await fetch(`/api/details/${supplementId}`);
     const details = await res.json();
     renderDetails(details);
+}
+
+async function loadAll(){
+    loadSupplements();
+    loadDetails();
+    loadJournals();
 }

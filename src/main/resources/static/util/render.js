@@ -1,3 +1,16 @@
+import{
+  createTierSelectBox,
+  createModalInner,
+  createTagList,
+  checkCheckboxes,
+  checkCheckboxesById,
+  ArrayCheckboxesById,
+  ObjectCheckboxesById,
+  ArrayCheckboxesByName,
+  resetModal,
+  createTooltip
+} from '/util/utils.js';
+
 function renderSupplements(list) {
     const tbody = document.getElementById('supplement-body');
     tbody.innerHTML = '';
@@ -53,7 +66,7 @@ function renderSupplements(list) {
     });
 }
 
-function renderJournals(list) {
+function renderJournals(list, journalMap) {
     const tbody = document.getElementById('journal-body');
     tbody.innerHTML = '';
     journalMap.clear();
@@ -104,7 +117,7 @@ function renderJournals(list) {
             `).join('');
 
         row.innerHTML = `
-          <td class="tooltip" data-position="right" data-tooltip="${item.summary}">
+          <td id="tooltip-${item.id}">
               <a target="_blank" rel="noopener noreferrer" href="${item.link}"> ${item.title}</a>
           </td>
           <td class="${item.trialDesign?.tier[0]}">
@@ -156,6 +169,8 @@ function renderJournals(list) {
           <td>${item.date?.slice(0, 7)}</td>
           ${editMode ? `<td>
              <div class="flex flex-col gap-2">
+
+
                 <button class="modal-btn" data-id="${item.id}">태그</button>
                 <button class="save-btn" data-id="${item.id}">저장</button>
              </div>
@@ -163,6 +178,9 @@ function renderJournals(list) {
         `;
 
         tbody.appendChild(row);
+        requestAnimationFrame(() => {
+          createTooltip(`tooltip-${item.id}`, item.summary, 'right');
+        });
     });
 }
 
@@ -198,6 +216,7 @@ function renderModal(type, list) {
 }
 
 function renderDetails(detail) {
+
     const intro = document.getElementById('intro');
     const positive = document.getElementById('positive');
     const negative = document.getElementById('negative');

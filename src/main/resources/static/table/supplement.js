@@ -12,7 +12,8 @@ import {
     setupPairToggleButton,
     setupModalOpenClose,
     setupSearchForm,
-    resetButton
+    resetButton,
+    supplementEvent
 } from '/util/eventUtils.js';
 
 import {
@@ -32,6 +33,8 @@ document.addEventListener('DOMContentLoaded', async e => {
     await loadBasic();
     await loadSupplements();
     await loadTags();
+    // 테이블 수정, 삭제
+    supplementEvent();
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadSupplements);
@@ -66,58 +69,7 @@ async function loadSupplements() {
 
 
 
-document.getElementById('supplement-body').addEventListener('click', async e => {
-    const row = e.target.closest('tr');
-    if (!row) return;
 
-    const itemId = e.target.dataset.id;
-
-    // 삭제 모드
-    if (document.getElementById('toggle-delete') ?.classList.contains('execute')) {
-        e.preventDefault(); // 링크 이동 방지
-        if (confirm(`'${item.korName}' 을 삭제할까요?`)) {
-           await fetch(`/api/supplements/${itemId}`, {
-           method: 'DELETE'
-           });
-           await loadSupplements();
-        }
-         return;
-    }
-
-    // 저장 버튼
-    if (e.target.classList.contains('save-btn')) {
-        const types = ArrayCheckboxesById('type');
-        const updated = {
-              id: itemId,
-              korName: row.querySelector('[name="korName"]').value,
-              engName: row.querySelector('[name="engName"]').value,
-              dosage: row.querySelector('[name="dosage"]').value,
-              cost: parseFloat(row.querySelector('[name="cost"]').value),
-              types
-        };
-
-        const res = await fetch(`/api/supplements/${item.id}`, {
-              method: 'PUT',
-              headers: {
-              'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(updated)
-        });
-
-        if (res.ok) {
-              alert('저장되었습니다');
-              await loadSupplements();
-              document.getElementById('list-sort')?.dispatchEvent(new Event('change'));
-        } else {
-              alert('저장 실패');
-        }
-    }
-    // 태그 모달
-    if (e.target.classList.contains('modal-btn')) {
-        //checkCheckboxesById('type', e.taget.types);
-        document.getElementById('modal').style.display = 'block';
-    }
-});
 
 // 태그 로딩
 async function loadTags() {

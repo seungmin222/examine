@@ -19,7 +19,8 @@ import {
     resetButton,
     selectList,
     onlyOneCheckboxes,
-    selectChange
+    selectChange,
+    journalEvent
 } from '/util/eventUtils.js';
 
 import {
@@ -41,6 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadBasic();
     await loadJournals();
     await loadTags();
+
+
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadJournals);
@@ -79,106 +82,9 @@ async function loadJournals() {
     }
     const res = await fetch(`/api/journals?sort=${sort}&direction=${dir}`);
     const allJournals = await res.json();
-    renderJournals(allJournals);
+    renderJournals(allJournals, journalMap);
+    journalEvent(journalMap);
 }
-
-document.getElementById('journal-body').addEventListener('click', async e => {
-    const row = e.target.closest('tr');
-    const itemId = Number(row?.dataset.id);
-    const item = journalMap.get(itemId);
-    const modal = document.getElementById('modal');
-    const modalId = modal?.dataset.id;
-    if (!row||!itemId) return;
-
-    // 삭제 모드
-    if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
-        e.preventDefault();
-        const title = row.querySelector('a')?.textContent.trim();
-        if (confirm(`'${title}' 논문을 삭제할까요?`)) {
-            await fetch(`/api/journals/${itemId}`, {
-                method: 'DELETE'
-            });
-            await loadJournals();
-        }
-        return;
-    }
-    // 태그 모달
-    if (e.target.classList.contains('modal-btn')) {
-        if (itemId != modalId) {
-           modal.dataset.id = itemId;
-           renderAllEffectCache(item);
-        }
-        modal.style.display = 'block';
-    }
-
-    // 저장 버튼
-    if (e.target.classList.contains('save-btn')) {
-        let effects, sideEffects;
-
-    if (itemId != modalId) {
-        effects = item.effects;
-        sideEffects = item.sideEffects;
-    } else {
-        effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
-            supplementId: parseInt(e.dataset.supplementId),
-            effectId: parseInt(e.dataset.effectId),
-            size: parseFloat(e.querySelector('input[name="size"]').value)
-        }));
-
-        sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
-            supplementId: parseInt(e.dataset.supplementId),
-            sideEffectId: parseInt(e.dataset.effectId),
-            size: parseFloat(e.querySelector('input[name="size"]').value)
-        }));
-    }
-
-    const trialDesign = {
-        id: parseInt(row.querySelector('[name="trialDesign"]').value)
-    };
-
-    const duration = {
-        value: parseInt(row.querySelector('[name="duration-value"]').value),
-        unit: row.querySelector('[name="duration-unit"]').value
-    };
-
-    const updated = {
-        title: item.title,
-        link: item.link,
-        trialDesign,
-        blind: row.querySelector('[name="blind"]').value,
-        parallel: row.querySelector('[name="parallel"]').value,
-        duration,
-        participants: parseInt(row.querySelector('[name="participants"]').value),
-        effects,
-        sideEffects,
-        summary: item.summary,
-        date: item.date
-    };
-
-    const res = await fetch(`/api/journals/${itemId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updated)
-    });
-
-    if (res.ok) {
-        alert("논문이 수정되었습니다.");
-        //모달 초기화 및 테이블 재랜더링
-        loadTags();
-        loadJournals();
-        modal.dataset.id = "0";
-    } else {
-        alert("수정 실패");
-    }
-}
-
-
-
-});
-
-
 
 // 태그 로딩
 async function loadTags() {
@@ -201,8 +107,6 @@ async function loadTags() {
      onlyOneCheckboxes(['positive', 'negative']);
      document.getElementById('mapping-cash').innerHTML = '';
 }
-
-
 
 // 태그 필터링
 async function filterByTag() {

@@ -101,11 +101,11 @@ public class SupplementService {
                 .toList();
     }
 
-    public SupplementRequest findOne(Long id) {
-        Supplement supplement = supplementRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("해당 성분이 존재하지 않습니다. ID: " + id));
-
-        return SupplementRequest.fromEntity(supplement);
+    public List<SupplementRequest> findOne(Long id) {
+        return supplementRepo.findById(id)
+                .stream()
+                .map(SupplementRequest::fromEntity)
+                .toList();
     }
 
 
