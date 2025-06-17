@@ -575,10 +575,6 @@ button:hover {
   background-color: #ff6a9c;
 }
 
-button:toggle {
-  background-color: red;
-}
-
 svg {
   width: 24px;
   height: 24px;

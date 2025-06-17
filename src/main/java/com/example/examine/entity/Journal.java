@@ -1,12 +1,12 @@
 package com.example.examine.entity;
 
+import com.example.examine.service.util.calculateScore;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "journal")
@@ -25,13 +25,13 @@ public class Journal {
 
     @ManyToOne
     @JoinColumn(name = "trial_design_id")
-    private TrialDesign trial_design;
+    private TrialDesign trialDesign;
 
-    private Integer duration_value;
+    private Integer durationValue;
 
-    private String duration_unit;
+    private String durationUnit;
 
-    private Integer duration_days;
+    private Integer durationDays;
 
     private Integer participants;
 
@@ -40,6 +40,8 @@ public class Journal {
     private Integer blind;
 
     private Boolean parallel;
+
+    private BigDecimal score;
 
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<JournalSupplementEffect> journalSupplementEffects = new ArrayList<>();
@@ -70,13 +72,13 @@ public class Journal {
     public String getSummary() { return summary; }
     public void setSummary(String summary) { this.summary = summary; }
 
-    public TrialDesign getTrial_design() { return trial_design;}
-    public void setTrial_design(TrialDesign trial_design) {
-        this.trial_design = trial_design;
+    public TrialDesign getTrialDesign() { return trialDesign;}
+    public void setTrialDesign(TrialDesign trialDesign) {
+        this.trialDesign = trialDesign;
     }
 
-    public String getDuration_unit() { return duration_unit; }
-    public void setDuration_unit(String duration_unit) { this.duration_unit = duration_unit; }
+    public String getDurationUnit() { return durationUnit; }
+    public void setDurationUnit(String durationUnit) { this.durationUnit = durationUnit; }
 
     public Integer getParticipants() { return participants; }
     public void setParticipants(Integer participants) { this.participants = participants; }
@@ -84,20 +86,20 @@ public class Journal {
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
 
-    public Integer getDuration_value() {
-        return duration_value;
+    public Integer getDurationValue() {
+        return durationValue;
     }
 
-    public void setDuration_value(Integer duration_value) {
-        this.duration_value = duration_value;
+    public void setDurationValue(Integer durationValue) {
+        this.durationValue = durationValue;
     }
 
-    public Integer getDuration_days() {
-        return duration_days;
+    public Integer getDurationDays() {
+        return durationDays;
     }
 
-    public void setDuration_days(Integer duration_days) {
-        this.duration_days = duration_days;
+    public void setDurationDays(Integer durationDays) {
+        this.durationDays = durationDays;
     }
 
     public List<JournalSupplementEffect> getJournalSupplementEffects() {
@@ -131,5 +133,17 @@ public class Journal {
 
     public void setParallel(Boolean parallel) {
         this.parallel = parallel;
+    }
+
+    public BigDecimal getScore() {
+        return score;
+    }
+
+    public void setScore() {
+        if (participants == null || durationDays == null) {
+            this.score = null;
+            return;
+        }
+        this.score = calculateScore.calculateJournalScore(participants,durationDays,trialDesign.getName(),blind);
     }
 }

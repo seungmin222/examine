@@ -121,9 +121,10 @@ public class SupplementService {
             List<Long> typeIds,
             List<Long> effectIds,
             List<Long> sideEffectIds,
+            List<String> tiers,
             Sort sort
     ){
-        return supplementRepo.findFiltered(typeIds, effectIds, sideEffectIds, sort)
+        return supplementRepo.findFiltered(typeIds, effectIds, sideEffectIds, tiers, sort)
                 .stream()
                 .map(SupplementRequest::fromEntity)
                 .toList();

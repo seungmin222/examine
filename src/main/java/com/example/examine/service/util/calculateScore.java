@@ -8,15 +8,21 @@ import java.util.List;
 
 public class calculateScore {
 
-    public static BigDecimal calculateJournalScore(BigDecimal strength, int participants, int duration, String design, int blind) {
+    public static BigDecimal calculateJournalScore(int participants, int duration, String design, int blind) {
         BigDecimal logParticipants = BigDecimal.valueOf(Math.log10(participants + 1));
         BigDecimal logDuration = BigDecimal.valueOf(Math.log(duration + 1));
         BigDecimal designWeight = getDesignWeight(design, blind);
 
-        return strength
-                .multiply(logParticipants)
+        return logParticipants
                 .multiply(logDuration)
                 .multiply(designWeight)
+                .setScale(4, RoundingMode.HALF_UP);
+    }
+
+    public static BigDecimal calculateJournalSupplementScore(BigDecimal strength, BigDecimal score ) {
+
+        return strength
+                .multiply(score)
                 .setScale(4, RoundingMode.HALF_UP);
     }
 

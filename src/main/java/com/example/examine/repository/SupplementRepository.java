@@ -24,11 +24,15 @@ public interface SupplementRepository extends JpaRepository<Supplement, Long> { 
         WHERE (:types IS NULL OR t.id IN :types)
           AND (:effectIds IS NULL OR e.effectTag.id IN :effectIds)
           AND (:sideEffectIds IS NULL OR se.sideEffectTag.id IN :sideEffectIds)
+          AND (:tiers IS NULL OR 
+                e.tier IN :tiers OR
+                se.tier IN :tiers)
         """)
     List<Supplement> findFiltered(
             @Param("types") List<Long> typeIds,
             @Param("effectIds") List<Long> effectIds,
             @Param("sideEffectIds") List<Long> sideEffectIds,
+            @Param("tiers") List<String> tiers,
             Sort sort // 명시 안해도 자동정렬
     );
 }

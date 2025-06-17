@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>성분 관리</title>
   <link href="/dist/output.css" rel="stylesheet">
-  <link rel="icon" type="image/png" href="../image/icon.png" />
-
+  <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
+  <script src="/headScript.js"></script>
 </head>
 <body>
 <!--기초 로딩-->
@@ -84,11 +84,22 @@
       <h2 class="text-center">부작용</h2>
       <ul id="negative-list"></ul>
     </div>
+    <div>
+      <h2 class="text-center">티어</h2>
+      <ul id="tier-list">
+        <li data-id="S" data-type="tier" class="S w-12">S</li>
+        <li data-id="A" data-type="tier" class="A w-12">A</li>
+        <li data-id="B" data-type="tier" class="B w-12">B</li>
+        <li data-id="C" data-type="tier" class="C w-12">C</li>
+        <li data-id="D" data-type="tier" class="D w-12">D</li>
+        <li data-id="F" data-type="tier" class="F w-12">F</li>
+      </ul>
+    </div>
     <div id="tag-controller"></div>
   </div>
 </div>
 <!-- ✅ 모달: 기대효과 선택 -->
-<div id="modal" class="modal" >
+<div id="modal" class="modal hidden" >
   <div class="modal-content">
     <div id="modal-controller" class="flex-end"></div>
     <div class="flex justify-between gap-5">

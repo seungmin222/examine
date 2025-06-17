@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <title>논문 관리</title>
     <link href="/dist/output.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="../image/icon.png" />
+    <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
+    <script src="/headScript.js"></script>
 </head>
 <body>
 
@@ -28,6 +29,8 @@
             <option value="title">제목순</option>
             <option value="date">최신순</option>
             <option value="participants">표본순</option>
+            <option value="durationDays">기간순</option>
+            <option value="score">점수순</option>
         </select>
     </div>
 </div>
@@ -66,25 +69,26 @@
         </select>
         </div>
         <select name="trialDesign" class="w-48">
-            <option value="1" class="A">Meta-analysis</option>
-            <option value="20" class="A">Systematic Review</option>
-            <option value="21" class="B">RCT</option>
-            <option value="22" class="B">Non-RCT</option>
-            <option value="23" class="C">Cohort</option>
-            <option value="24" class="C">Case-control</option>
-            <option value="25" class="C">Cross-sectional</option>
-            <option value="26" class="D">Case Report</option>
-            <option value="27" class="F">Animal Study</option>
-            <option value="28" class="F">In-vitro Study</option>
+            <option value="29" class="F w-48">Unknown</option>
+            <option value="1" class="A w-48">Meta-analysis</option>
+            <option value="20" class="A w-48">Systematic Review</option>
+            <option value="21" class="B w-48">RCT</option>
+            <option value="22" class="B w-48">Non-RCT</option>
+            <option value="23" class="C w-48">Cohort</option>
+            <option value="24" class="C w-48">Case-control</option>
+            <option value="25" class="C w-48">Cross-sectional</option>
+            <option value="26" class="D w-48">Case Report</option>
+            <option value="27" class="F w-48">Animal Study</option>
+            <option value="28" class="F w-48">In-vitro Study</option>
         </select>
         <select name="blind" class="w-32">
-            <option value="open-label">open-label</option>
-            <option value="single-blind" class="B">single-blind</option>
-            <option value="double-blind" class="A">double-blind</option>
+            <option value="open-label" class="w-32">open-label</option>
+            <option value="single-blind" class="B w-32">single-blind</option>
+            <option value="double-blind" class="A w-32">double-blind</option>
         </select>
         <select name="parallel" class="w-32">
-           <option value="true">parallel</option>
-           <option value="false">cross-over</option>
+           <option value="true" class="w-32">parallel</option>
+           <option value="false" class="w-32">cross-over</option>
         </select>
         <input type="number" name="participants" placeholder="참가자"/>
         <button type="button" id="modal-open">태그 선택</button>
@@ -125,7 +129,7 @@
 
 <!-- ✅ 모달: 기대효과 선택 -->
 
-<div id="modal" class="modal">
+<div id="modal" class="modal hidden">
     <div class="modal-content">
     <div id="modal-controller" class="flex-end"></div>
     <div class="flex justify-between gap-5">

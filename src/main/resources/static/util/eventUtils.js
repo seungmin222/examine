@@ -1,5 +1,9 @@
 import {
-  createTooltip
+  createTooltip,
+  resetEventListener,
+  ArrayCheckboxesById,
+  checkCheckboxesById,
+  renderEffectCache
 } from '/util/utils.js';
 
 function setupFoldToggle(buttonId, targetFn) {
@@ -67,11 +71,17 @@ function setupModalOpenClose(openId, closeId, modalId) {
 
   if (openBtn) openBtn.addEventListener('click', () => {
     modal.dataset.id = '0';
-    modal.style.display = 'block';
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    modalScroll('top-scroll', modalId, 'top');
+    modalScroll('bottom-scroll', modalId, 'bottom');
   });
 
   if (closeBtn) closeBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    pageScroll('top-scroll', 'top');
+    pageScroll('bottom-scroll', 'bottom');
   });
 }
 
@@ -195,6 +205,7 @@ function indexScroll(indexId, type, behavior = 'smooth', offset = 70) {
 
 
 function pageScroll(btnId, direction = 'top', behavior = 'smooth') {
+  resetEventListener(btnId);
   const button = document.getElementById(btnId);
   if (!button) return;
 
@@ -203,6 +214,24 @@ function pageScroll(btnId, direction = 'top', behavior = 'smooth') {
     window.scrollTo({ top: y, behavior });
   });
 }
+
+function modalScroll(btnId, modalId, direction = 'top', behavior = 'smooth') {
+  resetEventListener(btnId);
+  const button = document.getElementById(btnId);
+  const modal = document.getElementById(modalId);
+  if (!button || !modal) return;
+
+  // modal 자체는 fixed라 스크롤 안먹힘
+  const scrollContainer = modal.querySelector('.modal-content');
+  if (!scrollContainer) return;
+
+  button.addEventListener('click', () => {
+    const y = direction === 'top' ? 0 : scrollContainer.scrollHeight;
+    scrollContainer.scrollTo({ top: y, behavior });
+  });
+}
+
+
 
 function noteLink(id, rid){
    const link = document.getElementById(id);
@@ -281,9 +310,9 @@ function journalEvent(journalMap){
         if (e.target.classList.contains('modal-btn')) {
             if (itemId != modalId) {
                modal.dataset.id = itemId;
-               renderAllEffectCache(item);
+               renderEffectCache(item);
             }
-            modal.style.display = 'block';
+            modal.classList.remove('hidden');
         }
 
         // 저장 버튼
@@ -350,13 +379,16 @@ function journalEvent(journalMap){
     }
     });
 }
-function supplementEvent(){
+function supplementEvent(supplementMap){
    document.getElementById('supplement-body').addEventListener('click', async e => {
        const row = e.target.closest('tr');
-       if (!row) return;
-
-       const itemId = e.target.dataset.id;
-
+       const itemId = Number(row?.dataset.id);
+       const item = journalMap.get(itemId);
+       const modal = document.getElementById('modal');
+       const modalId = modal?.dataset.id;
+       if (!row||!itemId) {
+           return;
+       }
        // 삭제 모드
        if (document.getElementById('toggle-delete') ?.classList.contains('execute')) {
            e.preventDefault(); // 링크 이동 방지
@@ -400,9 +432,29 @@ function supplementEvent(){
        // 태그 모달
        if (e.target.classList.contains('modal-btn')) {
            //checkCheckboxesById('type', e.taget.types);
-           document.getElementById('modal').style.display = 'block';
+           document.getElementById('modal').classList.remove('hidden');
        }
    });
+}
+
+function themeSelect(selectId, iconId) {
+  const select = document.getElementById(selectId);
+  const icon = document.getElementById(iconId);
+  function applyTheme(theme) {
+      for (const c of [...document.documentElement.classList]) {
+        if (c.startsWith('theme-')) {
+          document.documentElement.classList.remove(c);
+        }
+      }
+      document.documentElement.classList.add(`theme-${theme}`);
+      icon.src = `/image/icon-${theme}.png`;
+      select.value = theme;
+  }
+  select.addEventListener('change', e => {
+    const selected = e.target.value;
+    applyTheme(selected);
+    localStorage.setItem('selectedTheme', selected);
+  });
 }
 
 export {
@@ -417,10 +469,12 @@ export {
   hideClickButton,
   indexScroll,
   pageScroll,
+  modalScroll,
   noteLink,
   onlyOneCheckboxes,
   selectList,
   selectChange,
   journalEvent,
-  supplementEvent
+  supplementEvent,
+  themeSelect
 };

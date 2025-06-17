@@ -97,25 +97,12 @@ public class JournalSupplementEffect {
     }
 
     public void setScore(SupplementEffect agg, int oldParticipants) {
-        if (this.journal == null || this.size == null) {
+        if (this.journal == null || this.journal.getScore() == null || this.size == null) {
             this.score = null;
             return;
         }
-
-        Integer participants = this.journal.getParticipants();
-        Integer duration = this.journal.getDuration_days();
-        if (participants == null || duration == null) {
-            this.score = null;
-            return;
-        }
-
-        String design = this.getJournal().getTrial_design() != null
-                ? this.getJournal().getTrial_design().getName()
-                : "unknown";
-        Integer blind = this.getJournal().getBlind();
-
-        BigDecimal strength = this.size;
-        BigDecimal newScore = calculateScore.calculateJournalScore(strength, participants, duration, design, blind)
+        int participants = this.journal.getParticipants();
+        BigDecimal newScore = calculateScore.calculateJournalSupplementScore(this.size, this.journal.getScore())
                 .setScale(4, RoundingMode.HALF_UP);
 
         // 기존 점수가 있었으면 제거
@@ -124,8 +111,7 @@ public class JournalSupplementEffect {
             agg.setTotalScore(agg.getTotalScore().subtract(oldContribution));
             agg.setTotalParticipants(agg.getTotalParticipants() - oldParticipants);
         }
-        ///  totalscore null일때걍 0으로 처리
-
+        ///  totalscore null 일때 걍 0으로 처리
         // 새 점수 반영
         BigDecimal newContribution = newScore.multiply(BigDecimal.valueOf(participants));
         agg.setTotalScore(agg.getTotalScore().add(newContribution));

@@ -85,10 +85,9 @@ function renderJournals(list, journalMap) {
       { value: '25', label: 'Cross-sectional', tier: 'C' },
       { value: '26', label: 'Case Report', tier: 'D' },
       { value: '27', label: 'Animal Study', tier: 'F' },
-      { value: '28', label: 'In-vitro Study', tier: 'F' }
+      { value: '28', label: 'In-vitro Study', tier: 'F' },
+      { value: '29', label: 'Unknown', tier: 'F' }
     ];
-
-
 
     shown.forEach(item => {
         journalMap.set(item.id, item);
@@ -228,6 +227,8 @@ function renderDetails(detail) {
     mechanism.innerHTML = `${detail.mechanism}`;
     dosage.innerHTML = `${detail.dosage}`;
 }
+
+
 
 export {
 renderSupplements,

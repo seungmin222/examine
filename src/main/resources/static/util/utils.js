@@ -153,6 +153,92 @@ function resetModal(types){
     });
 }
 
+function resetEventListener(Id) {
+  const oldElem = document.getElementById(Id);
+  if (!oldElem) return;
+  const newElem = oldElem.cloneNode(true); // true: 하위 요소까지 복제
+  oldElem.parentNode.replaceChild(newElem, oldElem);
+}
+
+function renderEffectCache(item) {
+  const container = document.getElementById('mapping-cash');
+  container.innerHTML = ''; // ✅ 초기화
+
+  // ✅ 효과(effect) 캐시
+  item.effects?.forEach(effect => {
+    const row = document.createElement('tr');
+    row.classList.add('effect-cash');
+    row.dataset.supplementId = effect.supplementId;
+    row.dataset.effectId = effect.effectId;
+
+    const td1 = document.createElement('td');
+    td1.textContent = effect.supplementName;
+
+    const td2 = document.createElement('td');
+    td2.textContent = effect.effectName;
+
+    const td3 = document.createElement('td');
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('flex');
+
+    const size = document.createElement('input');
+    size.name = 'size';
+    size.type = 'number';
+    size.classList.add('wid-60px');
+    size.value = effect.size ?? '';
+
+    const percent = document.createElement('span');
+    percent.textContent = ' %';
+
+    wrapper.appendChild(size);
+    wrapper.appendChild(percent);
+    td3.appendChild(wrapper);
+
+    row.appendChild(td1);
+    row.appendChild(td2);
+    row.appendChild(td3);
+
+    container.appendChild(row);
+  });
+
+  // ✅ 부작용(sideEffect) 캐시
+  item.sideEffects?.forEach(effect => {
+    const row = document.createElement('tr');
+    row.classList.add('sideEffect-cash');
+    row.dataset.supplementId = effect.supplementId;
+    row.dataset.effectId = effect.sideEffectId;
+
+    const td1 = document.createElement('td');
+    td1.textContent = effect.supplementName;
+
+    const td2 = document.createElement('td');
+    td2.textContent = effect.sideEffectName;
+
+    const td3 = document.createElement('td');
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('flex');
+
+    const size = document.createElement('input');
+    size.name = 'size';
+    size.type = 'number';
+    size.classList.add('wid-60px');
+    size.value = effect.size ?? '';
+
+    const percent = document.createElement('span');
+    percent.textContent = ' %';
+
+    wrapper.appendChild(size);
+    wrapper.appendChild(percent);
+    td3.appendChild(wrapper);
+
+    row.appendChild(td1);
+    row.appendChild(td2);
+    row.appendChild(td3);
+
+    container.appendChild(row);
+  });
+}
+
 
 export {
   createTierSelectBox,
@@ -164,5 +250,7 @@ export {
   ObjectCheckboxesById,
   ArrayCheckboxesByName,
   resetModal,
-  createTooltip
+  createTooltip,
+  resetEventListener,
+  renderEffectCache
 };

@@ -1,0 +1,8 @@
+
+
+git status                      # 변경사항 확인
+git add .                       # 전체 변경 추가
+git commit -m "변경 내용 메시지"
+git push                        # 원격 저장소로 푸시
+
+npx tailwindcss -i src/input.css -o src/main/resources/static/dist/output.css --watch

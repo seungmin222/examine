@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>용어 설명</title>
   <link href="/dist/output.css" rel="stylesheet">
-  <link rel="icon" type="image/png" href="../image/icon.png" />
+  <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
+  <script src="/headScript.js"></script>
 </head>
 <body>
 <div id="load-basic"></div>
@@ -35,7 +36,7 @@
       따라서 근거 수준이 낮은 연구들도 여전히 일정한 가치를 가진다.  (ex) ITP 쥐 수명 증가 실험
     </p>
     </div>
-    <img src="../image/pyramid4.png"  style="width:250px;">
+    <img src="../image/pyramid.png"  style="width:250px;">
   </div>
 
 </div>
@@ -109,7 +110,6 @@
     <a href="#inote-1">[1]</a><span id="note-1">
 $$
 \text{JournalScore} =
-\text{EffectSize} \times
 \log_{10}(\text{Participants} + 1) \times
 \log(\text{Duration} + 1) \times
 \text{Design} \times
@@ -136,15 +136,17 @@ $$
 \frac{
 \sum\limits_{i=1}^{n}
 \left(
-\text{JournalScore}_i \times \text{Participants}_i
+\text{EffectSize} \times
+\text{JournalScore}_i \times
+\text{Participants}_i
 \right)
 }{
 \sum\limits_{i=1}^{n} \text{Participants}_i
 }
 \quad
+$$
+$$
 \text{(단, } \text{Participants}_i \geq 10 \text{인 논문만 포함)}
-$$
-$$
 \text{Tier} =
 \begin{cases}
 \textcolor{magenta}{\text{S}} & \text{if } \text{Score} \geq 100 \\

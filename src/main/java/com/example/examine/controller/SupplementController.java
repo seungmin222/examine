@@ -64,11 +64,12 @@ public class SupplementController {
             @RequestParam(required = false) List<Long> typeIds,
             @RequestParam(required = false) List<Long> effectIds,
             @RequestParam(required = false) List<Long> sideEffectIds,
+            @RequestParam(required = false) List<String> tiers,
             @RequestParam(defaultValue = "engName") String sort,       // ✅ 기본값 추가하면 더 안전
             @RequestParam(defaultValue = "asc") String direction
     ) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return supplementService.findFiltered(typeIds, effectIds, sideEffectIds, sorting);
+        return supplementService.findFiltered(typeIds, effectIds, sideEffectIds, tiers, sorting);
     }
 
     @GetMapping("/{id}")

@@ -13,7 +13,8 @@ import {
     setupModalOpenClose,
     setupSearchForm,
     resetButton,
-    supplementEvent
+    supplementEvent,
+    selectList
 } from '/util/eventUtils.js';
 
 import {
@@ -57,6 +58,8 @@ document.addEventListener('DOMContentLoaded', async e => {
     setupSearchForm("tags", "tag-search-form", "tag-sort", ["type", "positive", "negative"], renderTags);
     setupSearchForm("tags", "modal-search-form", "modal-sort", ["type", "positive", "negative"], renderModal);
     setupSearchForm("supplements", "search-form", "list-sort", null, renderSupplements);
+
+    selectList(["type", "positive", "negative", "tier"],filterByTag);
 });
 
 
@@ -66,9 +69,6 @@ async function loadSupplements() {
     const allSupplements = await res.json();
     renderSupplements(allSupplements);
 }
-
-
-
 
 
 // 태그 로딩
@@ -95,11 +95,13 @@ async function filterByTag() {
         const typeIds = selected.filter(e => e.dataset.type === 'type').map(e => e.dataset.id);
         const effectIds = selected.filter(e => e.dataset.type === 'positive').map(e => e.dataset.id);
         const sideEffectIds = selected.filter(e => e.dataset.type === 'negative').map(e => e.dataset.id);
-
+        const tiers = selected.filter(e => e.dataset.type === 'tier').map(e => e.dataset.id);
+        //selected 개수 많아지면 filter 말고 append로 한번에 처리
         const params = new URLSearchParams();
         typeIds.forEach(id => params.append('typeIds', id));
         effectIds.forEach(id => params.append('effectIds', id));
         sideEffectIds.forEach(id => params.append('sideEffectIds', id));
+        tiers.forEach(id => params.append('tiers', id));
 
         const res = await fetch(`/api/supplements/filter?${params.toString()}&sort=${sort}&direction=asc`);
         const filtered = await res.json();

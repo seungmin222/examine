@@ -13,7 +13,6 @@ import com.example.examine.service.crawler.SemanticScholarCrawler;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -83,9 +81,9 @@ public class JournalService {
         }
 
         Journal journal = new Journal();
-        journal.setDuration_value(dto.duration().value());
-        journal.setDuration_unit(dto.duration().unit());
-        journal.setDuration_days(dto.duration().days());
+        journal.setDurationValue(dto.duration().value());
+        journal.setDurationUnit(dto.duration().unit());
+        journal.setDurationDays(dto.duration().days());
         journal.setParticipants(dto.participants());
 
         int blind = IntStream.range(0, blindLabel.length)
@@ -99,10 +97,12 @@ public class JournalService {
         if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
             TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesign().id()));
-            journal.setTrial_design(td);
+            journal.setTrialDesign(td);
         } else {
-            journal.setTrial_design(null);
+            journal.setTrialDesign(null);
         }
+
+        journal.setScore();
 
         syncJournalSupplementEffects(journal, dto.effects());
         syncJournalSupplementSideEffects(journal, dto.sideEffects());
@@ -146,20 +146,22 @@ public class JournalService {
                 .findFirst()
                 .orElse(0);
         int days = toDays(dto.duration().value(), dto.duration().unit());
-        int oldDuration = journal.getDuration_days() != null ? journal.getDuration_days() : 0;
+        int oldDuration = journal.getDurationDays() != null ? journal.getDurationDays() : 0;
         int oldParticipants = journal.getParticipants() != null ? journal.getParticipants() : 0;
 
-        Long oldTrialDesignId = journal.getTrial_design() != null ? journal.getTrial_design().getId() : null;
+        Long oldTrialDesignId = journal.getTrialDesign() != null ? journal.getTrialDesign().getId() : null;
         Long newTrialDesignId = dto.trialDesign() != null ? dto.trialDesign().id() : null;
 
         TrialDesign newTrialDesign = null;
         if (dto.trialDesign() != null && newTrialDesignId != null) {
             newTrialDesign = trialDesignRepo.findById(newTrialDesignId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + newTrialDesignId));
-            journal.setTrial_design(newTrialDesign);
+            journal.setTrialDesign(newTrialDesign);
         } else {
-            journal.setTrial_design(null);
+            journal.setTrialDesign(null);
         }
+
+        journal.setScore();
 
         // ✅ 변경사항 비교 후 score 재계산
         boolean journalChanged =
@@ -170,9 +172,9 @@ public class JournalService {
 
 
         // 🔧 새 값 세팅
-        journal.setDuration_value(dto.duration().value());
-        journal.setDuration_unit(dto.duration().unit());
-        journal.setDuration_days(days);
+        journal.setDurationValue(dto.duration().value());
+        journal.setDurationUnit(dto.duration().unit());
+        journal.setDurationDays(days);
         journal.setBlind(blind);
         journal.setParallel(dto.parallel() == null || dto.parallel());
         journal.setParticipants(dto.participants());

@@ -31,7 +31,7 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
 
     @Query("""
         SELECT DISTINCT s FROM Journal s
-        LEFT JOIN s.trial_design t
+        LEFT JOIN s.trialDesign t
         LEFT JOIN s.journalSupplementEffects e
         LEFT JOIN s.journalSupplementSideEffects se
         WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)

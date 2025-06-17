@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadBasic();
     await loadJournals();
     await loadTags();
-
-
+   // 테이블 클릭 이벤트리스너, 이벤트 위임이므로 한번만 추가
+    journalEvent(journalMap);
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadJournals);
@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     selectList(["trialDesign", "blind", "parallel", "supplement", "positive", "negative"],filterByTag);
     selectChange('journal-body');
+    selectChange('insert-form');
 });
 
 async function loadJournals() {
@@ -83,8 +84,9 @@ async function loadJournals() {
     const res = await fetch(`/api/journals?sort=${sort}&direction=${dir}`);
     const allJournals = await res.json();
     renderJournals(allJournals, journalMap);
-    journalEvent(journalMap);
+
 }
+
 
 // 태그 로딩
 async function loadTags() {
@@ -134,7 +136,7 @@ async function filterByTag() {
         const res = await fetch(`/api/journals/filter?${params.toString()}&sort=${sort}&direction=asc`);
         const filtered = await res.json();
 
-        renderJournals(filtered);
+        renderJournals(filtered, journalMap);
 
     }
 }
@@ -274,81 +276,4 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
     }
 });
 
-function renderAllEffectCache(item) {
-  const container = document.getElementById('mapping-cash');
-  container.innerHTML = ''; // ✅ 초기화
 
-  // ✅ 효과(effect) 캐시
-  item.effects?.forEach(effect => {
-    const row = document.createElement('tr');
-    row.classList.add('effect-cash');
-    row.dataset.supplementId = effect.supplementId;
-    row.dataset.effectId = effect.effectId;
-
-    const td1 = document.createElement('td');
-    td1.textContent = effect.supplementName;
-
-    const td2 = document.createElement('td');
-    td2.textContent = effect.effectName;
-
-    const td3 = document.createElement('td');
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('flex');
-
-    const size = document.createElement('input');
-    size.name = 'size';
-    size.type = 'number';
-    size.classList.add('wid-60px');
-    size.value = effect.size ?? '';
-
-    const percent = document.createElement('span');
-    percent.textContent = ' %';
-
-    wrapper.appendChild(size);
-    wrapper.appendChild(percent);
-    td3.appendChild(wrapper);
-
-    row.appendChild(td1);
-    row.appendChild(td2);
-    row.appendChild(td3);
-
-    container.appendChild(row);
-  });
-
-  // ✅ 부작용(sideEffect) 캐시
-  item.sideEffects?.forEach(effect => {
-    const row = document.createElement('tr');
-    row.classList.add('sideEffect-cash');
-    row.dataset.supplementId = effect.supplementId;
-    row.dataset.effectId = effect.sideEffectId;
-
-    const td1 = document.createElement('td');
-    td1.textContent = effect.supplementName;
-
-    const td2 = document.createElement('td');
-    td2.textContent = effect.sideEffectName;
-
-    const td3 = document.createElement('td');
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('flex');
-
-    const size = document.createElement('input');
-    size.name = 'size';
-    size.type = 'number';
-    size.classList.add('wid-60px');
-    size.value = effect.size ?? '';
-
-    const percent = document.createElement('span');
-    percent.textContent = ' %';
-
-    wrapper.appendChild(size);
-    wrapper.appendChild(percent);
-    td3.appendChild(wrapper);
-
-    row.appendChild(td1);
-    row.appendChild(td2);
-    row.appendChild(td3);
-
-    container.appendChild(row);
-  });
-}

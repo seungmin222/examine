@@ -7,23 +7,199 @@
   :root {
     --navbar-height: 60px;
     --sidebar-width: 10%;
-    --color-primary: #ffcfea;
-    --color-secondary: #ffe4ec;
-    --color-text: #333;
+    --color-background: white;
+    --color-1: #ffcfea;
+    --color-2: #ffe4ec;
+    --color-text: gray;
+    --color-bold-text: magenta;
+    --color-button: hotpink;
+    --color-button-text: white;
+    --color-scroll-button: rgba(186, 104, 200, 0.5);
     --color-border: #ff6a9c;
+    --color-focus: #fff0f5;
+    --color-focus-button: #ff6a9c;
+    --color-toggle-button: red;
+    --color-selected: #DDA0DD;
+    --color-checked: #ff6a9c;
     --color-tier-s: magenta;
     --color-tier-a: blue;
     --color-tier-b: red;
-    --color-tier-c: gold;
+    --color-tier-c: #B8860B;
     --color-tier-d: green;
+    --color-tier-f: gray;
+    --color-tier-null: gray;
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-2);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail-border: var(--color-border);
+    --color-header: #ff00ff;
+    --color-link: #ff00ff;
+    --color-link-hover: #ff1493;
+    --color-menu-border: rgba(206, 212, 218, 1);
+    --color-scroll-line: #777;
+    --color-sidebar: #f8f8f8;
+    --color-sidebar-border: #ddd;
   }
 
+
+  :root.theme-blue {
+    --color-background: white;
+    --color-1: #c2e9fb;
+    --color-2: #e6f7ff;
+    --color-text: #444;
+    --color-bold-text: #0077cc;
+    --color-button: #00bfff;
+    --color-button-text: white;
+    --color-scroll-button: rgba(100, 181, 246, 0.5);
+    --color-border: #40a9ff;
+    --color-focus: #e0f7ff;
+    --color-focus-button: #40a9ff;
+    --color-toggle-button: #1e88e5;
+    --color-selected: #add8e6;
+    --color-checked: #40a9ff;
+    --color-tier-s: magenta;
+    --color-tier-a: blue;
+    --color-tier-b: red;
+    --color-tier-c: #B8860B;
+    --color-tier-d: green;
+    --color-tier-f: gray;
+    --color-tier-null: gray;
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-2);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail-border: var(--color-border);
+    --color-header: #0077cc;
+    --color-link: #0077cc;
+    --color-link-hover: #005999;
+    --color-menu-border: rgba(180, 220, 240, 1);
+    --color-scroll-line: #77aaff;
+    --color-sidebar: #f0faff;
+    --color-sidebar-border: #bbdefb;
+  }
+
+  :root.theme-gray {
+    --color-background: white;
+    --color-1: #e0e0e0;
+    --color-2: #f0f0f0;
+    --color-text: #333;
+    --color-bold-text: #000;
+    --color-button: #888;
+    --color-button-text: white;
+    --color-scroll-button: rgba(120, 120, 120, 0.5);
+    --color-border: #999;
+    --color-focus: #ddd;
+    --color-focus-button: #999;
+    --color-toggle-button: #666;
+    --color-selected: #bbb;
+    --color-checked: #666;
+    --color-tier-s: magenta;
+    --color-tier-a: blue;
+    --color-tier-b: red;
+    --color-tier-c: #B8860B;
+    --color-tier-d: green;
+    --color-tier-f: gray;
+    --color-tier-null: gray;
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-2);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail-border: var(--color-border);
+    --color-header: #111;
+    --color-link: #333;
+    --color-link-hover: #000;
+    --color-menu-border: #ccc;
+    --color-scroll-line: #888;
+    --color-sidebar: #efefef;
+    --color-sidebar-border: #ccc;
+  }
+
+:root.theme-green {
+  --color-background: white;
+  --color-1: #c8e6c9;
+  --color-2: #dcedc8;
+  --color-text: #2e7d32;
+  --color-bold-text: #1b5e20;
+  --color-button: #66bb6a;
+  --color-button-text: white;
+  --color-scroll-button: rgba(102, 187, 106, 0.5);
+  --color-border: #388e3c;
+  --color-focus: #e8f5e9;
+  --color-focus-button: #43a047;
+  --color-toggle-button: #2e7d32;
+  --color-selected: #a5d6a7;
+  --color-checked: #43a047;
+  --color-tier-s: magenta;
+  --color-tier-a: blue;
+  --color-tier-b: red;
+  --color-tier-c: #B8860B;
+  --color-tier-d: green;
+  --color-tier-f: gray;
+  --color-tier-null: gray;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-2);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-2);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #1b5e20;
+  --color-link: #2e7d32;
+  --color-link-hover: #1b5e20;
+  --color-menu-border: rgba(76, 175, 80, 0.5);
+  --color-scroll-line: #66bb6a;
+  --color-sidebar: #f1f8e9;
+  --color-sidebar-border: #c5e1a5;
+}
+
+:root.theme-lavender {
+  --color-background: white;
+  --color-1: #e1bee7;
+  --color-2: #f8eafa;
+  --color-text: #6a1b9a;
+  --color-bold-text: #4a148c;
+  --color-button: #ba68c8;
+  --color-button-text: white;
+  --color-scroll-button: rgba(186, 104, 200, 0.5);
+  --color-border: #ab47bc;
+  --color-focus: #f3e5f5;
+  --color-focus-button: #ab47bc;
+  --color-toggle-button: #8e24aa;
+  --color-selected: #ce93d8;
+  --color-checked: #ab47bc;
+  --color-tier-s: magenta;
+  --color-tier-a: blue;
+  --color-tier-b: red;
+  --color-tier-c: #B8860B;
+  --color-tier-d: green;
+  --color-tier-f: gray;
+  --color-tier-null: gray;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-2);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-2);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #4a148c;
+  --color-link: #6a1b9a;
+  --color-link-hover: #4a148c;
+  --color-menu-border: rgba(186, 104, 200, 0.5);
+  --color-scroll-line: #ab47bc;
+  --color-sidebar: #f9f0ff;
+  --color-sidebar-border: #d1c4e9;
+}
+
+
+
   body {
-    background-color: #ffcfea; /*#ffc0cb*/
+    background-color: var(--color-1);
+    color: var(--color-text);
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
     padding: 0;
-    color: gray;
     padding-top: 70px; /* ✅ 상단바 공간 확보 */
   }
 
@@ -31,7 +207,7 @@
       font-size: 2em;       /* 약 32px (보통 브라우저 기본) */
       font-weight: bold;
       margin: 0.67em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -40,7 +216,7 @@
       font-size: 1.5em;     /* 약 24px */
       font-weight: bold;
       margin: 0.75em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -49,7 +225,7 @@
       font-size: 1.17em;    /* 약 18.72px */
       font-weight: bold;
       margin: 0.83em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -58,7 +234,7 @@
       font-size: 1em;       /* 16px */
       font-weight: bold;
       margin: 1.12em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -67,7 +243,7 @@
       font-size: 0.83em;    /* 약 13.28px */
       font-weight: bold;
       margin: 1.5em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -76,7 +252,7 @@
       font-size: 0.67em;    /* 약 10.72px */
       font-weight: bold;
       margin: 1.67em 0;
-      color: #ff00ff;
+      color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
     }
@@ -87,12 +263,11 @@
   button,
   textarea
    {
-    color: gray;
     width: 80px;
     height: 36px;
     padding: 8px;
     border-radius: 6px;
-    border: 1px solid #ff6a9c;
+    border: 1px solid var(--color-border);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     font-family: inherit;
     box-sizing: border-box;
@@ -103,12 +278,15 @@
     padding-bottom: 0px;
   }
 
+  label{
+    text-align:center;
+  }
 
   span.border{
      height: 36px;
      padding: 8px;
      border-radius: 6px;
-     border: 1px solid #ff6a9c;
+     border: 1px solid var(--color-border);
      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
      font-family: inherit;
      box-sizing: border-box;
@@ -123,7 +301,7 @@
   .modal-content {
     width: 100%;
     height: 100%;
-    background-color: #ffcfea;
+    color: var(--color-text);
     padding: 2rem;
     gap: 0rem;
     overflow-y: auto;
@@ -135,11 +313,11 @@
     gap: 0.5rem;
     align-items: center;
     flex-direction: row-reverse; /* ✅ 순서 반전 */
-    border: 2px solid #ff6a9c;
+    border: 2px solid var(--color-border);
     border-radius: 12px;
     padding: 8px;
     text-align: left;
-    background-color:white;
+    background-color:var(--color-background);
     justify-content: flex-end;
     flex-wrap: wrap;
   }
@@ -161,33 +339,40 @@
   }
 
   .modal {
-    display: none;
     position: fixed;
     top: var(--navbar-height);
     left: var(--sidebar-width);
     width: calc(100vw - var(--sidebar-width));
     height: calc(100vh - var(--navbar-height));
     z-index: 1000;
+    background-color:var(--color-1);
   }
 
+
+
   .menu{
+    width: auto;
     position: absolute;
-    background-color:white;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color:var(--color-background);
     margin-top:0;
     align-items: center;
-    border: 2px solid #ff6a9c;
+    border: 2px solid var(--color-border);
     border-radius: 12px;
-    border-color: rgb(206 212 218 / var(--tw-border-opacity, 1));
+    border-color: var(--color-menu-border);
     border-width: 1px;
     padding: 8px;
     text-align: left;
     justify-content: flex-end;
     flex-wrap: wrap;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    z-index: 9999;
   }
 
   .menu a.logo{
-    color: #ff00ff;
+    white-space: nowrap;
+    color: var(--color-header);
   }
 
   .checkbox {
@@ -204,31 +389,31 @@
 
   table {
     width: 100%;
-    border: 2px solid #ff6a9c;
+    border: 2px solid var(--color-border);
     border-collapse: collapse;
     border-spacing: 0;
     margin-bottom: 2rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    background-color:white;
+    background-color:var(--color-background);
   }
 
 
   th, td {
     position: relative;
-    background-color: white;
-    border: 1px solid #ff6a9c;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
     padding: 8px;
     text-align: left;
   }
 
   th {
     white-space: nowrap;
-    background-color: #ffe4ec;
+    background-color: var(--color-2);
   }
 
   tbody tr:hover td, tr:hover td span {
-    background-color: #ffe4ec;
+    background-color: var(--color-2);
   }
 
   input[type="checkbox"], input[type="radio"]{
@@ -236,9 +421,9 @@
     -webkit-appearance: none;       /* Safari용 */
     width: 16px;
     height: 16px;
-    border: 2px solid #ff6a9c;      /* ✅ 분홍색 테두리 */
+    border: 2px solid var(--color-border);      /* ✅ 분홍색 테두리 */
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--color-background);
     cursor: pointer;
     position: relative;
     vertical-align: middle;
@@ -248,13 +433,13 @@
   input[type="checkbox"]:checked,
   input[type="radio"]:checked
   {
-    background-color: #ff6a9c;
+    background-color: var(--color-checked);
   }
 
   label input[type="checkbox"]:checked + span,
   label input[type="radio"]:checked + span
   {
-    color: #ff00ff;
+    color: var(--color-bold-text);
   }
 
   .modal-inner span {
@@ -264,8 +449,8 @@
 
   input:focus,textarea:focus {
     outline: none;
-    border: 2px solid #ff8fb1;
-    background-color: #fff0f5;
+    border: 2px solid var(--color-border);
+    background-color: var(--color-focus);
   }
 
   textarea{
@@ -277,8 +462,8 @@
   [type='button'],
   [type='submit'],
   [type='reset'] {
-    background-color: hotpink;
-    color: white;
+    background-color: var(--color-button);
+    color: var(--color-button-text);
     border: none;
     cursor: pointer;
     font-weight: bold;
@@ -287,29 +472,30 @@
   }
 
   button:hover {
-    background-color: #ff6a9c;
+    background-color: var(--color-focus-button);
   }
 
-  button:toggle {
-    background-color: red;
+  button.toggle {
+    background-color: var(--color-toggle-button);
   }
 
   button.dropdown {
+    color: var(--color-button);
     width:auto;
     height:40px;
     text-align: left;
-    background-color:white;
+    background-color:var(--color-background);
     box-shadow: none;
-    color: hotpink;
     font-size: 1.3rem;
     font-weight: bold;
     display: flex;
+    line-height:1.1;
 
   }
 
 
   button.dropdown:hover{
-    background-color:white;
+    background-color: var(--color-background);
   }
 
   svg {
@@ -320,7 +506,6 @@
 
   ul {
    display: grid;
-    background-color: #ffcfea;
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -335,20 +520,19 @@
 
   li{
    width : 160px;
-   background-color: white;
+   background-color: var(--color-background);
    text-align: center;
    padding : 0.4rem;
    margin-bottom: 0px;
   }
 
   li:hover {
-    background-color: #ffe4ec;
+    background-color: var(--color-focus);
     cursor: pointer;
   }
   li.selected {
-    background-color: #DDA0DD; /* 연한 빨강핑크 */
+    background-color: var(--color-selected);
     font-weight: bold;
-    color: #333;
   }
   li.detail{
      width:auto;
@@ -358,7 +542,7 @@
   span {
     position : relative;
     scroll-margin-top:70px;
-    background-color: white;
+    background-color: var(--color-background);
     width: auto;
     height: auto;
   }
@@ -366,7 +550,7 @@
 
   p {
     display: block;
-    background-color: white;
+    background-color: var(--color-background);
     padding: 8px 12px;
     border-radius: 12px;
     line-height: 1.6;
@@ -378,7 +562,7 @@
   a {
 
     text-decoration: none;      /* 밑줄 제거 */
-    color: #ff00ff;             /* 분홍색 (HotPink) */
+    color: var(--color-link);           /* 분홍색 (HotPink) */
     font-weight: bold;          /* 선택 사항: 강조 */
   }
 
@@ -388,7 +572,7 @@
   }
 
   a:hover {
-    color: #ff1493;             /* 더 진한 분홍 (DeepPink) */
+    color: var(--color-link-hover);            /* 더 진한 분홍 (DeepPink) */
     text-decoration: underline; /* 마우스 오버 시 밑줄 다시 표시하고 싶다면 */
   }
 
@@ -408,7 +592,7 @@
      display: block;
      font-size: 1.3rem;
      font-weight: bold;
-     color: hotpink;
+     color: var(--color-button);
      text-decoration: none;
    }
 
@@ -420,9 +604,9 @@
   top: 100%;       /* 아래로 붙임 */
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ffe4ec;
+  background-color: var(--color-tooltip);
   padding: 6px;
-  border: 1px solid #ff6a9c;
+  border: 1px solid var(--color-tooltip-border);
   border-radius: 4px;
   z-index: 9000;
 }
@@ -453,7 +637,7 @@
   transform: translateX(-50%);
   border-width: 10px 10px 0 10px;
   border-style: solid;
-  border-color: #ffe4ec transparent transparent transparent;
+  border-color: var(--color-tooltip-tail) transparent transparent transparent;
 }
 
 .tooltip-box[data-position="top"] .tooltip-tail-border {
@@ -462,7 +646,7 @@
   transform: translateX(-50%);
   border-width: 11px 11px 0 11px;
   border-style: solid;
-  border-color: #ff6a9c transparent transparent transparent;
+  border-color: var(--color-tooltip-border) transparent transparent transparent;
 }
 
 /* 위치 right */
@@ -478,7 +662,7 @@
   transform: translateY(-50%);
   border-width: 10px 10px 10px 0;
   border-style: solid;
-  border-color: transparent #ffe4ec transparent transparent;
+  border-color: transparent var(--color-tooltip-tail) transparent transparent;
 }
 
 .tooltip-box[data-position="right"] .tooltip-tail-border {
@@ -487,7 +671,7 @@
   transform: translateY(-50%);
   border-width: 11px 11px 11px 0;
   border-style: solid;
-  border-color: transparent #ff6a9c transparent transparent;
+  border-color: transparent var(--color-tooltip-border) transparent transparent;
 }
 
 
@@ -515,12 +699,12 @@
       left: 0;
       width: 100%;
       height: var(--navbar-height);
-      background-color: white;
+      background-color: var(--color-background);
       border-bottom: 2px solid #eee;
       justify-content: space-between;
       align-items: center;
       padding: 0 1.5rem;
-      z-index: 999;
+      z-index: 9999;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
@@ -531,25 +715,22 @@
     left: 0;
     height: 100vh;         /* 전체 높이 */
     width: var(--sidebar-width);          /* 너비 */
-    background-color: #f8f8f8;
-    border-right: 1px solid #ddd;
+    background-color: var(--color-sidebar);
+    border-right: 1px solid var(--color-sidebar-border);
     display: flex;
     flex-direction: column; /* 수직 정렬 */
     gap: 1rem;              /* 항목 간 간격 */
     overflow-y: auto;
+    z-index: 9999;
   }
 
    .logo-icon {
      width: 24px;
      height: 24px;
-     object-fit: contain;
-     vertical-align: middle;
-     margin-right: 4px;
-     margin-top: 3px;
    }
 
   .text{
-   background-color: white;
+   background-color: var(--color-background);
    width:100%;
    height: auto;
    border-radius:12px;
@@ -559,28 +740,28 @@
   }
 
   .S{
-   color: magenta;
+   color: var(--color-tier-s);
    font-weight: bold;
   }
 
   .A {
-  color:blue;
+   color : var(--color-tier-a);
   }
 
   .B{
-  color:red;
+   color :var(--color-tier-b);
   }
 
   .C{
-  color:#B8860B
+   color :var(--color-tier-c);
   }
 
   .D{
-  color: green;
+   color :var(--color-tier-d);
   }
 
   .F, .null {
-  color: gray;
+   color :var(--color-tier-f);
   }
 
   .scroll {
@@ -596,7 +777,7 @@
    .scroll button{
       width: 40px;
       height: 40px;
-      background-color: rgba(186, 104, 200, 0.5); /* 연보라, 50% 투명도 */
+      background-color: var(--color-scroll-button); /* 연보라, 50% 투명도 */
    }
 
   .scroll button .icon-wrapper {

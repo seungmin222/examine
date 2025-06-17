@@ -23,7 +23,7 @@ public record JournalRequest(
     };
 
     public static JournalRequest fromEntity(Journal journal) {
-        TrialDesign td = journal.getTrial_design();
+        TrialDesign td = journal.getTrialDesign();
         TierTagRequest tierTagRequest = td != null
                 ? new TierTagRequest(td.getId(), td.getName(), td.getTier())
                 : null;
@@ -48,7 +48,7 @@ public record JournalRequest(
                 tierTagRequest,
                 blind,
                 journal.getParallel(),
-                new DurationRequest(journal.getDuration_value(), journal.getDuration_unit(), journal.getDuration_days()),
+                new DurationRequest(journal.getDurationValue(), journal.getDurationUnit(), journal.getDurationDays()),
                 journal.getParticipants(),
                 journal.getDate()
         );
