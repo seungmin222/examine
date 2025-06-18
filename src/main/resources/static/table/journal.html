@@ -64,12 +64,13 @@
         <input type="number" name="duration-value" placeholder="기간"/>
         <select class="w-28" name="duration-unit">
             <option value="day">일(day)</option>
+            <option value="week">주(week)</option>
             <option value="month">월(month)</option>
             <option value="year">년(year)</option>
         </select>
         </div>
         <select name="trialDesign" class="w-48">
-            <option value="29" class="F w-48">Unknown</option>
+            <option value="" class="F w-48">Unknown</option>
             <option value="1" class="A w-48">Meta-analysis</option>
             <option value="20" class="A w-48">Systematic Review</option>
             <option value="21" class="B w-48">RCT</option>
@@ -82,11 +83,13 @@
             <option value="28" class="F w-48">In-vitro Study</option>
         </select>
         <select name="blind" class="w-32">
+            <option value="" class="w-32">Unknown</option>
             <option value="open-label" class="w-32">open-label</option>
             <option value="single-blind" class="B w-32">single-blind</option>
             <option value="double-blind" class="A w-32">double-blind</option>
         </select>
         <select name="parallel" class="w-32">
+           <option value="" class="w-32">Unknown</option>
            <option value="true" class="w-32">parallel</option>
            <option value="false" class="w-32">cross-over</option>
         </select>

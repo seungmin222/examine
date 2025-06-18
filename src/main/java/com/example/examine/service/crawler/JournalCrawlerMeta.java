@@ -2,13 +2,13 @@ package com.example.examine.service.crawler;
 
 import java.time.LocalDate;
 
-public class JournalMeta {
+public class JournalCrawlerMeta {
     private String title;
     private Integer participants;
     private String summary;
     private LocalDate date;
 
-    public JournalMeta(String title, Integer participants, String summary, LocalDate date) {
+    public JournalCrawlerMeta(String title, Integer participants, String summary, LocalDate date) {
         this.title = title;
         this.participants = participants;
         this.summary = summary;

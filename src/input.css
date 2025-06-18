@@ -475,7 +475,7 @@
     background-color: var(--color-focus-button);
   }
 
-  button.toggle {
+  button.excute {
     background-color: var(--color-toggle-button);
   }
 

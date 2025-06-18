@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @Component
 public class PubmedCrawler implements JournalCrawler {
     @Override
-    public JournalMeta extract(String webUrl) throws IOException {
+    public JournalCrawlerMeta extract(String webUrl) throws IOException {
         Pattern p = Pattern.compile("pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d+)");
         Matcher m = p.matcher(webUrl);
         String pId = "";
@@ -40,6 +40,6 @@ public class PubmedCrawler implements JournalCrawler {
             sb.append(abs.text()).append("\n");
         }
         String summary = sb.toString().trim();
-        return new JournalMeta(title, null ,summary, PubmedDateParser.parse(date));
+        return new JournalCrawlerMeta(title, null ,summary, PubmedDateParser.parse(date));
     }
 }

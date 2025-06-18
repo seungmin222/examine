@@ -6,8 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.example.examine.service.util.ClinicalTrialsDateParser;
-import com.example.examine.service.util.PubmedDateParser;
-import com.example.examine.service.util.SemanticScholarDateParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -15,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SemanticScholarCrawler implements JournalCrawler {
     @Override
-    public JournalMeta extract(String webUrl) throws IOException  {
+    public JournalCrawlerMeta extract(String webUrl) throws IOException  {
         // DOI 또는 Semantic Scholar ID
         Pattern p = Pattern.compile("semanticscholar\\.org/paper/.+/([a-f0-9]{40})");
         Matcher m = p.matcher(webUrl);
@@ -44,6 +42,6 @@ public class SemanticScholarCrawler implements JournalCrawler {
         System.out.println("Abstract: " + summary);
         System.out.println("Citations: " + citationCount);
 
-        return new JournalMeta(title, citationCount ,summary, ClinicalTrialsDateParser.parse(date));
+        return new JournalCrawlerMeta(title, citationCount ,summary, ClinicalTrialsDateParser.parse(date));
     }                                                         //"yyyy-mm-dd" 형식
 }

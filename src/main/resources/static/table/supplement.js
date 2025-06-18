@@ -27,6 +27,7 @@ import {
     loadBasic
 } from '/util/load.js';
 
+const supplementMap = new Map();
 
 // 초기 로딩
 document.addEventListener('DOMContentLoaded', async e => {
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async e => {
     await loadSupplements();
     await loadTags();
     // 테이블 수정, 삭제
-    supplementEvent();
+    supplementEvent(supplementMap, loadSupplements);
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadSupplements);

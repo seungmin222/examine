@@ -285,7 +285,7 @@ function selectChange(boxId){
     });
 }
 
-function journalEvent(journalMap){
+function journalEvent(journalMap, loadJournals){
     document.getElementById('journal-body').addEventListener('click', async e => {
         const row = e.target.closest('tr');
         const itemId = Number(row?.dataset.id);
@@ -379,7 +379,7 @@ function journalEvent(journalMap){
     }
     });
 }
-function supplementEvent(supplementMap){
+function supplementEvent(supplementMap, loadSupplements) {
    document.getElementById('supplement-body').addEventListener('click', async e => {
        const row = e.target.closest('tr');
        const itemId = Number(row?.dataset.id);

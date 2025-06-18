@@ -1,5 +1,6 @@
 package com.example.examine.entity;
 
+import com.example.examine.service.JournalService;
 import com.example.examine.service.util.calculateScore;
 import jakarta.persistence.*;
 
@@ -20,27 +21,35 @@ public class Journal {
 
     private String link;
 
-    @Column(columnDefinition = "TEXT") // 긴 요약 대응
+    @Column(nullable = true)
     private String summary;
 
     @ManyToOne
     @JoinColumn(name = "trial_design_id")
-    private TrialDesign trialDesign;
+    private TrialDesign trialDesign; // 이미 nullable (nullable=true가 default)
 
+    @Column(nullable = true)
     private Integer durationValue;
 
+    @Column(nullable = true)
     private String durationUnit;
 
+    @Column(nullable = true)
     private Integer durationDays;
 
+    @Column(nullable = true)
     private Integer participants;
 
+    @Column(nullable = true)
     private LocalDate date;
 
+    @Column(nullable = true)
     private Integer blind;
 
+    @Column(nullable = true)
     private Boolean parallel;
 
+    @Column(nullable = true)
     private BigDecimal score;
 
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -98,8 +107,8 @@ public class Journal {
         return durationDays;
     }
 
-    public void setDurationDays(Integer durationDays) {
-        this.durationDays = durationDays;
+    public void setDurationDays() {
+        this.durationDays = JournalService.toDays(this.durationValue, this.durationUnit);
     }
 
     public List<JournalSupplementEffect> getJournalSupplementEffects() {

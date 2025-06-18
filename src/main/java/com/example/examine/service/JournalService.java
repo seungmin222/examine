@@ -1,22 +1,29 @@
 package com.example.examine.service;
 
 import com.example.examine.controller.DetailController;
+import com.example.examine.dto.JournalAnalysis;
 import com.example.examine.dto.JournalEffectRequest;
 import com.example.examine.dto.JournalSideEffectRequest;
 import com.example.examine.entity.*;
 import com.example.examine.dto.JournalRequest;
 import com.example.examine.repository.*;
 import com.example.examine.service.crawler.ClinicalTrialsCrawler;
-import com.example.examine.service.crawler.JournalMeta;
+import com.example.examine.service.crawler.JournalCrawlerMeta;
 import com.example.examine.service.crawler.PubmedCrawler;
 import com.example.examine.service.crawler.SemanticScholarCrawler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestTemplate;
 
 
 import java.io.IOException;
@@ -81,18 +88,21 @@ public class JournalService {
         }
 
         Journal journal = new Journal();
+        journal.setLink(dto.link());
         journal.setDurationValue(dto.duration().value());
         journal.setDurationUnit(dto.duration().unit());
-        journal.setDurationDays(dto.duration().days());
+        journal.setDurationDays();
         journal.setParticipants(dto.participants());
 
-        int blind = IntStream.range(0, blindLabel.length)
+        Integer blind = IntStream.range(0, blindLabel.length)
+                .boxed()
                 .filter(i -> blindLabel[i].equals(dto.blind()))
                 .findFirst()
-                .orElse(0);
+                .orElse(null);
+
         journal.setBlind(blind);
 
-        journal.setParallel(dto.parallel() == null || dto.parallel());
+        journal.setParallel(dto.parallel());
 
         if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
             TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
@@ -102,13 +112,11 @@ public class JournalService {
             journal.setTrialDesign(null);
         }
 
-        journal.setScore();
-
         syncJournalSupplementEffects(journal, dto.effects());
         syncJournalSupplementSideEffects(journal, dto.sideEffects());
 
         try {
-            JournalMeta meta = crawlJournalMeta(dto.link());
+            JournalCrawlerMeta meta = crawlJournalMeta(dto.link());
 
             journal.setTitle(meta.getTitle());
             if(journal.getParticipants()==null){
@@ -116,14 +124,23 @@ public class JournalService {
             }
             journal.setSummary(meta.getSummary());
             journal.setDate(meta.getDate());
+
+            JournalAnalysis result = null;
+            try {
+                result = analyze(journal.getSummary());
+                applyAnalysis(journal, result);
+            } catch (Exception e) {
+                System.out.println("LLM 분석 실패: " + e.getMessage());
+            }
+
         } catch (IOException e) {
             System.out.println("크롤링 실패: " + e.getMessage());
         }
-
+        journal.setScore();
         return ResponseEntity.ok(journalRepo.save(journal));
     }
 
-    public JournalMeta crawlJournalMeta(String url) throws IOException {
+    public JournalCrawlerMeta crawlJournalMeta(String url) throws IOException {
         if (url.contains("pubmed.ncbi.nlm.nih.gov")) {
             return pubmedCrawler.extract(url);
         } else if (url.contains("clinicaltrials.gov")) {
@@ -135,6 +152,75 @@ public class JournalService {
             throw new IllegalArgumentException("지원하지 않는 논문 링크입니다.");
         }
     }
+
+    public JournalAnalysis analyze(String abstractText) throws IOException{
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String prompt = """
+You will be given an abstract of a scientific paper. Your task is to extract the following fields in strict JSON format with no explanation or commentary. If a value is not found, use null.
+
+Return only this JSON:
+
+{
+  "participants": (integer or null),
+  "durationValue": (integer or null),
+  "durationUnit": "day" | "week" | "month" | "year" | null,
+  "blind": (0=open-label, 1=single-blind, 2=double-blind, or null),
+  "parallel": (true/false/null),
+  "design": one of the following strings, or null:
+    [
+      "Meta-analysis", "Systematic Review", "RCT", "Non-RCT",
+      "Cohort", "Case-control", "Cross-sectional", "Case Report",
+      "Animal Study", "In-vitro Study", "Unknown"
+    ]
+}
+
+Abstract: %s
+""".formatted(abstractText);
+
+
+        String requestBody = """
+    {
+      "model": "llama3",
+      "prompt": "%s"
+    }
+    """.formatted(prompt);
+
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:11434/api/generate", entity, String.class);
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(response.getBody(), JournalAnalysis.class);
+    }
+
+    private String objectToJsonString(String text) {
+        return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\"";
+    }
+
+    // 🔸 applyAnalysisToJournal(): 값이 없을 경우만 반영
+    private void applyAnalysis(Journal journal, JournalAnalysis result) {
+        if (journal.getParticipants() == null && result.participants() != null) {
+            journal.setParticipants(result.participants());
+        }
+        if (journal.getDurationDays() == null && result.durationValue()!= null && result.durationUnit() != null) {
+            journal.setDurationValue(result.durationValue());
+            journal.setDurationUnit(result.durationUnit());
+            journal.setDurationDays();
+        }
+        if (journal.getBlind() == null && result.blind() != null) {
+            journal.setBlind(result.blind());
+        }
+        if (journal.getParallel() == null && result.parallel() != null) {
+            journal.setParallel(result.parallel());
+        }
+        if (journal.getTrialDesign() == null && result.design() !=null){
+            journal.setTrialDesign(trialDesignRepo.findByName(result.design()).orElse(null));
+        }
+    }
+
 
     @Transactional
     public ResponseEntity<?> update(Long id, JournalRequest dto) {
@@ -174,9 +260,9 @@ public class JournalService {
         // 🔧 새 값 세팅
         journal.setDurationValue(dto.duration().value());
         journal.setDurationUnit(dto.duration().unit());
-        journal.setDurationDays(days);
+        journal.setDurationDays();
         journal.setBlind(blind);
-        journal.setParallel(dto.parallel() == null || dto.parallel());
+        journal.setParallel(dto.parallel());
         journal.setParticipants(dto.participants());
 
 
@@ -230,7 +316,10 @@ public class JournalService {
     }
 
 
-    public static int toDays(int value, String unit) {
+    public static Integer toDays(Integer value, String unit) {
+        if(value==null||unit==null) {
+            return null;
+        }
         return switch (unit.toLowerCase()) {
             case "day", "days" -> value;
             case "week", "weeks" -> value * 7;
@@ -372,4 +461,7 @@ public class JournalService {
         journalRepo.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+
+
 }

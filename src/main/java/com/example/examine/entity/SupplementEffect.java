@@ -26,8 +26,8 @@ public class SupplementEffect {
 
     private String tier;
 
-        private BigDecimal totalScore;      // ∑(score × participants)
-        private Integer totalParticipants;     // ∑(participants)
+    private BigDecimal totalScore;      // ∑(score × participants)
+    private Integer totalParticipants;     // ∑(participants)
     private BigDecimal finalScore;         // totalScoreSum / totalParticipants
 
 

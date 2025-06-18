@@ -5,8 +5,12 @@ import com.example.examine.entity.*;
 import com.example.examine.repository.*;
 import com.example.examine.service.*;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -32,6 +36,8 @@ public class JournalController {
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody JournalRequest dto) {
         return journalService.update(id, dto);
     }
+
+
 
     @GetMapping
     public List<JournalRequest> sort(@RequestParam(defaultValue = "title") String sort,
@@ -69,4 +75,7 @@ public class JournalController {
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return journalService.delete(id);
     }
+
+
+
 }

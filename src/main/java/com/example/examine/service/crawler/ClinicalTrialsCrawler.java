@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 @Component
 public class ClinicalTrialsCrawler implements JournalCrawler {
     @Override
-    public JournalMeta extract(String webUrl) throws IOException {
+    public JournalCrawlerMeta extract(String webUrl) throws IOException {
         Pattern p = Pattern.compile("NCT\\d+");
         Matcher m = p.matcher(webUrl);
         String apiUrl = "https://clinicaltrials.gov/api/v2/studies/";
@@ -31,7 +31,7 @@ public class ClinicalTrialsCrawler implements JournalCrawler {
         System.out.println(title);
         System.out.println(summary);
         System.out.println(date);
-        return new JournalMeta(title, participants, summary, ClinicalTrialsDateParser.parse(date));
+        return new JournalCrawlerMeta(title, participants, summary, ClinicalTrialsDateParser.parse(date));
     }
 
 }

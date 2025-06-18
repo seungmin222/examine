@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadJournals();
     await loadTags();
    // 테이블 클릭 이벤트리스너, 이벤트 위임이므로 한번만 추가
-    journalEvent(journalMap);
+    journalEvent(journalMap, loadJournals);
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadJournals);
