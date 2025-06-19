@@ -148,7 +148,7 @@ function renderJournals(list, journalMap) {
           </td>
           <td>
             ${editMode
-              ? `<input name="duration-value" value="${item.duration.value}"/>
+              ? `<input name="duration-value" type="number" value="${item.duration.value}"/>
                  <select name="duration-unit">
                     <option value="day" ${item.duration.unit === 'day' ? 'selected' : ''}>day</option>
                     <option value="month" ${item.duration.unit === 'month' ? 'selected' : ''}>month</option>

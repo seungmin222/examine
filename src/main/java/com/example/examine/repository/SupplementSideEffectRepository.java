@@ -1,7 +1,7 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.SupplementSideEffect;
-import com.example.examine.entity.SupplementSideEffectId;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffectId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

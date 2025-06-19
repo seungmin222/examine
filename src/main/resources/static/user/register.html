@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <link href="/dist/output.css" rel="stylesheet">
+  <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
+  <script src="/headScript.js"></script>
+</head>
+
+<body>
+<div id="load-basic"></div>
+<div class="w-[90%] ml-auto mr-0">
+  <!--background-->
+  <div class="w-[95%] mx-auto">
+    <!--main-content-->
+    <h2>회원가입</h2>
+    <form method="post" action="/api/user/register">
+      <label>아이디: <input type="text" name="username" required></label><br>
+      <label>비밀번호: <input type="password" name="password" required></label><br>
+      <button type="submit">가입하기</button>
+    </form>
+    <div class="flex items-center">
+      <span>이미 계정이 있으신가요? <a href="/user/login.html">로그인</a></span>
+    </div>
+  </div>
+</div>
+<script type="module" src="login.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-package com.example.examine.entity;
+package com.example.examine.entity.JournalSupplementEffect;
 
 import jakarta.persistence.Embeddable;
 
@@ -6,62 +6,67 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class JournalSupplementEffectId implements Serializable {
+public class JournalSupplementSideEffectId implements Serializable,JSEId {
 
     private Long journalId;
     private Long supplementId;
-    private Long effectTagId;
+    private Long sideEffectTagId;
 
     // 기본 생성자
-    public JournalSupplementEffectId() {}
+    public JournalSupplementSideEffectId() {}
 
     // 필드 초기화 생성자
-    public JournalSupplementEffectId(Long journalId, Long supplementId, Long effectTagId) {
+    public JournalSupplementSideEffectId(Long journalId, Long supplementId, Long effectTagId) {
         this.journalId = journalId;
         this.supplementId = supplementId;
-        this.effectTagId = effectTagId;
+        this.sideEffectTagId = sideEffectTagId;
     }
 
     // Getter & Setter
+    @Override
     public Long getJournalId() {
         return journalId;
     }
 
+    @Override
     public void setJournalId(Long journalId) {
         this.journalId = journalId;
     }
 
+    @Override
     public Long getSupplementId() {
         return supplementId;
     }
 
+    @Override
     public void setSupplementId(Long SupplementId) {
         this.supplementId = SupplementId;
     }
 
-
-    public Long getEffectTagId() {
-        return effectTagId;
+    @Override
+    public Long getEffectId() {
+        return sideEffectTagId;
     }
 
-    public void setEffectTagId(Long effectTagId) {
-        this.effectTagId = effectTagId;
+    @Override
+    public void setEffectId(Long sideEffectTagId) {
+        this.sideEffectTagId = sideEffectTagId;
     }
 
     // equals
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JournalSupplementEffectId)) return false;
-        JournalSupplementEffectId that = (JournalSupplementEffectId) o;
+        if (!(o instanceof JournalSupplementSideEffectId)) return false;
+        JournalSupplementSideEffectId that = (JournalSupplementSideEffectId) o;
         return Objects.equals(journalId, that.journalId)
                 && Objects.equals(supplementId, that.supplementId)
-                && Objects.equals(effectTagId, that.effectTagId);
+                && Objects.equals(sideEffectTagId, that.sideEffectTagId);
     }
 
     // hashCode
     @Override
     public int hashCode() {
-        return Objects.hash(journalId, supplementId, effectTagId);
+        return Objects.hash(journalId, supplementId, sideEffectTagId);
     }
 }

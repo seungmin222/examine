@@ -1,5 +1,7 @@
 package com.example.examine.entity;
 
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,10 +17,10 @@ public class Supplement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true , nullable = false)
     private String korName;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String engName;
 
     private String dosage;

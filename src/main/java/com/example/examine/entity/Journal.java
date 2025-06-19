@@ -1,7 +1,9 @@
 package com.example.examine.entity;
 
-import com.example.examine.service.JournalService;
-import com.example.examine.service.util.calculateScore;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffect;
+import com.example.examine.service.EntityService.JournalService;
+import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ public class Journal {
 
     private String title;
 
+    @Column(unique = true)
     private String link;
 
     @Column(nullable = true)
@@ -149,10 +152,6 @@ public class Journal {
     }
 
     public void setScore() {
-        if (participants == null || durationDays == null) {
-            this.score = null;
-            return;
-        }
-        this.score = calculateScore.calculateJournalScore(participants,durationDays,trialDesign.getName(),blind);
+        this.score = CalculateScore.calculateJournalScore(participants,durationDays,trialDesign.getName(),blind);
     }
 }

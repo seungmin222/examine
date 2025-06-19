@@ -1,6 +1,7 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.*;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffectId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

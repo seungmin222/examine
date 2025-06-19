@@ -1,16 +1,20 @@
-package com.example.examine.entity;
+package com.example.examine.entity.JournalSupplementEffect;
 
-import com.example.examine.service.util.calculateScore;
+import com.example.examine.entity.Effect.Effect;
+import com.example.examine.entity.Effect.EffectTag;
+import com.example.examine.entity.Journal;
+import com.example.examine.entity.Supplement;
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
+import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 
 @Entity
 @Table(name = "journal_supplement_effect")
-public class JournalSupplementEffect {
+public class JournalSupplementEffect implements JSE {
 
     @EmbeddedId
     private JournalSupplementEffectId id = new JournalSupplementEffectId();
@@ -51,80 +55,64 @@ public class JournalSupplementEffect {
     }
 
     // getter/setter
-
+    @Override
     public JournalSupplementEffectId getId() {
         return id;
     }
 
-    public void setId(JournalSupplementEffectId id) {
-        this.id = id;
+    @Override
+    public void setId(JSEId id) {
+        this.id = (JournalSupplementEffectId) id;
     }
 
+    @Override
     public Journal getJournal() {
         return journal;
     }
 
+    @Override
     public void setJournal(Journal journal) {
         this.journal = journal;
     }
 
+    @Override
     public Supplement getSupplement() {
         return supplement;
     }
 
+    @Override
     public void setSupplement(Supplement supplement) {
         this.supplement = supplement;
     }
 
-    public EffectTag getEffectTag() {
+    @Override
+    public EffectTag getEffect() {
         return effectTag;
     }
 
-    public void setEffectTag(EffectTag effectTag) {
-        this.effectTag = effectTag;
+    @Override
+    public void setEffect(Effect effect) {
+        this.effectTag = (EffectTag)effect;
     }
 
+    @Override
     public BigDecimal getSize() {
         return size;
     }
 
+    @Override
     public void setSize(BigDecimal size) {
         this.size = size;
     }
 
+    @Override
     public BigDecimal getScore() {
         return score;
     }
 
-    public void setScore(SupplementEffect agg, int oldParticipants) {
-        if (this.journal == null || this.journal.getScore() == null || this.size == null) {
-            this.score = null;
-            return;
-        }
-        int participants = this.journal.getParticipants();
-        BigDecimal newScore = calculateScore.calculateJournalSupplementScore(this.size, this.journal.getScore())
-                .setScale(4, RoundingMode.HALF_UP);
-
-        // 기존 점수가 있었으면 제거
-        if (this.score != null) {
-            BigDecimal oldContribution = this.score.multiply(BigDecimal.valueOf(oldParticipants));
-            agg.setTotalScore(agg.getTotalScore().subtract(oldContribution));
-            agg.setTotalParticipants(agg.getTotalParticipants() - oldParticipants);
-        }
-        ///  totalscore null 일때 걍 0으로 처리
-        // 새 점수 반영
-        BigDecimal newContribution = newScore.multiply(BigDecimal.valueOf(participants));
-        agg.setTotalScore(agg.getTotalScore().add(newContribution));
-        agg.setTotalParticipants(agg.getTotalParticipants() + participants);
-
-        if (agg.getTotalParticipants() > 0) {
-            agg.setFinalScore(agg.getTotalScore()
-                    .divide(BigDecimal.valueOf(agg.getTotalParticipants()), 4, RoundingMode.HALF_UP));
-        } else {
-            agg.setFinalScore(BigDecimal.ZERO);
-        }
-
-        this.score = newScore;
+    @Override
+    public void setScore() {
+        return;
     }
 
 

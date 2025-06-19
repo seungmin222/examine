@@ -11,9 +11,14 @@ public class PubmedDateParser {
         if (raw == null || raw.isBlank()) return null;
 
         try {
-            raw+="-01-01";
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // "2025-03-27" 같은 형식
-            return LocalDate.parse(raw.trim(), fmt);
+            // "2012 Apr 18:3:61." → "2012 Apr"
+            String[] sp = raw.trim().split(" ");
+            String cleaned = raw.trim().split(" ")[0];
+            if(sp.length > 1){
+                cleaned += " " + sp[1];
+            }
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy MMM", Locale.ENGLISH);
+            return YearMonth.parse(cleaned, fmt).atDay(1);
         } catch (DateTimeParseException e) {
             System.err.println("❌ PubMed 날짜 파싱 실패: " + raw);
             return null;

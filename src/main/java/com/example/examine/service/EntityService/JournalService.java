@@ -1,16 +1,26 @@
-package com.example.examine.service;
+package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
 import com.example.examine.dto.JournalAnalysis;
-import com.example.examine.dto.JournalEffectRequest;
-import com.example.examine.dto.JournalSideEffectRequest;
+import com.example.examine.dto.JSERequest;
 import com.example.examine.entity.*;
 import com.example.examine.dto.JournalRequest;
+import com.example.examine.entity.Effect.EffectTag;
+import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffectId;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffect;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffectId;
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import com.example.examine.repository.*;
 import com.example.examine.service.crawler.ClinicalTrialsCrawler;
 import com.example.examine.service.crawler.JournalCrawlerMeta;
 import com.example.examine.service.crawler.PubmedCrawler;
 import com.example.examine.service.crawler.SemanticScholarCrawler;
+import com.example.examine.service.llm.LLMResponse;
+import com.example.examine.service.util.CalculateScore;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -22,7 +32,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -93,16 +102,14 @@ public class JournalService {
         journal.setDurationUnit(dto.duration().unit());
         journal.setDurationDays();
         journal.setParticipants(dto.participants());
+        journal.setParallel(dto.parallel());
 
         Integer blind = IntStream.range(0, blindLabel.length)
                 .boxed()
                 .filter(i -> blindLabel[i].equals(dto.blind()))
                 .findFirst()
                 .orElse(null);
-
         journal.setBlind(blind);
-
-        journal.setParallel(dto.parallel());
 
         if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
             TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
@@ -112,8 +119,8 @@ public class JournalService {
             journal.setTrialDesign(null);
         }
 
-        syncJournalSupplementEffects(journal, dto.effects());
-        syncJournalSupplementSideEffects(journal, dto.sideEffects());
+        syncJSE(journal, null, dto.effects());
+        syncJSSE(journal, null, dto.sideEffects());
 
         try {
             JournalCrawlerMeta meta = crawlJournalMeta(dto.link());
@@ -127,14 +134,14 @@ public class JournalService {
 
             JournalAnalysis result = null;
             try {
-                result = analyze(journal.getSummary());
+                result = analyze(journal.getTitle(), journal.getSummary());
                 applyAnalysis(journal, result);
             } catch (Exception e) {
-                System.out.println("LLM 분석 실패: " + e.getMessage());
+                log.error("llm 분석 실패", e);
             }
 
         } catch (IOException e) {
-            System.out.println("크롤링 실패: " + e.getMessage());
+            log.error("크롤링 실패", e);
         }
         journal.setScore();
         return ResponseEntity.ok(journalRepo.save(journal));
@@ -153,52 +160,64 @@ public class JournalService {
         }
     }
 
-    public JournalAnalysis analyze(String abstractText) throws IOException{
+    public JournalAnalysis analyze(String title, String abstractText) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         String prompt = """
-You will be given an abstract of a scientific paper. Your task is to extract the following fields in strict JSON format with no explanation or commentary. If a value is not found, use null.
+        You will be given an abstract of a scientific paper. Your task is to extract the following fields in strict JSON format with no explanation or commentary. If a value is not found, use null.
 
-Return only this JSON:
+        No explanation, no preamble, no code block.
+        Return only valid compact JSON. :
 
-{
-  "participants": (integer or null),
-  "durationValue": (integer or null),
-  "durationUnit": "day" | "week" | "month" | "year" | null,
-  "blind": (0=open-label, 1=single-blind, 2=double-blind, or null),
-  "parallel": (true/false/null),
-  "design": one of the following strings, or null:
-    [
-      "Meta-analysis", "Systematic Review", "RCT", "Non-RCT",
-      "Cohort", "Case-control", "Cross-sectional", "Case Report",
-      "Animal Study", "In-vitro Study", "Unknown"
-    ]
-}
+        {
+          "participants": (integer or null),
+          "durationValue": (integer or null),
+          "durationUnit": "day" | "week" | "month" | "year" | null,
+          "blind": (0=open-label, 1=single-blind, 2=double-blind, or null),
+          "parallel": (true/false/null),
+          "design": one of the following strings, or null:
+            [
+              "Meta-analysis", "Systematic Review", "RCT", "Non-RCT",
+              "Cohort", "Case-control", "Cross-sectional", "Case Report",
+              "Animal Study", "In-vitro Study", "Unknown"
+            ]
+        }
+      
+        Title: %s
+        
+        Abstract: %s
+        """.formatted(title, abstractText);
 
-Abstract: %s
-""".formatted(abstractText);
-
-
+        // 요청 body에 stream: false 추가
         String requestBody = """
-    {
-      "model": "llama3",
-      "prompt": "%s"
-    }
-    """.formatted(prompt);
+        {
+          "model": "llama3",
+          "prompt": %s,
+          "stream": false
+        }
+        """.formatted(objectToJsonString(prompt));  // 문자열이므로 내부에 따옴표 자동 붙이게 처리
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:11434/api/generate", entity, String.class);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:11434/api/generate", entity, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(response.getBody(), JournalAnalysis.class);
+
+        // 응답 구조 파싱
+        LLMResponse wrapper = mapper.readValue(response.getBody(), LLMResponse.class);
+
+        // wrapper.response에 최종 JSON 문자열이 담겨 있으므로 여기서 바로 파싱
+        return mapper.readValue(wrapper.response, JournalAnalysis.class);
     }
 
-    private String objectToJsonString(String text) {
-        return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\"";
+    private String objectToJsonString(String str) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(str);  // "escaped string" 형태로 반환됨
     }
+
 
     // 🔸 applyAnalysisToJournal(): 값이 없을 경우만 반영
     private void applyAnalysis(Journal journal, JournalAnalysis result) {
@@ -226,14 +245,25 @@ Abstract: %s
     public ResponseEntity<?> update(Long id, JournalRequest dto) {
         Journal journal = journalRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Journal not found"));
+        Journal OldJournal = journal;
 
-        int blind = IntStream.range(0, blindLabel.length)
+        Integer blind = IntStream.range(0, blindLabel.length)
+                .boxed()
                 .filter(i -> blindLabel[i].equals(dto.blind()))
                 .findFirst()
-                .orElse(0);
-        int days = toDays(dto.duration().value(), dto.duration().unit());
-        int oldDuration = journal.getDurationDays() != null ? journal.getDurationDays() : 0;
-        int oldParticipants = journal.getParticipants() != null ? journal.getParticipants() : 0;
+                .orElse(null);
+        journal.setBlind(blind);
+
+        if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
+            TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesign().id()));
+            journal.setTrialDesign(td);
+        } else {
+            journal.setTrialDesign(null);
+        }
+        Integer days = toDays(dto.duration().value(), dto.duration().unit());
+        Integer oldDuration = journal.getDurationDays() != null ? journal.getDurationDays() : 1;
+        Integer oldParticipants = journal.getParticipants() != null ? journal.getParticipants() : 1;
 
         Long oldTrialDesignId = journal.getTrialDesign() != null ? journal.getTrialDesign().getId() : null;
         Long newTrialDesignId = dto.trialDesign() != null ? dto.trialDesign().id() : null;
@@ -269,24 +299,24 @@ Abstract: %s
         if (journalChanged) {
             List<JournalSupplementEffect> effects = journalSupplementEffectRepo.findAllByJournalId(id);
             List<JournalSupplementSideEffect> sideEffects = journalSupplementSideEffectRepo.findAllByJournalId(id);
-            for (JournalSupplementEffect e : effects) {
-                SupplementEffect agg = findOrCreateSupplementEffect(
-                        e.getSupplement().getId(),
-                        e.getEffectTag().getId()
+            for (JournalSupplementEffect jse : effects) {
+                SupplementEffect se = findOrCreateSupplementEffect(
+                        jse.getSupplement().getId(),
+                        jse.getEffect().getId()
                 );
-                e.setScore(agg, oldParticipants); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
+                jse.setScore(); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
             }
-            for (JournalSupplementSideEffect e : sideEffects) {
-                SupplementSideEffect agg = findOrCreateSupplementSideEffect(
-                        e.getSupplement().getId(),
-                        e.getSideEffectTag().getId()
+            for (JournalSupplementSideEffect jse : sideEffects) {
+                SupplementSideEffect se = findOrCreateSupplementSideEffect(
+                        jse.getSupplement().getId(),
+                        jse.getEffect().getId()
                 );
-                e.setScore(agg, oldParticipants); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
+                jse.setScore(); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
             }
         }
 
-        syncJournalSupplementEffects(journal, dto.effects());
-        syncJournalSupplementSideEffects(journal, dto.sideEffects());
+        syncJSE(journal, OldJournal, dto.effects());
+        syncJSSE(journal, OldJournal, dto.sideEffects());
 
         return ResponseEntity.ok(journalRepo.save(journal));
     }
@@ -309,7 +339,7 @@ Abstract: %s
                     Supplement supplement = supplementRepo.findById(supplementId)
                             .orElseThrow(() -> new EntityNotFoundException("해당 supplement가 존재하지 않습니다."));
                     SideEffectTag sideEffect = sideEffectRepo.findById(sideEffectId)
-                            .orElseThrow(() -> new EntityNotFoundException("해당 sideEffectTag가 존재하지 않습니다."));
+                            .orElseThrow(() -> new EntityNotFoundException("해당 sideEffect가 존재하지 않습니다."));
                     SupplementSideEffect newEntity = new SupplementSideEffect(supplement, sideEffect);
                     return supplementSideEffectRepo.save(newEntity);
                 });
@@ -329,7 +359,36 @@ Abstract: %s
         };
     }
 
-    private void syncJournalSupplementEffects(Journal journal, List<JournalEffectRequest> requests) {
+    private void syncJSE(Journal journal, Journal oldJournal, List<JSERequest> requests) {
+        // 데이터 미리 로딩
+        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
+                        requests.stream().map(JSERequest::supplementId).toList())
+                .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
+
+        Map<Long, EffectTag> effectMap = effectRepo.findAllById(
+                        requests.stream().map(JSERequest::effectId).toList())
+                .stream().collect(Collectors.toMap(EffectTag::getId, Function.identity()));
+
+        if (oldJournal == null) {
+            for (JSERequest req : requests) {
+                JournalSupplementEffectId id = new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId());
+                SupplementEffect se = findOrCreateSupplementEffect(
+                        req.supplementId(),
+                        req.effectId()
+                );
+                Supplement s = supplementMap.get(id.getSupplementId());
+                EffectTag t = effectMap.get(id.getEffectId());
+                if (s == null || t == null) {
+                    throw new IllegalArgumentException("Invalid supplement/effect ID");
+                }
+                JournalSupplementEffect newEffect = new JournalSupplementEffect(journal, s, t, req.size());
+                newEffect.setScore();
+                CalculateScore.addScore(se, newEffect);
+                journalSupplementEffectRepo.save(newEffect);
+            }
+            return;
+        }
+
         Map<JournalSupplementEffectId, JournalSupplementEffect> existingMap = journal.getJournalSupplementEffects().stream()
                 .collect(Collectors.toMap(JournalSupplementEffect::getId, Function.identity()));
 
@@ -337,91 +396,123 @@ Abstract: %s
                 .map(req -> new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId()))
                 .collect(Collectors.toSet());
 
-        // 삭제 대상
+        // 삭제
         Set<JournalSupplementEffectId> toDelete = new HashSet<>(existingMap.keySet());
         toDelete.removeAll(newIdSet);
-        toDelete.forEach( id -> {
-            JournalSupplementEffect entity = existingMap.get(id);
-            journal.getJournalSupplementEffects().remove(entity); // 🔹 메모리 컬렉션에서 제거
-            journalSupplementEffectRepo.deleteById(id);           // 🔥 실제 DB에서도 삭제
+        toDelete.forEach(id -> {
+            JournalSupplementEffect jse = existingMap.get(id);
+            SupplementEffect se = findOrCreateSupplementEffect(
+                    jse.getSupplement().getId(),
+                    jse.getEffect().getId()
+            );
+            CalculateScore.deleteScore(se, jse, oldJournal);
+            journal.getJournalSupplementEffects().remove(jse);
+            journalSupplementEffectRepo.deleteById(id);
         });
 
-        // 필요 데이터 미리 조회
-        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
-                        requests.stream().map(JournalEffectRequest::supplementId).toList())
-                .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
-
-        Map<Long, EffectTag> effectMap = effectRepo.findAllById(
-                        requests.stream().map(JournalEffectRequest::effectId).toList())
-                .stream().collect(Collectors.toMap(EffectTag::getId, Function.identity()));
-
         // 삽입 또는 갱신
-        for (JournalEffectRequest req : requests) {
+        for (JSERequest req : requests) {
             JournalSupplementEffectId id = new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId());
-            SupplementEffect agg = findOrCreateSupplementEffect(
+            SupplementEffect se = findOrCreateSupplementEffect(
                     req.supplementId(),
                     req.effectId()
             );
             if (existingMap.containsKey(id)) {
-                JournalSupplementEffect e = existingMap.get(id);
-                e.setSize(req.size());
-                e.setScore(agg, journal.getParticipants());
+                JournalSupplementEffect jse = existingMap.get(id);
+                CalculateScore.deleteScore(se, jse, oldJournal);
+                jse.setSize(req.size());
+                jse.setScore();
+                CalculateScore.addScore(se, jse);
             } else {
                 Supplement s = supplementMap.get(req.supplementId());
                 EffectTag t = effectMap.get(req.effectId());
                 if (s == null || t == null) throw new IllegalArgumentException("Invalid supplement/effect ID");
                 JournalSupplementEffect newEffect = new JournalSupplementEffect(journal, s, t, req.size());
-                newEffect.setScore(agg, journal.getParticipants());
+                newEffect.setScore();
+                CalculateScore.addScore(se, newEffect);
                 journalSupplementEffectRepo.save(newEffect);
             }
         }
     }
 
-    private void syncJournalSupplementSideEffects(Journal journal, List<JournalSideEffectRequest> requests) {
+
+    private void syncJSSE(Journal journal, Journal oldJournal, List<JSERequest> requests) {
+        // 데이터 미리 로딩
+        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
+                        requests.stream().map(JSERequest::supplementId).toList())
+                .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
+
+        Map<Long, SideEffectTag> effectMap = sideEffectRepo.findAllById(
+                        requests.stream().map(JSERequest::effectId).toList())
+                .stream().collect(Collectors.toMap(SideEffectTag::getId, Function.identity()));
+
+        if (oldJournal == null) {
+            for (JSERequest req : requests) {
+                JournalSupplementSideEffectId id = new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId());
+                SupplementSideEffect se = findOrCreateSupplementSideEffect(
+                        req.supplementId(),
+                        req.effectId()
+                );
+                Supplement s = supplementMap.get(id.getSupplementId());
+                SideEffectTag t = effectMap.get(id.getEffectId());
+                if (s == null || t == null) {
+                    throw new IllegalArgumentException("Invalid supplement/sideEffect ID");
+                }
+                JournalSupplementSideEffect newEffect = new JournalSupplementSideEffect(journal, s, t, req.size());
+                newEffect.setScore();
+                CalculateScore.addScore(se, newEffect);
+                journalSupplementSideEffectRepo.save(newEffect);
+            }
+            return;
+        }
+
         Map<JournalSupplementSideEffectId, JournalSupplementSideEffect> existingMap = journal.getJournalSupplementSideEffects().stream()
                 .collect(Collectors.toMap(JournalSupplementSideEffect::getId, Function.identity()));
 
         Set<JournalSupplementSideEffectId> newIdSet = requests.stream()
-                .map(req -> new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.sideEffectId()))
+                .map(req -> new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId()))
                 .collect(Collectors.toSet());
 
+        // 삭제
         Set<JournalSupplementSideEffectId> toDelete = new HashSet<>(existingMap.keySet());
         toDelete.removeAll(newIdSet);
-        toDelete.forEach( id->{
-            JournalSupplementSideEffect entity = existingMap.get(id);
-            journal.getJournalSupplementSideEffects().remove(entity); // 🔹 메모리 컬렉션에서 제거
-            journalSupplementSideEffectRepo.deleteById(id);           // 🔥 실제 DB에서도 삭제
+        toDelete.forEach(id -> {
+            JournalSupplementSideEffect jse = existingMap.get(id);
+            SupplementSideEffect se = findOrCreateSupplementSideEffect(
+                    jse.getSupplement().getId(),
+                    jse.getEffect().getId()
+            );
+            CalculateScore.deleteScore(se, jse, oldJournal);
+            journal.getJournalSupplementSideEffects().remove(jse);
+            journalSupplementSideEffectRepo.deleteById(id);
         });
 
-        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
-                        requests.stream().map(JournalSideEffectRequest::supplementId).toList())
-                    .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
 
-        Map<Long, SideEffectTag> effectMap = sideEffectRepo.findAllById(
-                        requests.stream().map(JournalSideEffectRequest::sideEffectId).toList())
-                .stream().collect(Collectors.toMap(SideEffectTag::getId, Function.identity()));
-
-        for (JournalSideEffectRequest req : requests) {
-            JournalSupplementSideEffectId id = new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.sideEffectId());
-            SupplementSideEffect agg = findOrCreateSupplementSideEffect(
+        // 삽입 또는 갱신
+        for (JSERequest req : requests) {
+            JournalSupplementSideEffectId id = new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId());
+            SupplementSideEffect se = findOrCreateSupplementSideEffect(
                     req.supplementId(),
-                    req.sideEffectId()
+                    req.effectId()
             );
-
             if (existingMap.containsKey(id)) {
-                JournalSupplementSideEffect e = existingMap.get(id);
-                e.setSize(req.size());
-                e.setScore(agg, journal.getParticipants());
+                JournalSupplementSideEffect jse = existingMap.get(id);
+                CalculateScore.deleteScore(se, jse, oldJournal);
+                jse.setSize(req.size());
+                jse.setScore();
+                CalculateScore.addScore(se, jse);
             } else {
                 Supplement s = supplementMap.get(req.supplementId());
-                SideEffectTag t = effectMap.get(req.sideEffectId());
+                SideEffectTag t = effectMap.get(req.effectId());
                 if (s == null || t == null) throw new IllegalArgumentException("Invalid supplement/sideEffect ID");
                 JournalSupplementSideEffect newEffect = new JournalSupplementSideEffect(journal, s, t, req.size());
-                newEffect.setScore(agg, journal.getParticipants());
+                newEffect.setScore();
+                CalculateScore.addScore(se, newEffect);
                 journalSupplementSideEffectRepo.save(newEffect);
             }
         }
     }
+
 
 
     public List<JournalRequest> sort(Sort sort) {

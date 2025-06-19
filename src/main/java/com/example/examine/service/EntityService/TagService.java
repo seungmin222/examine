@@ -1,9 +1,11 @@
-package com.example.examine.service;
+package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
 import com.example.examine.dto.TagRequest;
 import com.example.examine.dto.TierTagRequest;
 import com.example.examine.entity.*;
+import com.example.examine.entity.Effect.EffectTag;
+import com.example.examine.entity.Effect.SideEffectTag;
 import com.example.examine.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,14 +172,14 @@ public class TagService {
                 break;
             case "positive":
                 effectRepo.findById(id).ifPresent(tag -> {
-                    tag.getSupplementMappings().clear();// 매핑부터 삭제
+                    tag.getSE().clear();// 매핑부터 삭제
                     effectRepo.delete(tag);
                     removed[0] = true;
                 });
                 break;
             case "negative":
                 sideEffectRepo.findById(id).ifPresent(tag -> {
-                    tag.getSupplementMappings().clear();
+                    tag.getSE().clear();
                     sideEffectRepo.delete(tag);
                     removed[0] = true;
                 });

@@ -1,14 +1,26 @@
 package com.example.examine.service.util;
 
-import com.example.examine.entity.JournalSupplementEffect;
+import com.example.examine.entity.Journal;
+import com.example.examine.entity.JournalSupplementEffect.JSE;
+import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
+import com.example.examine.entity.SupplementEffect.SE;
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 
-public class calculateScore {
+public class CalculateScore {
 
-    public static BigDecimal calculateJournalScore(int participants, int duration, String design, int blind) {
+    public static BigDecimal calculateJournalScore(Integer participants, Integer duration, String design, Integer blind) {
+        if (participants == null){
+            participants = 1;
+        }
+        if (duration == null){
+            duration = 1;
+        }
+        if (blind == null){
+            blind = 0;
+        }
         BigDecimal logParticipants = BigDecimal.valueOf(Math.log10(participants + 1));
         BigDecimal logDuration = BigDecimal.valueOf(Math.log(duration + 1));
         BigDecimal designWeight = getDesignWeight(design, blind);
@@ -42,28 +54,30 @@ public class calculateScore {
         };
 
         return baseWeight.multiply(detailWeight);
+
     }
-    public static BigDecimal calculateSupplementScore(List<JournalSupplementEffect> effects) {
-        BigDecimal weightedSum = BigDecimal.ZERO;
-        BigDecimal weightSum = BigDecimal.ZERO;
 
-        for (JournalSupplementEffect e : effects) {
-            BigDecimal score = e.getScore(); // 이미 strength × log × weight 계산됨
-            int participants = e.getJournal().getParticipants();
+    /// 점수 빼는 로직, 더하는 로직 나누기
+    public static void deleteScore(SE se, JSE jse, Journal oldJournal) {
+        int participants = oldJournal.getParticipants() != null ? oldJournal.getParticipants() : 1;
+        se.setTotalScore(
+                se.getTotalScore().subtract(
+                        jse.getScore().multiply(BigDecimal.valueOf(participants))
+                )
+        );
+        se.setTotalParticipants(se.getTotalParticipants()-participants);
+        se.setFinalScore();
+    }
 
-            // 필터링 옵션
-            if (participants < 10) continue;
-
-            BigDecimal weight = BigDecimal.valueOf(participants);
-            weightedSum = weightedSum.add(score.multiply(weight));
-            weightSum = weightSum.add(weight);
-        }
-
-        BigDecimal finalScore = weightSum.compareTo(BigDecimal.ZERO) > 0
-                ? weightedSum.divide(weightSum, 4, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
-
-        return finalScore;
+    public static void addScore(SE se, JSE jse){
+        int participants = jse.getJournal().getParticipants() != null ? jse.getJournal().getParticipants() : 1;
+        se.setTotalScore(
+                se.getTotalScore().add(
+                        jse.getScore().multiply(BigDecimal.valueOf(participants))
+                )
+        );
+        se.setTotalParticipants(se.getTotalParticipants()+participants);
+        se.setFinalScore();
     }
 
     public static String calculateTier(BigDecimal score) {

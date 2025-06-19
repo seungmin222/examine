@@ -1,4 +1,4 @@
-package com.example.examine.service;
+package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
 import com.example.examine.dto.DetailRequest;
@@ -7,7 +7,6 @@ import com.example.examine.dto.SupplementRequest;
 import com.example.examine.dto.TagRequest;
 import com.example.examine.entity.*;
 import com.example.examine.repository.*;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;

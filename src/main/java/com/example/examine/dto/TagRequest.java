@@ -2,6 +2,8 @@ package com.example.examine.dto;
 
 
 import com.example.examine.entity.*;
+import com.example.examine.entity.Effect.EffectTag;
+import com.example.examine.entity.Effect.SideEffectTag;
 
 public record TagRequest(
         Long id,

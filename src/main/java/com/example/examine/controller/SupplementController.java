@@ -2,7 +2,7 @@ package com.example.examine.controller;
 
 import com.example.examine.dto.SupplementRequest;
 import com.example.examine.repository.*;
-import com.example.examine.service.*;
+import com.example.examine.service.EntityService.SupplementService;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;

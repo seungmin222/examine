@@ -1,15 +1,19 @@
-package com.example.examine.entity;
+package com.example.examine.entity.SupplementEffect;
 
+import com.example.examine.entity.Effect.Effect;
+import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.entity.Supplement;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.example.examine.service.util.calculateScore;
+import com.example.examine.service.util.CalculateScore;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 @Entity
 @Table(name = "supplement_side_effect")
-public class SupplementSideEffect {
+public class SupplementSideEffect implements SE {
 
     @EmbeddedId
     private SupplementSideEffectId id = new SupplementSideEffectId();
@@ -44,39 +48,47 @@ public class SupplementSideEffect {
     }
 
     // getter/setter
-
+    @Override
     public SupplementSideEffectId getId() {
         return id;
     }
 
-    public void setId(SupplementSideEffectId id) {
-        this.id = id;
+    @Override
+    public void setId(SEId id) {
+        this.id = (SupplementSideEffectId) id;
     }
 
+    @Override
     public Supplement getSupplement() {
         return supplement;
     }
 
+    @Override
     public void setSupplement(Supplement supplement) {
         this.supplement = supplement;
     }
 
-    public SideEffectTag getSideEffectTag() {
+    @Override
+    public SideEffectTag getEffect() {
         return sideEffectTag;
     }
 
-    public void setSideEffectTag(SideEffectTag sideEffectTag) {
-        this.sideEffectTag = sideEffectTag;
+    @Override
+    public void setEffect(Effect effect) {
+        this.sideEffectTag = (SideEffectTag) effect;
     }
 
+    @Override
     public String getTier() {
         return tier;
     }
 
+    @Override
     public void setTier(String tier) {
         this.tier = tier;
     }
 
+    @Override
     public BigDecimal getTotalScore() {
         return totalScore;
     }
@@ -85,21 +97,29 @@ public class SupplementSideEffect {
         this.totalScore = totalScore;
     }
 
+    @Override
     public Integer getTotalParticipants() {
         return totalParticipants;
     }
 
+    @Override
     public void setTotalParticipants(Integer totalParticipants) {
         this.totalParticipants = totalParticipants;
     }
 
+    @Override
     public BigDecimal getFinalScore() {
         return finalScore;
     }
 
-    public void setFinalScore(BigDecimal finalScore) {
-        this.finalScore = finalScore;
-        this.tier = calculateScore.calculateTier(finalScore);
+    @Override
+    public void setFinalScore() {
+        this.finalScore = this.totalScore.divide(
+                BigDecimal.valueOf(this.totalParticipants),
+                4,  // 소수점 4자리
+                RoundingMode.HALF_UP
+        );
+        this.tier = CalculateScore.calculateTier(finalScore);
     }
 }
 

@@ -31,8 +31,12 @@ public class PubmedCrawler implements JournalCrawler {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(new URL(apiUrl));
         Document xmlDoc = Jsoup.connect(efetchUrl).get();
-        String title = root.path("result").path(pId).path("title").asText();
-        String date = root.path("result").path(pId).path("pubdate").asText();
+        JsonNode resultNode = root.path("result").path(pId);
+        String title = resultNode.path("title").asText();
+        String pubDate = resultNode.path("pubdate").asText("");
+        String ePubDate = resultNode.path("epubdate").asText("");
+
+        String date = ePubDate.length() > pubDate.length() ? ePubDate : pubDate;
         Elements abstracts = xmlDoc.select("Abstract > AbstractText");
 
         StringBuilder sb = new StringBuilder();

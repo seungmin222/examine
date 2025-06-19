@@ -12,8 +12,8 @@ public record SupplementRequest(
         String dosage,
         BigDecimal cost,
         List<TagRequest> types,
-        List<EffectRequest> effects,
-        List<SideEffectRequest> sideEffects
+        List<SERequest> effects,
+        List<SERequest> sideEffects
 ) {
     public static SupplementRequest fromEntity(Supplement supplement) {
         return new SupplementRequest(
@@ -26,12 +26,12 @@ public record SupplementRequest(
                         .map(e->new TagRequest(e.getId(),e.getName(),"type"))
                         .toList(),
                 supplement.getEffects().stream()
-                        .map(e -> new EffectRequest(
-                                e.getEffectTag().getId(), e.getEffectTag().getName(), e.getTier()))
+                        .map(e -> new SERequest(
+                                e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
                         .toList(),
                 supplement.getSideEffects().stream()
-                        .map(e -> new SideEffectRequest(
-                                e.getSideEffectTag().getId(), e.getSideEffectTag().getName(), e.getTier()))
+                        .map(e -> new SERequest(
+                                e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
                         .toList()
         );
     }

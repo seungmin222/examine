@@ -8,8 +8,8 @@ public record JournalRequest(
         Long id,
         String title,
         String link,
-        List<JournalEffectRequest> effects,
-        List<JournalSideEffectRequest> sideEffects,
+        List<JSERequest> effects,
+        List<JSERequest> sideEffects,
         String summary,
         TierTagRequest trialDesign,
         String blind,
@@ -39,10 +39,10 @@ public record JournalRequest(
                 journal.getTitle(),
                 journal.getLink(),
                 journal.getJournalSupplementEffects().stream()
-                        .map(JournalEffectRequest::fromEntity)
+                        .map(JSERequest::fromEntity)
                         .toList(),
                 journal.getJournalSupplementSideEffects().stream()
-                        .map(JournalSideEffectRequest::fromEntity)
+                        .map(JSERequest::fromEntity)
                         .toList(),
                 journal.getSummary(),
                 tierTagRequest,

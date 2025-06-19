@@ -1,6 +1,6 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.SideEffectTag;
+import com.example.examine.entity.Effect.SideEffectTag;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 

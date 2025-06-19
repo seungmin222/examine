@@ -5,7 +5,7 @@ import java.util.List;
 import com.example.examine.dto.TagRequest;
 import com.example.examine.dto.TierTagRequest;
 
-import com.example.examine.service.TagService;
+import com.example.examine.service.EntityService.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
