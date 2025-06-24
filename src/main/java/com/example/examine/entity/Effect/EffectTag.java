@@ -1,5 +1,6 @@
 package com.example.examine.entity.Effect;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import com.example.examine.entity.SupplementEffect.SE;
 import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "effect_tag")
@@ -22,6 +24,10 @@ public class EffectTag implements Effect {
     @OneToMany(mappedBy = "effectTag", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<SupplementEffect> se = new ArrayList<>();
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Getter, Setter
     @Override

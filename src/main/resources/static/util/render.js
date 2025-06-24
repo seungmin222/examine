@@ -11,15 +11,16 @@ import{
   createTooltip
 } from '/util/utils.js';
 
-function renderSupplements(list) {
+function renderSupplements(list,supplementMap) {
     const tbody = document.getElementById('supplement-body');
     tbody.innerHTML = '';
+    supplementMap.clear();
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
     const shown = isFolded ? list.slice(0, 5) : list;
     const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
-    const deleteMode = document.getElementById('toggle-delete')?.classList.contains('execute');
 
     shown.forEach(item => {
+        supplementMap.set(item.id, item);
         const row = document.createElement('tr');
         row.dataset.id = item.id;
         const types = item.types?.map(e => e.name).join(', ') || '';
@@ -43,8 +44,14 @@ function renderSupplements(list) {
       <td>${types}</td>
       <td>
       ${editMode
-      ? `<input name="dosage" value="${item.dosage}"/>`
-      : item.dosage
+      ? `<input name="dosageValue" value="${item.dosageValue}"/>
+         <select name="dosageUnit" class="w-16">
+            <option value="g" ${item.dosageUnit === 'g' ? 'selected' : ''}>g</option>
+            <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
+            <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
+            <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
+         </select>`
+      : `${item.dosageValue}${item.dosageUnit}`
       }
       </td>
       <td>
@@ -73,7 +80,6 @@ function renderJournals(list, journalMap) {
     const folded = document.getElementById('fold-toggle')?.classList.contains('folded');
     const shown = folded ? list.slice(0, 5) : list;
     const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
-    const deleteMode = document.getElementById('toggle-delete')?.classList.contains('execute');
 
     const trialDesignOptions = [ // 추후 하드코딩 말고 api로 받아서 전역 map으로 설정하기
       { value: '1', label: 'Meta-analysis', tier: 'A' },
@@ -110,7 +116,7 @@ function renderJournals(list, journalMap) {
 
         const parallel = item.parallel ? 'O' : 'X';
         const trialDesignSelectOptions = trialDesignOptions.map(opt => `
-              <option value="${opt.value}" class="w-32 ${opt.tier}" ${item.trialDesign?.id === opt.value ? 'selected' : ''}>
+              <option value="${opt.value}" class="w-32 ${opt.tier}" ${item.trialDesign?.id === Number(opt.value) ? 'selected' : ''}>
                 ${opt.label}
               </option>
             `).join('');
@@ -130,9 +136,9 @@ function renderJournals(list, journalMap) {
           <td>
             ${editMode
                ? `<select name="blind" class="w-32 ${blindClass}">
-                     <option value="open-label" class='w-32' ${item.blind === 'open-label' ? 'selected' : ''}>open-label</option>
-                     <option value="single-blind" class="w-32 B" ${item.blind === 'single-blind' ? 'selected' : ''}>single-blind</option>
-                     <option value="double-blind" class="w-32 A" ${item.blind === 'double-blind' ? 'selected' : ''}>double-blind</option>
+                     <option value="0" class='w-32' ${item.blind === 'open-label' ? 'selected' : ''}>open-label</option>
+                     <option value="1" class="w-32 B" ${item.blind === 'single-blind' ? 'selected' : ''}>single-blind</option>
+                     <option value="2" class="w-32 A" ${item.blind === 'double-blind' ? 'selected' : ''}>double-blind</option>
                   </select>`
                : `${item.blind}`
              }
@@ -148,9 +154,10 @@ function renderJournals(list, journalMap) {
           </td>
           <td>
             ${editMode
-              ? `<input name="duration-value" type="number" value="${item.duration.value}"/>
-                 <select name="duration-unit">
+              ? `<input name="durationValue" type="number" value="${item.duration.value}"/>
+                 <select name="durationUnit">
                     <option value="day" ${item.duration.unit === 'day' ? 'selected' : ''}>day</option>
+                    <option value="week" ${item.duration.unit === 'week' ? 'selected' : ''}>week</option>
                     <option value="month" ${item.duration.unit === 'month' ? 'selected' : ''}>month</option>
                     <option value="year" ${item.duration.unit === 'year' ? 'selected' : ''}>year</option>
                  </select>`
@@ -168,8 +175,6 @@ function renderJournals(list, journalMap) {
           <td>${item.date?.slice(0, 7)}</td>
           ${editMode ? `<td>
              <div class="flex flex-col gap-2">
-
-
                 <button class="modal-btn" data-id="${item.id}">태그</button>
                 <button class="save-btn" data-id="${item.id}">저장</button>
              </div>
@@ -228,12 +233,22 @@ function renderDetails(detail) {
     dosage.innerHTML = `${detail.dosage}`;
 }
 
-
+function renderButton(boxId, id, text, cls){
+    const button = document.createElement('button');
+    if(!button){
+        return;
+    }
+    button.textContent = text;
+    button.id=id;
+    button.className = cls;
+    document.getElementById(boxId).appendChild(button);
+}
 
 export {
 renderSupplements,
 renderJournals,
 renderTags,
 renderModal,
-renderDetails
+renderDetails,
+renderButton
 };

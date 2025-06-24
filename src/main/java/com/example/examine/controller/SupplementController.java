@@ -1,9 +1,11 @@
 package com.example.examine.controller;
 
-import com.example.examine.dto.SupplementRequest;
+import com.example.examine.dto.request.SupplementRequest;
+import com.example.examine.dto.response.SupplementResponse;
 import com.example.examine.repository.*;
 import com.example.examine.service.EntityService.SupplementService;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +29,14 @@ public class SupplementController {
         this.supplementService = supplementService;
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody SupplementRequest dto) {
        log.info("📥 받은 데이터: {}", dto);
        return supplementService.create(dto);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SupplementRequest dto) {
@@ -43,14 +47,14 @@ public class SupplementController {
 
 
     @GetMapping
-    public List<SupplementRequest> findAll(@RequestParam(defaultValue = "engName") String sort,
-                                   @RequestParam(defaultValue = "asc") String direction) {
+    public List<SupplementResponse> findAll(@RequestParam(defaultValue = "engName") String sort,
+                                            @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
         return supplementService.findAll(sorting);
     }
 
     @GetMapping("/search")
-    public List<SupplementRequest> search(
+    public List<SupplementResponse> search(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "engName") String sort,
             @RequestParam(defaultValue = "asc") String direction
@@ -60,7 +64,7 @@ public class SupplementController {
     }
 
     @GetMapping("/filter")
-    public List<SupplementRequest> filterByTagIds(
+    public List<SupplementResponse> filterByTagIds(
             @RequestParam(required = false) List<Long> typeIds,
             @RequestParam(required = false) List<Long> effectIds,
             @RequestParam(required = false) List<Long> sideEffectIds,
@@ -73,10 +77,11 @@ public class SupplementController {
     }
 
     @GetMapping("/{id}")
-    public List<SupplementRequest> findOne(@PathVariable Long id) {
+    public List<SupplementResponse> findOne(@PathVariable Long id) {
         return supplementService.findOne(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         return supplementService.delete(id);

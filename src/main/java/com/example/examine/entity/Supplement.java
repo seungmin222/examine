@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "supplement", uniqueConstraints = @UniqueConstraint(columnNames = {"korName", "engName"}))
@@ -23,7 +24,9 @@ public class Supplement {
     @Column(unique = true, nullable = false)
     private String engName;
 
-    private String dosage;
+    private BigDecimal dosageValue;
+
+    private String dosageUnit;
 
     private BigDecimal cost;
 
@@ -51,6 +54,10 @@ public class Supplement {
     )
     @JsonIgnore
     private List<Journal> journals = new ArrayList<>();
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
  // detail 클래스를 supplement 엔티티에 직접 추가하면 자원낭비
  // detail에서 id 받는게 적절
@@ -86,12 +93,12 @@ public class Supplement {
         this.engName = engName;
     }
 
-    public String getDosage() {
-        return dosage;
+    public String getDosageUnit() {
+        return dosageUnit;
     }
 
-    public void setDosage(String dosage) {
-        this.dosage = dosage;
+    public void setDosageUnit(String dosageUnit) {
+        this.dosageUnit = dosageUnit;
     }
 
     public BigDecimal getCost() {
@@ -130,5 +137,13 @@ public class Supplement {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
+    }
+
+    public BigDecimal getDosageValue() {
+        return dosageValue;
+    }
+
+    public void setDosageValue(BigDecimal dosageValue) {
+        this.dosageValue = dosageValue;
     }
 }

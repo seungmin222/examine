@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8" />
   <title>성분 관리</title>
@@ -7,110 +8,126 @@
   <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
   <script src="/headScript.js"></script>
 </head>
+
 <body>
 <!--기초 로딩-->
 <div id="load-basic"></div>
-<div class="w-[90%] ml-auto mr-0"><!--background-->
-  <div class="w-[95%] mx-auto"><!--main-content-->
-  <div class="w-full flex justify-between items-center flex-wrap gap-2"><!--section-header-->
-  <h2 id="index-1">성분 리스트</h2>
-  <!-- 🔍 검색 폼 -->
-<div class="flex gap-2 items-start">
-  <form id="search-form" class="flex-row"><!--wide-form-->
-      <input name="input" type="text" class="w-48" placeholder="한글명 또는 영어명으로 검색" />
-      <button type="submit">검색</button>
-  </form>
-    <button id="toggle-change">수정</button>
-    <button id="toggle-delete">삭제</button>
-    <button id="toggle-fold">접기</button>
-    <select name="typeId" id="list-sort">
-      <option value="korName">한글순</option>
-      <option value="engName">영어순</option>
-    </select>
-  </div>
-</div>
-<table id="content-1">
-  <thead>
-  <tr>
-    <th>한글명</th>
-    <th>영어명</th>
-    <th>분류</th>
-    <th>복용량(일)</th>
-    <th>비용(복용량당)</th>
-    <th>기대효과</th>
-    <th>부작용</th>
-  </tr>
-  </thead>
-  <tbody id="supplement-body"></tbody>
-</table>
+<div class="w-[90%] ml-auto mr-0">
+  <!--background-->
+  <div class="w-[95%] mx-auto">
+    <!--main-content-->
+    <div class="w-full flex justify-between items-center flex-wrap gap-2">
+      <!--section-header-->
+      <h2 id="index-1">성분 리스트</h2>
+      <!-- 🔍 검색 폼 -->
+      <div class="flex gap-2 items-start">
+        <form id="search-form" class="flex-row">
+          <!--wide-form-->
+          <input name="input" type="text" class="w-48" placeholder="한글명 또는 영어명으로 검색" />
+          <button type="submit">검색</button>
+        </form>
+        <div id="button-box" class="flex gap-2"></div>
+        <button id="toggle-fold">접기</button>
+        <select name="typeId" id="list-sort">
+          <option value="korName">한글순</option>
+          <option value="engName">영어순</option>
+        </select>
+      </div>
+    </div>
+    <table id="content-1">
+      <thead>
+      <tr>
+        <th>한글명</th>
+        <th>영어명</th>
+        <th>분류</th>
+        <th>복용량(일)</th>
+        <th>비용(복용량당)</th>
+        <th>기대효과</th>
+        <th>부작용</th>
+      </tr>
+      </thead>
+      <tbody id="supplement-body"></tbody>
+    </table>
 
-<!-- ➕ 성분/태그 추가 -->
+    <!-- ➕ 성분/태그 추가 -->
 
-  <div name="journal-container" class="flex justify-between items-start mb-4 flex-wrap gap-5"> <!--container-->
-    <!-- 성분 추가 -->
-    <div>
-    <h2 id="index-2" class="text-center">성분 추가</h2>
-      <form id="insert-form" class="left-form gap-2">
-      <input name="korName" placeholder="한글명" class="w-48"/>
-      <input name="engName" placeholder="영문명" class="w-48"/>
-      <input name="dosage" placeholder="복용량" class="w-48"/>
-      <input name="cost" placeholder="비용" class="w-48" type="number" step="0.01"/>
-      <button type="button" id="modal-open">태그 선택</button>
-      <button type="submit">추가</button>
-    </form>
+    <div name="journal-container" class="flex justify-between items-start mb-4 flex-wrap gap-5">
+      <!--container-->
+      <!-- 성분 추가 -->
+      <div>
+        <h2 id="index-2" class="text-center">성분 추가</h2>
+        <form id="insert-form" class="left-form gap-2">
+          <input name="korName" placeholder="한글명" class="w-48" />
+          <input name="engName" placeholder="영문명" class="w-48" />
+          <div class="flex">
+            <input name="dosageValue" type="number" step="0.01" placeholder="복용량" class="w-32" />
+            <select name="dosageUnit" class="w-16">
+              <option value="">Unknown</option>
+              <option value="g">g</option>
+              <option value="mg">mg</option>
+              <option value="ug">ug</option>
+              <option value="iu">iu</option>
+            </select>
+          </div>
+          <input name="cost" placeholder="비용" class="w-48" type="number" step="0.01" />
+          <button type="button" id="modal-open">태그 선택</button>
+          <button type="submit">추가</button>
+        </form>
+      </div>
+      <!-- 태그 추가 -->
+      <div>
+        <h2 class="text-center">태그 추가</h2>
+        <form id="tag-form" class="gap-2">
+          <select name="tagType" required>
+            <option value="type">분류</option>
+            <option value="positive">기대효과</option>
+            <option value="negative">부작용</option>
+          </select>
+          <input name="tagName" placeholder="태그 이름" required />
+          <button type="submit">태그 추가</button>
+        </form>
+      </div>
+      <!-- 태그 목록 -->
+      <div>
+        <h2 class="text-center">분류</h2>
+        <ul id="type-list"></ul>
+      </div>
+      <div>
+        <h2 class="text-center">기대효과</h2>
+        <ul id="positive-list"></ul>
+      </div>
+      <div>
+        <h2 class="text-center">부작용</h2>
+        <ul id="negative-list"></ul>
+      </div>
+      <div>
+        <h2 class="text-center">티어</h2>
+        <ul id="tier-list">
+          <li data-id="S" data-type="tier" class="S w-12">S</li>
+          <li data-id="A" data-type="tier" class="A w-12">A</li>
+          <li data-id="B" data-type="tier" class="B w-12">B</li>
+          <li data-id="C" data-type="tier" class="C w-12">C</li>
+          <li data-id="D" data-type="tier" class="D w-12">D</li>
+          <li data-id="F" data-type="tier" class="F w-12">F</li>
+        </ul>
+      </div>
+      <div id="tag-controller"></div>
     </div>
-    <!-- 태그 추가 -->
-    <div><h2 class="text-center">태그 추가</h2>
-    <form id="tag-form" class="gap-2">
-      <select name="tagType" required>
-        <option value="type">분류</option>
-        <option value="positive">기대효과</option>
-        <option value="negative">부작용</option>
-      </select>
-      <input name="tagName" placeholder="태그 이름" required />
-      <button type="submit">태그 추가</button>
-    </form>
-    </div>
-    <!-- 태그 목록 -->
-    <div>
-      <h2 class="text-center">분류</h2>
-      <ul id="type-list"></ul>
-    </div>
-    <div>
-      <h2 class="text-center">기대효과</h2>
-      <ul id="positive-list"></ul>
-    </div>
-    <div>
-      <h2 class="text-center">부작용</h2>
-      <ul id="negative-list"></ul>
-    </div>
-    <div>
-      <h2 class="text-center">티어</h2>
-      <ul id="tier-list">
-        <li data-id="S" data-type="tier" class="S w-12">S</li>
-        <li data-id="A" data-type="tier" class="A w-12">A</li>
-        <li data-id="B" data-type="tier" class="B w-12">B</li>
-        <li data-id="C" data-type="tier" class="C w-12">C</li>
-        <li data-id="D" data-type="tier" class="D w-12">D</li>
-        <li data-id="F" data-type="tier" class="F w-12">F</li>
-      </ul>
-    </div>
-    <div id="tag-controller"></div>
   </div>
-</div>
-<!-- ✅ 모달: 기대효과 선택 -->
-<div id="modal" class="modal hidden" >
-  <div class="modal-content">
-    <div id="modal-controller" class="flex-end"></div>
-    <div class="flex justify-between gap-5">
-     <div>
-       <h2 class="text-center">분류 선택</h2>
-       <div id="type-checkboxes" class="checkbox grid grid-cols-4"></div>
-     </div>
-   </div>
+  <!-- ✅ 모달: 기대효과 선택 -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <div id="modal-controller" class="flex-end"></div>
+      <div class="flex justify-between gap-5">
+        <div>
+          <h2 class="text-center">분류 선택</h2>
+          <div id="type-checkboxes" class="checkbox grid grid-cols-4"></div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 </div>
 <script type="module" src="supplement.js"></script>
 </body>
+
 </html>

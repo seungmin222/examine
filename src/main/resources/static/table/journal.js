@@ -21,7 +21,7 @@ import {
     onlyOneCheckboxes,
     selectChange,
     journalEvent
-} from '/util/eventUtils.js';
+} from '/util/event.js';
 
 import {
     renderJournals,
@@ -32,6 +32,7 @@ import {
 import {
     loadBasic
 } from '/util/load.js';
+
 
 // 전역 맵
 const journalMap = new Map();
@@ -222,10 +223,6 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
    e.preventDefault();
    const form = e.target;
 
-   const trialDesign = {
-     id: form.trialDesign.value
-   };
-
    const effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
      supplementId: parseInt(e.dataset.supplementId),
      effectId: parseInt(e.dataset.effectId),
@@ -238,18 +235,14 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
      size: parseFloat(e.querySelector('input[name="size"]').value)
    }));
 
-    const duration = {
-        value: form['duration-value'].value,
-        unit: form['duration-unit'].value
-    };
-
     const data = {
         link: form.link.value,
-        trialDesign,
-        blind: form.blind.value,
+        trialDesignId: parseInt(form.trialDesign.value),
+        blind: parseInt(form.blind.value),
         parallel: form.parallel.value,
-        duration,
-        participants: form.participants.value,
+        durationValue: parseInt(form.durationValue.value),
+        durationUnit: form.durationUnit.value,
+        participants:  parseInt(form.participants.value),
         effects,
         sideEffects,
     };

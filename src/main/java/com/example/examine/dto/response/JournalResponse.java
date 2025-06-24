@@ -1,20 +1,21 @@
-package com.example.examine.dto;
+package com.example.examine.dto.response;
+import com.example.examine.entity.Journal;
+import com.example.examine.entity.TrialDesign;
 
-import com.example.examine.entity.*;
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 
-public record JournalRequest(
+public record JournalResponse(
         Long id,
         String title,
         String link,
-        List<JSERequest> effects,
-        List<JSERequest> sideEffects,
+        List<JSEResponse> effects,
+        List<JSEResponse> sideEffects,
         String summary,
-        TierTagRequest trialDesign,
+        TierTagResponse trialDesign,
         String blind,
         Boolean parallel,
-        DurationRequest duration,
+        DurationResponse duration,
         Integer participants,
         LocalDate date
 ) {
@@ -22,10 +23,10 @@ public record JournalRequest(
             "open-label", "single-blind", "double-blind"
     };
 
-    public static JournalRequest fromEntity(Journal journal) {
+    public static JournalResponse fromEntity(Journal journal) {
         TrialDesign td = journal.getTrialDesign();
-        TierTagRequest tierTagRequest = td != null
-                ? new TierTagRequest(td.getId(), td.getName(), td.getTier())
+        TierTagResponse tierTagResponse = td != null
+                ? new TierTagResponse(td.getId(), td.getName(), td.getTier())
                 : null;
 
         Integer blindNum = journal.getBlind();
@@ -34,24 +35,23 @@ public record JournalRequest(
                 : "unknown";
 
 
-        return new JournalRequest(
+        return new JournalResponse(
                 journal.getId(),
                 journal.getTitle(),
                 journal.getLink(),
                 journal.getJournalSupplementEffects().stream()
-                        .map(JSERequest::fromEntity)
+                        .map(JSEResponse::fromEntity)
                         .toList(),
                 journal.getJournalSupplementSideEffects().stream()
-                        .map(JSERequest::fromEntity)
+                        .map(JSEResponse::fromEntity)
                         .toList(),
                 journal.getSummary(),
-                tierTagRequest,
+                tierTagResponse,
                 blind,
                 journal.getParallel(),
-                new DurationRequest(journal.getDurationValue(), journal.getDurationUnit(), journal.getDurationDays()),
+                new DurationResponse(journal.getDurationValue(), journal.getDurationUnit(), journal.getDurationDays()),
                 journal.getParticipants(),
                 journal.getDate()
         );
     }
-
 }

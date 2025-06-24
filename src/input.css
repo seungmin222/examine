@@ -263,6 +263,7 @@
   button,
   textarea
    {
+    white-space: nowrap;
     width: 80px;
     height: 36px;
     padding: 8px;
@@ -358,10 +359,9 @@
     background-color:var(--color-background);
     margin-top:0;
     align-items: center;
-    border: 2px solid var(--color-border);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     border-color: var(--color-menu-border);
-    border-width: 1px;
     padding: 8px;
     text-align: left;
     justify-content: flex-end;
@@ -594,12 +594,14 @@
      font-weight: bold;
      color: var(--color-button);
      text-decoration: none;
+     white-space: nowrap;
    }
 
   /* 툴팁 박스 */
 
 .tooltip-box {
-  width: 800px;
+  display: inline-block;
+  min-height: 10px;
   position: absolute;
   top: 100%;       /* 아래로 붙임 */
   left: 50%;
@@ -608,8 +610,20 @@
   padding: 6px;
   border: 1px solid var(--color-tooltip-border);
   border-radius: 4px;
-  z-index: 9000;
+  z-index: 9999;
 }
+
+ .tooltip-box.bg{
+   background-color: var(--color-background);
+ }
+ .tooltip-body{
+   display: block;
+   max-width: 1000px;
+   width: auto;
+   height: auto;
+   position: relative;
+   z-index: 9000;
+ }
 
 .tooltip-tail {
   position: absolute;
@@ -625,23 +639,22 @@
   z-index: 8000;
 }
 
-/* 위치 top */
 .tooltip-box[data-position="top"] {
    top: -50%;
    left: 50%;
    transform: translateY(-100%) translateX(-50%);
 }
 .tooltip-box[data-position="top"] .tooltip-tail {
-  bottom: -10px;
+  bottom: -10.5px;
   left: 50%;
   transform: translateX(-50%);
-  border-width: 10px 10px 0 10px;
+  border-width: 11px 10px 0 10px;
   border-style: solid;
   border-color: var(--color-tooltip-tail) transparent transparent transparent;
 }
 
 .tooltip-box[data-position="top"] .tooltip-tail-border {
-  bottom: -11px;
+  bottom: -11.5px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 11px 11px 0 11px;
@@ -649,7 +662,54 @@
   border-color: var(--color-tooltip-border) transparent transparent transparent;
 }
 
-/* 위치 right */
+  .tooltip-box[data-position="bottom"] {
+    top: 100%;
+    left: 50%;
+    transform: translateY(0) translateX(-50%);
+  }
+
+  .tooltip-box[data-position="bottom"] .tooltip-tail {
+    top: -9.5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 10px 11px 10px;
+    border-style: solid;
+    border-color: transparent transparent var(--color-tooltip-tail) transparent;
+  }
+
+  .tooltip-box[data-position="bottom"] .tooltip-tail-border {
+    top: -10.5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 11px 11px 11px;
+    border-style: solid;
+    border-color: transparent transparent var(--color-tooltip-border) transparent;
+  }
+
+  .tooltip-box[data-position="left"] {
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%) translateX(-100%);
+  }
+
+  .tooltip-box[data-position="left"] .tooltip-tail {
+    left: calc(100% - 1px);
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 0 10px 11px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--color-tooltip-tail);
+  }
+
+  .tooltip-box[data-position="left"] .tooltip-tail-border {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 11px 0 11px 11px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--color-tooltip-border);
+  }
+
 .tooltip-box[data-position="right"] {
   top: 50%;
   left: 100%;
@@ -657,16 +717,16 @@
 }
 
 .tooltip-box[data-position="right"] .tooltip-tail {
-  left: -9px;
+  left: -9.5px;
   top: 50%;
   transform: translateY(-50%);
-  border-width: 10px 10px 10px 0;
+  border-width: 10px 11px 10px 0;
   border-style: solid;
   border-color: transparent var(--color-tooltip-tail) transparent transparent;
 }
 
 .tooltip-box[data-position="right"] .tooltip-tail-border {
-  left: -10px;
+  left: -10.5px;
   top: 50%;
   transform: translateY(-50%);
   border-width: 11px 11px 11px 0;
@@ -674,7 +734,18 @@
   border-color: transparent var(--color-tooltip-border) transparent transparent;
 }
 
-
+  .tooltip-box[data-position="top"] .tooltip-tail.bg{
+    border-color: transparent var(--color-background) transparent transparent;
+  }
+  .tooltip-box[data-position="bottom"] .tooltip-tail.bg{
+    border-color: transparent transparent var(--color-background) transparent;
+  }
+  .tooltip-box[data-position="left"] .tooltip-tail.bg{
+    border-color: transparent transparent transparent var(--color-background);
+  }
+  .tooltip-box[data-position="right"] .tooltip-tail.bg{
+    border-color: transparent var(--color-background) transparent transparent;
+  }
 
   /* 마우스 올릴 때 둘 다 보이게 */
   .tooltip:hover::after,
@@ -692,9 +763,14 @@
     overflow: visible;
   }
 
+  nav {
+    display: flex;
+    position: fixed;
+    z-index: 9000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
   nav.navbar {
-      display: flex;
-      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -704,12 +780,9 @@
       justify-content: space-between;
       align-items: center;
       padding: 0 1.5rem;
-      z-index: 9999;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
   nav.sidebar {
-    position: fixed;       /* 화면에 고정 */
     top: 60px;
     bottom: 0;
     left: 0;
@@ -717,11 +790,9 @@
     width: var(--sidebar-width);          /* 너비 */
     background-color: var(--color-sidebar);
     border-right: 1px solid var(--color-sidebar-border);
-    display: flex;
-    flex-direction: column; /* 수직 정렬 */
     gap: 1rem;              /* 항목 간 간격 */
     overflow-y: auto;
-    z-index: 9999;
+    flex-direction: column;
   }
 
    .logo-icon {

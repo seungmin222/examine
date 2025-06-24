@@ -1,5 +1,6 @@
 package com.example.examine.entity.Effect;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "side_effect_tag")
@@ -24,6 +26,9 @@ public class SideEffectTag implements Effect {
     @JsonIgnore
     private List<SupplementSideEffect> se = new ArrayList<>();
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Getter, Setter
     @Override

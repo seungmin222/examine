@@ -1,10 +1,11 @@
 package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
-import com.example.examine.dto.JournalAnalysis;
-import com.example.examine.dto.JSERequest;
+import com.example.examine.dto.response.JournalAnalysis;
+import com.example.examine.dto.request.JSERequest;
+import com.example.examine.dto.response.JournalResponse;
 import com.example.examine.entity.*;
-import com.example.examine.dto.JournalRequest;
+import com.example.examine.dto.request.JournalRequest;
 import com.example.examine.entity.Effect.EffectTag;
 import com.example.examine.entity.Effect.SideEffectTag;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
@@ -19,6 +20,7 @@ import com.example.examine.service.crawler.JournalCrawlerMeta;
 import com.example.examine.service.crawler.PubmedCrawler;
 import com.example.examine.service.crawler.SemanticScholarCrawler;
 import com.example.examine.service.llm.LLMResponse;
+import com.example.examine.service.llm.LLMService;
 import com.example.examine.service.util.CalculateScore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +41,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static com.example.examine.service.llm.LLMService.objectToJsonString;
 
 // 서비스
 @Service
@@ -58,12 +61,6 @@ public class JournalService {
     private final PubmedCrawler pubmedCrawler;
     private final ClinicalTrialsCrawler clinicalTrialsCrawler;
     private final SemanticScholarCrawler semanticScholarCrawler;
-    private static final String[] blindLabel = {
-            "open-label", "single-blind", "double-blind"
-    };
-
-
-
 
     public JournalService(JournalRepository journalRepo,
                           TrialDesignRepository trialDesignRepo,
@@ -91,6 +88,7 @@ public class JournalService {
         this.semanticScholarCrawler = semanticScholarCrawler;
     }
 
+    @Transactional
     public ResponseEntity<?> create(JournalRequest dto) {
         if (journalRepo.findByLink(dto.link()).isPresent()) {
             return ResponseEntity.badRequest().body("이미 같은 논문이 존재합니다.");
@@ -98,22 +96,16 @@ public class JournalService {
 
         Journal journal = new Journal();
         journal.setLink(dto.link());
-        journal.setDurationValue(dto.duration().value());
-        journal.setDurationUnit(dto.duration().unit());
+        journal.setDurationValue(dto.durationValue());
+        journal.setDurationUnit(dto.durationUnit());
         journal.setDurationDays();
         journal.setParticipants(dto.participants());
         journal.setParallel(dto.parallel());
+        journal.setBlind(dto.blind());
 
-        Integer blind = IntStream.range(0, blindLabel.length)
-                .boxed()
-                .filter(i -> blindLabel[i].equals(dto.blind()))
-                .findFirst()
-                .orElse(null);
-        journal.setBlind(blind);
-
-        if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
-            TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesign().id()));
+        if (dto.trialDesignId() != null) {
+            TrialDesign td = trialDesignRepo.findById(dto.trialDesignId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesignId()));
             journal.setTrialDesign(td);
         } else {
             journal.setTrialDesign(null);
@@ -122,47 +114,42 @@ public class JournalService {
         syncJSE(journal, null, dto.effects());
         syncJSSE(journal, null, dto.sideEffects());
 
-        try {
-            JournalCrawlerMeta meta = crawlJournalMeta(dto.link());
+        JournalCrawlerMeta meta = crawlJournalMeta(dto.link());
 
-            journal.setTitle(meta.getTitle());
-            if(journal.getParticipants()==null){
-              journal.setParticipants(meta.getParticipants());
-            }
-            journal.setSummary(meta.getSummary());
-            journal.setDate(meta.getDate());
-
-            JournalAnalysis result = null;
-            try {
-                result = analyze(journal.getTitle(), journal.getSummary());
-                applyAnalysis(journal, result);
-            } catch (Exception e) {
-                log.error("llm 분석 실패", e);
-            }
-
-        } catch (IOException e) {
-            log.error("크롤링 실패", e);
+        journal.setTitle(meta.getTitle());
+        if(journal.getParticipants()==null){
+            journal.setParticipants(meta.getParticipants());
         }
+        journal.setSummary(meta.getSummary());
+        journal.setDate(meta.getDate());
+
+        JournalAnalysis result = analyze(journal.getTitle(), journal.getSummary());
+        applyAnalysis(journal, result);
+
         journal.setScore();
         return ResponseEntity.ok(journalRepo.save(journal));
     }
 
-    public JournalCrawlerMeta crawlJournalMeta(String url) throws IOException {
-        if (url.contains("pubmed.ncbi.nlm.nih.gov")) {
-            return pubmedCrawler.extract(url);
-        } else if (url.contains("clinicaltrials.gov")) {
-            return clinicalTrialsCrawler.extract(url);
+    public JournalCrawlerMeta crawlJournalMeta(String url) {
+        try {
+            if (url.contains("pubmed.ncbi.nlm.nih.gov")) {
+                return pubmedCrawler.extract(url);
+            } else if (url.contains("clinicaltrials.gov")) {
+                return clinicalTrialsCrawler.extract(url);
+            } else if (url.contains("semanticscholar")) {
+                return semanticScholarCrawler.extract(url);
+            } else {
+                throw new IllegalArgumentException("지원하지 않는 논문 링크입니다.");
+            }
+        } catch (IOException e) {
+            log.error("크롤링 실패", e);
         }
-        else if (url.contains("semanticscholar")) {
-            return semanticScholarCrawler.extract(url);
-        } else {
-            throw new IllegalArgumentException("지원하지 않는 논문 링크입니다.");
-        }
+        return new JournalCrawlerMeta(null,null,null,null);
     }
 
-    public JournalAnalysis analyze(String title, String abstractText) throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
 
+    public JournalAnalysis analyze(String title, String abstractText) {
+        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -185,38 +172,48 @@ public class JournalService {
               "Animal Study", "In-vitro Study", "Unknown"
             ]
         }
-      
+
         Title: %s
         
         Abstract: %s
         """.formatted(title, abstractText);
 
-        // 요청 body에 stream: false 추가
-        String requestBody = """
+        try {
+            String jsonPrompt = LLMService.objectToJsonString(prompt);
+
+            String requestBody = """
         {
           "model": "llama3",
           "prompt": %s,
           "stream": false
         }
-        """.formatted(objectToJsonString(prompt));  // 문자열이므로 내부에 따옴표 자동 붙이게 처리
+        """.formatted(jsonPrompt);
 
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "http://localhost:11434/api/generate", entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    "http://localhost:11434/api/generate", entity, String.class);
 
-        ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 
-        // 응답 구조 파싱
-        LLMResponse wrapper = mapper.readValue(response.getBody(), LLMResponse.class);
+            LLMResponse wrapper = mapper.readValue(response.getBody(), LLMResponse.class);
 
-        // wrapper.response에 최종 JSON 문자열이 담겨 있으므로 여기서 바로 파싱
-        return mapper.readValue(wrapper.response, JournalAnalysis.class);
+            String raw = wrapper.response;
+            if (!raw.trim().endsWith("}")) {
+                raw += "}";
+            }
+
+            System.out.println("LLM 응답: " + raw);
+            return mapper.readValue(raw, JournalAnalysis.class);
+
+        } catch (Exception e) {
+            log.error("LLM 분석 실패", e);// 혹은 logger.error("LLM 분석 실패", e);
+        }
+        return new JournalAnalysis(null,null,null,null,null,null);
     }
 
-    private String objectToJsonString(String str) throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(str);  // "escaped string" 형태로 반환됨
-    }
+
+
 
 
     // 🔸 applyAnalysisToJournal(): 값이 없을 경우만 반영
@@ -246,30 +243,24 @@ public class JournalService {
         Journal journal = journalRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Journal not found"));
         Journal OldJournal = journal;
+        journal.setBlind(dto.blind());
 
-        Integer blind = IntStream.range(0, blindLabel.length)
-                .boxed()
-                .filter(i -> blindLabel[i].equals(dto.blind()))
-                .findFirst()
-                .orElse(null);
-        journal.setBlind(blind);
-
-        if (dto.trialDesign() != null && dto.trialDesign().id() != null) {
-            TrialDesign td = trialDesignRepo.findById(dto.trialDesign().id())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesign().id()));
+        if (dto.trialDesignId() != null) {
+            TrialDesign td = trialDesignRepo.findById(dto.trialDesignId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + dto.trialDesignId()));
             journal.setTrialDesign(td);
         } else {
             journal.setTrialDesign(null);
         }
-        Integer days = toDays(dto.duration().value(), dto.duration().unit());
+        Integer days = toDays(dto.durationValue(), dto.durationUnit());
         Integer oldDuration = journal.getDurationDays() != null ? journal.getDurationDays() : 1;
         Integer oldParticipants = journal.getParticipants() != null ? journal.getParticipants() : 1;
 
         Long oldTrialDesignId = journal.getTrialDesign() != null ? journal.getTrialDesign().getId() : null;
-        Long newTrialDesignId = dto.trialDesign() != null ? dto.trialDesign().id() : null;
+        Long newTrialDesignId = dto.trialDesignId() != null ? dto.trialDesignId() : null;
 
         TrialDesign newTrialDesign = null;
-        if (dto.trialDesign() != null && newTrialDesignId != null) {
+        if (dto.trialDesignId() != null && newTrialDesignId != null) {
             newTrialDesign = trialDesignRepo.findById(newTrialDesignId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid trialDesign ID: " + newTrialDesignId));
             journal.setTrialDesign(newTrialDesign);
@@ -283,15 +274,15 @@ public class JournalService {
         boolean journalChanged =
                 oldParticipants != dto.participants()
                         || oldDuration != days
-                        || journal.getBlind() != blind
+                        || journal.getBlind() != dto.blind()
                         || !Objects.equals(oldTrialDesignId, newTrialDesignId);
 
 
         // 🔧 새 값 세팅
-        journal.setDurationValue(dto.duration().value());
-        journal.setDurationUnit(dto.duration().unit());
+        journal.setDurationValue(dto.durationValue());
+        journal.setDurationUnit(dto.durationUnit());
         journal.setDurationDays();
-        journal.setBlind(blind);
+        journal.setBlind(dto.blind());
         journal.setParallel(dto.parallel());
         journal.setParticipants(dto.participants());
 
@@ -405,7 +396,9 @@ public class JournalService {
                     jse.getSupplement().getId(),
                     jse.getEffect().getId()
             );
-            CalculateScore.deleteScore(se, jse, oldJournal);
+            if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+                supplementEffectRepo.deleteById(se.getId());
+            }
             journal.getJournalSupplementEffects().remove(jse);
             journalSupplementEffectRepo.deleteById(id);
         });
@@ -419,7 +412,9 @@ public class JournalService {
             );
             if (existingMap.containsKey(id)) {
                 JournalSupplementEffect jse = existingMap.get(id);
-                CalculateScore.deleteScore(se, jse, oldJournal);
+                if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+                    supplementEffectRepo.deleteById(se.getId());
+                }
                 jse.setSize(req.size());
                 jse.setScore();
                 CalculateScore.addScore(se, jse);
@@ -482,7 +477,9 @@ public class JournalService {
                     jse.getSupplement().getId(),
                     jse.getEffect().getId()
             );
-            CalculateScore.deleteScore(se, jse, oldJournal);
+            if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+                supplementSideEffectRepo.deleteById(se.getId());
+            }
             journal.getJournalSupplementSideEffects().remove(jse);
             journalSupplementSideEffectRepo.deleteById(id);
         });
@@ -497,7 +494,9 @@ public class JournalService {
             );
             if (existingMap.containsKey(id)) {
                 JournalSupplementSideEffect jse = existingMap.get(id);
-                CalculateScore.deleteScore(se, jse, oldJournal);
+                if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+                    supplementSideEffectRepo.deleteById(se.getId());
+                }
                 jse.setSize(req.size());
                 jse.setScore();
                 CalculateScore.addScore(se, jse);
@@ -515,23 +514,23 @@ public class JournalService {
 
 
 
-    public List<JournalRequest> sort(Sort sort) {
+    public List<JournalResponse> sort(Sort sort) {
         return journalRepo.findAll(sort)
                 .stream()
-                .map(JournalRequest::fromEntity)
+                .map(JournalResponse::fromEntity)
                 .toList();
     }
 
-    public List<JournalRequest> search(String keyword, Sort sort) {
+    public List<JournalResponse> search(String keyword, Sort sort) {
         return journalRepo.findByTitleContainingIgnoreCase(
                 keyword, sort).
                 stream()
-                .map(JournalRequest::fromEntity)
+                .map(JournalResponse::fromEntity)
                 .toList();
     }
 
 
-    public List<JournalRequest> findFiltered(
+    public List<JournalResponse> findFiltered(
             List<Long> trialDesign,
             Integer blind,
             Boolean parallel,
@@ -542,9 +541,10 @@ public class JournalService {
     ) {
         return journalRepo.findFiltered(trialDesign, blind, parallel, supplementIds, effectIds, sideEffectIds, sort)
                 .stream()
-                .map(JournalRequest::fromEntity)
+                .map(JournalResponse::fromEntity)
                 .toList();
     }
+
     public ResponseEntity<?> delete(Long id) {
         if (!journalRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
@@ -552,7 +552,5 @@ public class JournalService {
         journalRepo.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
-
 
 }

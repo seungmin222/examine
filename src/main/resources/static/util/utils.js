@@ -130,7 +130,7 @@ function checkCheckboxes(type, tag) {
 
 function ArrayCheckboxesById(type) {
     return Array.from(document.querySelectorAll(`#${type}-checkboxes input:checked`))
-              .map(cb => ({ id: parseInt(cb.value) }));
+              .map(cb => (parseInt(cb.value) ));
 }
 
 function ObjectCheckboxesById(type) {
@@ -239,6 +239,50 @@ function renderEffectCache(item) {
   });
 }
 
+async function checkLogin() {
+  const userDiv = document.getElementById("user-info");
+
+  async function fetchUser() {
+    const res = await fetch("/api/user/me", { credentials: "include" });
+
+    if (res.status === 200) {
+      const data = await res.json();
+      userDiv.textContent = `${data.username}`;
+      userDiv.dataset.level = `${data.level}`;
+      return true;
+    }
+
+    // 401: 액세스 토큰 만료 → 리프레시 시도
+    if (res.status === 401) {
+      const refreshRes = await fetch("/api/refresh", {
+        method: "POST",
+        credentials: "include"
+      });
+
+      if (refreshRes.ok) {
+        // 재발급 성공 → 다시 유저 정보 재시도
+        return await fetchUser();
+      }
+      else {
+        // 🔔 세션 만료 안내
+        const message = await refreshRes.text();
+        alert(message || "세션이 만료되었습니다. 다시 로그인해주세요.");
+        window.location.href = "/user/login.html";  // 로그인 페이지로 이동
+        return false;
+      }
+    }
+
+    // 실패 시 초기화
+    userDiv.textContent = "";
+    userDiv.dataset.level = "";
+    return false;
+  }
+
+  return await fetchUser();
+}
+
+
+
 
 export {
   createTierSelectBox,
@@ -252,5 +296,6 @@ export {
   resetModal,
   createTooltip,
   resetEventListener,
-  renderEffectCache
+  renderEffectCache,
+  checkLogin
 };

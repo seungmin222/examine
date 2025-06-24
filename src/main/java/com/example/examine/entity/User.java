@@ -1,10 +1,13 @@
 package com.example.examine.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,6 +25,17 @@ public class User implements UserDetails {
     private String password;
 
     private String role = "USER"; // 기본 역할
+
+    private Integer level = 1;
+
+    @CreatedDate
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     // 권한을 단순 문자열로 예시
     @Override
@@ -68,5 +82,20 @@ public class User implements UserDetails {
 
     public void setRole(String role) {
         this.role = role;
+        int level = switch (role) {
+            case "ADMIN" -> 10;
+            case "USER" -> 1;
+            default -> 0;
+        };
+        this.level = level;
     }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
 }

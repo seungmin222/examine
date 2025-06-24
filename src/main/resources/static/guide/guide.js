@@ -5,7 +5,7 @@
 import{
   hideClickButton,
   indexScroll
-} from '/util/eventUtils.js';
+} from '/util/event.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 

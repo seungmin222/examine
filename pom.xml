@@ -22,57 +22,99 @@
 	</properties>
 
 	<dependencies>
-		<!-- Spring Data JPA -->
+		<!-- ✅ JPA를 이용한 ORM (엔티티-DB 매핑) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- Spring Web (REST API 용) -->
+		<!-- ✅ REST API 서버 개발을 위한 Spring Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- MySQL JDBC -->
+		<!-- ✅ MySQL DB와 연결하기 위한 JDBC 드라이버 -->
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- 테스트 -->
+
+		<!-- ✅ JUnit 기반의 테스트 환경 설정 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- ✅ 코드 수정 시 서버 자동 리로드 (개발 편의용 DevTools) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<version>3.4.4</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- ✅ .env 파일을 불러와 환경변수처럼 쓰기 위한 라이브러리 -->
 		<dependency>
 			<groupId>io.github.cdimascio</groupId>
 			<artifactId>dotenv-java</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+
+		<!-- ✅ HTML 파싱을 위한 Jsoup (크롤링 등) -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
 			<version>1.17.2</version>
 		</dependency>
+
+		<!-- ✅ JSON 파싱 및 객체 매핑용 Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.15.2</version>
 		</dependency>
+
+		<!-- ✅ Spring Security (로그인, 인증, 인가 처리용) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- ✅ Redis와 연결해 세션/캐시/토큰 저장 등에 사용 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId> <!-- JSON 처리용 (Jackson 연동) -->
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
+
 
 	<build>
 		<plugins>

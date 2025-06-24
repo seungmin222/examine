@@ -1,6 +1,9 @@
 package com.example.examine.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "type_tag")
@@ -11,6 +14,10 @@ public class TypeTag {
 
     @Column(unique = true)
     private String name;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Getter, Setter
     public Long getId() {

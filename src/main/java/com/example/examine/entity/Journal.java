@@ -5,9 +5,11 @@ import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideE
 import com.example.examine.service.EntityService.JournalService;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,15 +63,9 @@ public class Journal {
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<JournalSupplementSideEffect> journalSupplementSideEffects = new ArrayList<>();
 
-    public void removeJournalSupplementEffect(JournalSupplementEffect effect) {
-        this.journalSupplementEffects.remove(effect);
-        effect.setJournal(null); // 🔹 양방향 연관관계 끊어주기
-    }
-
-    public void removeJournalSupplementSideEffect(JournalSupplementSideEffect sideEffect) {
-        this.journalSupplementSideEffects.remove(sideEffect);
-        sideEffect.setJournal(null); // 🔹 양방향 연관관계 끊어주기
-    }
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Getter/Setter
     public Long getId() { return id; }

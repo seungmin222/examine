@@ -49,3 +49,9 @@ java
 @Query("DELETE FROM JournalSupplementEffect jse WHERE jse.journal.id = :journalId")
 void deleteAllByJournalId(@Param("journalId") Long journalId);
 필요 시 EntityManager.clear()도 병행하면 세션 충돌도 피할 수 있어.
+
+예시	설명
+검색 캐시	자주 쓰는 키워드 결과 캐싱 (search:단백질)
+랭킹	ZSET 사용해서 실시간 인기순
+알림 큐	List로 작업 저장 후 worker가 처리
+방문자 수	HyperLogLog로 유니크 카운트 추정

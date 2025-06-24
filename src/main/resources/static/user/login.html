@@ -15,15 +15,15 @@
     <!--background-->
     <div class="w-[95%] mx-auto">
         <!--main-content-->
-        <h2>로그인</h2>
-        <form method="post" action="/api/login">
-            <label>아이디: <input type="text" name="username" /></label><br>
-            <label>비밀번호: <input type="password" name="password" /></label><br>
+        <div class="flex justify-center">
+        <form id="login-form" class="w-64 gap-4">
+            <h2 class="text-center">로그인</h2>
+            <input class="w-32" type="text" name="username" placeholder="아이디"/></label>
+            <input class="w-32" type="password" name="password" placeholder="비밀번호"/></label>
             <button type="submit">로그인</button>
+            <p>아직 회원이 아니신가요? <a href="/user/register.html">회원가입</a></p>
         </form>
-        <div class="flex items-center">
-            <span>아직 회원이 아니신가요? <a href="/user/register.html">회원가입</a></span>
-        </div>
+        </div>>
     </div>
 </div>
 <script type="module" src="login.js"></script>

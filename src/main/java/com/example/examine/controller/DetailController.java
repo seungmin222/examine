@@ -1,7 +1,9 @@
 package com.example.examine.controller;
 
-import com.example.examine.dto.DetailRequest;
-import com.example.examine.dto.JournalRequest;
+import com.example.examine.dto.request.DetailRequest;
+import com.example.examine.dto.request.JournalRequest;
+import com.example.examine.dto.response.DetailResponse;
+import com.example.examine.dto.response.JournalResponse;
 import com.example.examine.entity.*;
 import com.example.examine.service.EntityService.SupplementService;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +29,12 @@ public class DetailController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SupplementDetail> detail(@PathVariable Long id) {
+    public DetailResponse detail(@PathVariable Long id) {
         return supplementService.detail(id);
     }
 
     @GetMapping("/{id}/journals")
-    public List<JournalRequest> journals(@PathVariable Long id) {
+    public List<JournalResponse> journals(@PathVariable Long id) {
         return supplementService.journals(id);
     }
 

@@ -1,4 +1,4 @@
-package com.example.examine.dto;
+package com.example.examine.dto.response;
 
 public record JournalAnalysis (
         Integer participants,

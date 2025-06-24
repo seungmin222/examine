@@ -8,9 +8,11 @@ import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -41,6 +43,10 @@ public class JournalSupplementSideEffect implements JSE {
 
     @Column(precision = 8, scale = 4)
     private BigDecimal score;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public JournalSupplementSideEffect() {}
 
@@ -114,6 +120,8 @@ public class JournalSupplementSideEffect implements JSE {
 
     @Override
     public void setScore() {
+        this.score = CalculateScore.calculateJournalSupplementScore(this.size, this.journal.getScore());
+        return;
     }
 }
 

@@ -32,9 +32,14 @@ public class SupplementEffect implements SE {
 
     private String tier;
 
-    private BigDecimal totalScore;      // ∑(score × participants)
-    private Integer totalParticipants;     // ∑(participants)
-    private BigDecimal finalScore;         // totalScoreSum / totalParticipants
+    @Column(name = "total_score", nullable = false)
+    private BigDecimal totalScore = BigDecimal.ZERO;
+
+    @Column(name = "total_participants", nullable = false)
+    private Integer totalParticipants = 0;
+
+    @Column(name = "final_score", nullable = false)
+    private BigDecimal finalScore = BigDecimal.ZERO;       // totalScoreSum / totalParticipants
 
 
     public SupplementEffect() {}
@@ -116,11 +121,16 @@ public class SupplementEffect implements SE {
 
     @Override
     public void setFinalScore() {
-        this.finalScore = this.totalScore.divide(
-                BigDecimal.valueOf(this.totalParticipants),
-                4,  // 소수점 4자리
-                RoundingMode.HALF_UP
-        );
+        if(this.totalParticipants==0){
+            this.finalScore = BigDecimal.ZERO;
+        }
+        else {
+            this.finalScore = this.totalScore.divide(
+                    BigDecimal.valueOf(this.totalParticipants),
+                    4,  // 소수점 4자리
+                    RoundingMode.HALF_UP
+            );
+        }
         this.tier = CalculateScore.calculateTier(finalScore);
     }
 }

@@ -1,10 +1,11 @@
-package com.example.examine.dto;
+package com.example.examine.dto.response;
 
+import com.example.examine.dto.request.JSERequest;
 import com.example.examine.entity.JournalSupplementEffect.JSE;
 
 import java.math.BigDecimal;
 
-public record JSERequest(
+public record JSEResponse(
         Long supplementId,
         Long effectId,
         String supplementName,
@@ -12,8 +13,8 @@ public record JSERequest(
         BigDecimal size,
         BigDecimal score
 ) {
-    public static JSERequest fromEntity(JSE jse) {
-        return new JSERequest(
+    public static JSEResponse fromEntity(JSE jse) {
+        return new JSEResponse(
                 jse.getId().getSupplementId(),
                 jse.getId().getEffectId(),
                 jse.getSupplement().getKorName(),
@@ -22,6 +23,4 @@ public record JSERequest(
                 jse.getScore()
         );
     }
-
-
 }

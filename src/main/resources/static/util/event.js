@@ -336,27 +336,16 @@ function journalEvent(journalMap, loadJournals){
             }));
         }
 
-        const trialDesign = {
-            id: parseInt(row.querySelector('[name="trialDesign"]').value)
-        };
-
-        const duration = {
-            value: parseInt(row.querySelector('[name="duration-value"]').value),
-            unit: row.querySelector('[name="duration-unit"]').value
-        };
-
         const updated = {
-            title: item.title,
             link: item.link,
-            trialDesign,
-            blind: row.querySelector('[name="blind"]').value,
+            trialDesignId: parseInt(row.querySelector('[name="trialDesign"]').value),
+            blind: parseInt(row.querySelector('[name="blind"]').value),
             parallel: row.querySelector('[name="parallel"]').value,
-            duration,
+            durationValue: parseInt(row.querySelector('[name="durationValue"]').value),
+            durationUnit: row.querySelector('[name="durationUnit"]').value,
             participants: parseInt(row.querySelector('[name="participants"]').value),
             effects,
-            sideEffects,
-            summary: item.summary,
-            date: item.date
+            sideEffects
         };
 
         const res = await fetch(`/api/journals/${itemId}`, {
@@ -383,7 +372,7 @@ function supplementEvent(supplementMap, loadSupplements) {
    document.getElementById('supplement-body').addEventListener('click', async e => {
        const row = e.target.closest('tr');
        const itemId = Number(row?.dataset.id);
-       const item = journalMap.get(itemId);
+       const item = supplementMap.get(itemId);
        const modal = document.getElementById('modal');
        const modalId = modal?.dataset.id;
        if (!row||!itemId) {
@@ -405,10 +394,10 @@ function supplementEvent(supplementMap, loadSupplements) {
        if (e.target.classList.contains('save-btn')) {
            const types = ArrayCheckboxesById('type');
            const updated = {
-                 id: itemId,
                  korName: row.querySelector('[name="korName"]').value,
                  engName: row.querySelector('[name="engName"]').value,
-                 dosage: row.querySelector('[name="dosage"]').value,
+                 dosageValue: row.querySelector('[name="dosageValue"]').value,
+                 dosageUnit: row.querySelector('[name="dosageUnit"]').value,
                  cost: parseFloat(row.querySelector('[name="cost"]').value),
                  types
            };
@@ -457,6 +446,21 @@ function themeSelect(selectId, iconId) {
   });
 }
 
+async function logout(buttonId){
+    document.getElementById(buttonId).addEventListener('click', async () => {
+        const res = await fetch("/api/logout", {
+            method: "POST",
+            credentials: "include" // 쿠키 포함 (세션 기반 인증 시 필수)
+        });
+
+        if (res.ok) {
+            window.location.reload(); // 또는 원하는 페이지로 리다이렉트
+        } else {
+            alert("로그아웃 실패");
+        }
+    });
+}
+
 export {
   setupFoldToggle,
   setupSortTrigger,
@@ -476,5 +480,6 @@ export {
   selectChange,
   journalEvent,
   supplementEvent,
-  themeSelect
+  themeSelect,
+  logout
 };

@@ -15,7 +15,7 @@ import {
     resetButton,
     supplementEvent,
     selectList
-} from '/util/eventUtils.js';
+} from '/util/event.js';
 
 import {
     renderSupplements,
@@ -68,7 +68,7 @@ async function loadSupplements() {
     const sort = document.getElementById('list-sort').value;
     const res = await fetch(`/api/supplements?sort=${sort}&direction=asc`);
     const allSupplements = await res.json();
-    renderSupplements(allSupplements);
+    renderSupplements(allSupplements,supplementMap);
 }
 
 
@@ -107,7 +107,7 @@ async function filterByTag() {
         const res = await fetch(`/api/supplements/filter?${params.toString()}&sort=${sort}&direction=asc`);
         const filtered = await res.json();
 
-        renderSupplements(filtered);
+        renderSupplements(filtered,supplementMap);
     }
 }
 
@@ -117,17 +117,14 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
     const form = e.target;
 
     const types = ArrayCheckboxesById('type');
-    const effects = ArrayCheckboxesById('positive');
-    const sideEffects = ArrayCheckboxesById('negative');
 
     const data = {
         korName: form.korName.value,
         engName: form.engName.value,
         types,
-        dosage: form.dosage.value,
+        dosageValue: form.dosageValue.value,
+        dosageUnit: form.dosageUnit.value,
         cost: parseFloat(form.cost.value),
-        effects,
-        sideEffects
     };
 
     const res = await fetch('/api/supplements', {

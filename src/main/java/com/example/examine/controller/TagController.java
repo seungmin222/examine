@@ -2,13 +2,16 @@ package com.example.examine.controller;
 
 import java.util.List;
 
-import com.example.examine.dto.TagRequest;
-import com.example.examine.dto.TierTagRequest;
+import com.example.examine.dto.request.TagRequest;
+import com.example.examine.dto.request.TierTagRequest;
 
+import com.example.examine.dto.response.TagResponse;
+import com.example.examine.dto.response.TierTagResponse;
 import com.example.examine.service.EntityService.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +26,7 @@ public class TagController {
         this.tagService = tagService;
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<?> addTag(@RequestBody TagRequest dto) {
         log.info("📥 받은 데이터: {}", dto);
@@ -31,8 +35,8 @@ public class TagController {
 
 
     @GetMapping
-    public List<TagRequest> getTags(
-            @RequestParam List<String> type,
+    public List<TagResponse> getTags(
+            @RequestParam String type,
             @RequestParam String sort,
             @RequestParam(defaultValue = "asc") String direction) {
 
@@ -40,13 +44,13 @@ public class TagController {
     }
 
     @GetMapping("/tier")
-    public List<TierTagRequest> getTierTags(@RequestParam List<String> type) {
+    public List<TierTagResponse> getTierTags(@RequestParam String type) {
         return tagService.get(type);
     }
 
 
     @GetMapping("/search")
-    public List<TagRequest> searchTags(
+    public List<TagResponse> searchTags(
             @RequestParam String keyword,
             @RequestParam List<String> type,
             @RequestParam String sort,
@@ -55,7 +59,7 @@ public class TagController {
         return tagService.search(keyword, type, sort, direction);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{type}/{id}")
     public ResponseEntity<?> deleteTag(@PathVariable String type, @PathVariable Long id) {
         return tagService.delete(type, id);

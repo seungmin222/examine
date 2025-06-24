@@ -22,8 +22,7 @@
            <input name="input" id="search-input" type="text" class="w-48" placeholder="제목으로 검색" />
            <button type="submit">검색</button>
         </form>
-        <button id="toggle-change">수정</button>
-        <button id="toggle-delete">삭제</button>
+        <div id="button-box" class="flex gap-2"></div>
         <button id="toggle-fold">접기</button>
         <select name="typeId" id="list-sort">
             <option value="title">제목순</option>
@@ -61,8 +60,8 @@
     <form id="insert-form" class="items-start gap-2">
         <input name="link" placeholder="링크" class="w-48"/>
         <div class="flex">
-        <input type="number" name="duration-value" placeholder="기간"/>
-        <select class="w-28" name="duration-unit">
+        <input type="number" name="durationValue" placeholder="기간"/>
+        <select class="w-28" name="durationUnit">
             <option value="day">일(day)</option>
             <option value="week">주(week)</option>
             <option value="month">월(month)</option>
@@ -84,9 +83,9 @@
         </select>
         <select name="blind" class="w-32">
             <option value="" class="w-32">Unknown</option>
-            <option value="open-label" class="w-32">open-label</option>
-            <option value="single-blind" class="B w-32">single-blind</option>
-            <option value="double-blind" class="A w-32">double-blind</option>
+            <option value="0" class="w-32">open-label</option>
+            <option value="1" class="B w-32">single-blind</option>
+            <option value="2" class="A w-32">double-blind</option>
         </select>
         <select name="parallel" class="w-32">
            <option value="" class="w-32">Unknown</option>

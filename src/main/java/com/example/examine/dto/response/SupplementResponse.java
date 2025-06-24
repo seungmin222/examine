@@ -1,36 +1,38 @@
-// SupplementRequest.java
-package com.example.examine.dto;
+package com.example.examine.dto.response;
 
-import com.example.examine.entity.*;
+import com.example.examine.entity.Supplement;
+
 import java.math.BigDecimal;
 import java.util.List;
 
-public record SupplementRequest(
+public record SupplementResponse(
         Long id,// 프론트엔드에서 받은 문자열 변환
         String korName,
         String engName,
-        String dosage,
+        BigDecimal dosageValue,
+        String dosageUnit,
         BigDecimal cost,
-        List<TagRequest> types,
-        List<SERequest> effects,
-        List<SERequest> sideEffects
+        List<TagResponse> types,
+        List<SEResponse> effects,
+        List<SEResponse> sideEffects
 ) {
-    public static SupplementRequest fromEntity(Supplement supplement) {
-        return new SupplementRequest(
+    public static SupplementResponse fromEntity(Supplement supplement) {
+        return new SupplementResponse(
                 supplement.getId(),
                 supplement.getKorName(),
                 supplement.getEngName(),
-                supplement.getDosage(),
+                supplement.getDosageValue(),
+                supplement.getDosageUnit(),
                 supplement.getCost(),
                 supplement.getTypes().stream()
-                        .map(e->new TagRequest(e.getId(),e.getName(),"type"))
+                        .map(e->new TagResponse(e.getId(),e.getName()))
                         .toList(),
                 supplement.getEffects().stream()
-                        .map(e -> new SERequest(
+                        .map(e -> new SEResponse(
                                 e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
                         .toList(),
                 supplement.getSideEffects().stream()
-                        .map(e -> new SERequest(
+                        .map(e -> new SEResponse(
                                 e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
                         .toList()
         );

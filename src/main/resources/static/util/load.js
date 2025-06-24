@@ -4,9 +4,16 @@ import{
   hideHoverButton,
   pageScroll,
   noteLink,
-  themeSelect
-} from '/util/eventUtils.js';
+  themeSelect,
+  logout
+} from '/util/event.js';
 
+import{
+    checkLogin
+} from '/util/utils.js';
+import{
+    renderButton
+} from '/util/render.js';
 
 async function loadNav(){
   await fetch(`/module/nav.html`)
@@ -19,6 +26,18 @@ async function loadNav(){
     script.src = '/module/module.js';
     document.body.appendChild(script);
   });
+  if(await checkLogin()){
+      const userLink = document.getElementById("user");
+      userLink.removeAttribute("href"); // 링크 제거
+      userLink.addEventListener("click", e => e.preventDefault());
+      userLink.querySelector("#user-dropdown-toggle").textContent = "내 정보";
+      hideHoverButton('user-dropdown-toggle','user-dropdown');
+      hideHoverButton('user-info-dropdown-toggle','user-info-dropdown');
+      hideHoverButton('bookmark-dropdown-toggle','bookmark-dropdown');
+      hideHoverButton('memo-dropdown-toggle','memo-dropdown');
+      logout('logout');
+  }
+  document.getElementById('user').href=`/user/login.html?redirect=${encodeURIComponent(window.location.href)}`;
   hideHoverButton('guide-dropdown-toggle','guide-dropdown');
   hideHoverButton('table-dropdown-toggle','table-dropdown');
   hideHoverButton('setting-dropdown-toggle','setting-dropdown');
@@ -112,6 +131,36 @@ function loadTheme(localSave, iconId, selectId){
     }
 }
 
+async function loadLoginInfo() {
+    const container = document.createElement("div");
+    container.id = "user-info";
+    container.className = "text-sm p-2";
+
+    try {
+        const res = await fetch("/api/user/me");
+        if (!res.ok) throw new Error();
+
+        const data = await res.json();
+        container.textContent = `👤 ${data.username} 님`;
+        container.classList.add("text-green-600");
+    } catch (e) {
+        container.textContent = "🔒 로그인 필요";
+        container.classList.add("text-red-500");
+    }
+
+    document.body.prepend(container); // 페이지 맨 위에 붙이기 (원하면 다른 위치로 이동 가능)
+}
+
+async function loadButton(){
+    const level = Number(document.getElementById('user-info').dataset.level);
+    if (level>=10){
+        renderButton('button-box','toggle-delete','삭제','');
+    }
+    if (level>=1){
+        renderButton('button-box','toggle-change','수정','');
+    }
+}
+
 
 async function loadBasic(){
   await loadNav(); // 네비게이션바
@@ -122,6 +171,7 @@ async function loadBasic(){
   await loadTagController(); //태그 리모컨
   await loadFold(); // 콘텐트 숨기기
   renderNote(); //주석 연결
+  await loadButton()
 }
 export{
    loadBasic,

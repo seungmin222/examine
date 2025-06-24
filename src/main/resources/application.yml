@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/examine
+    username: root
+    password: book1615
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  spring:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  access-expiration: 15m
+  refresh-expiration: 1h
+  secret: c2Rmc2Rhc2RzZnNmc2Rhc2Rhc2RzYWRhc2Rkc2FkYXNmYXNmZGZhZmRhZmZk

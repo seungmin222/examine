@@ -1,6 +1,9 @@
 package com.example.examine.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "supplement_detail")
@@ -18,6 +21,9 @@ public class SupplementDetail {
     private String negative;
     private String mechanism;
     private String dosage;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public String getIntro() {
         return intro;

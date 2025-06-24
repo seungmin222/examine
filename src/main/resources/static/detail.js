@@ -7,13 +7,14 @@ import {
     setupPairToggleButton,
     journalEvent,
     supplementEvent
-} from '/util/eventUtils.js';
+} from '/util/event.js';
 
 
 import {
     renderSupplements,
     renderJournals,
-    renderDetails
+    renderDetails,
+    renderButton
 } from '/util/render.js';
 
 const params = new URLSearchParams(window.location.search);
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadBasic();
         supplementEvent();
         journalEvent();
+
         setupPairToggleButton('toggle-delete', 'toggle-change', loadAll);
     } catch (err) {
         document.getElementById('title').textContent = '성분을 불러올 수 없습니다';

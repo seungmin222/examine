@@ -2,9 +2,8 @@ package com.example.examine.service.util;
 
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.JournalSupplementEffect.JSE;
-import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
 import com.example.examine.entity.SupplementEffect.SE;
-import com.example.examine.entity.SupplementEffect.SupplementEffect;
+
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -58,7 +57,7 @@ public class CalculateScore {
     }
 
     /// 점수 빼는 로직, 더하는 로직 나누기
-    public static void deleteScore(SE se, JSE jse, Journal oldJournal) {
+    public static boolean deleteScore(SE se, JSE jse, Journal oldJournal) {
         int participants = oldJournal.getParticipants() != null ? oldJournal.getParticipants() : 1;
         se.setTotalScore(
                 se.getTotalScore().subtract(
@@ -66,7 +65,13 @@ public class CalculateScore {
                 )
         );
         se.setTotalParticipants(se.getTotalParticipants()-participants);
-        se.setFinalScore();
+        if (se.getTotalParticipants()==0){
+            return false;
+        }
+        else {
+            se.setFinalScore();
+            return true;
+        }
     }
 
     public static void addScore(SE se, JSE jse){

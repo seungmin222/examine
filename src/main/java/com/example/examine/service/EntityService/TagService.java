@@ -1,8 +1,10 @@
 package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
-import com.example.examine.dto.TagRequest;
-import com.example.examine.dto.TierTagRequest;
+import com.example.examine.dto.request.TagRequest;
+import com.example.examine.dto.request.TierTagRequest;
+import com.example.examine.dto.response.TagResponse;
+import com.example.examine.dto.response.TierTagResponse;
 import com.example.examine.entity.*;
 import com.example.examine.entity.Effect.EffectTag;
 import com.example.examine.entity.Effect.SideEffectTag;
@@ -72,63 +74,57 @@ public class TagService {
         return ResponseEntity.ok().build();
     }
 
-    public List<TagRequest> get(List<String> type, String sort, String direction ){
-        List<TagRequest> tag = new ArrayList<>();
+    // 지금까지 타입을 여러개씩 받고 있었음-> 하나로 변경하니 프론트도 확인 필요
+    public List<TagResponse> get(String type, String sort, String direction ){
+        List<TagResponse> tag = new ArrayList<>();
 
-        for (String t : type) {
-            String actualSort = (t.equals("supplement") && sort.equals("name")) ? "korName" : sort;
+            String actualSort = (type.equals("supplement") && sort.equals("name")) ? "korName" : sort;
             Sort sorting = Sort.by(Sort.Direction.fromString(direction), actualSort);
-            switch (t) {
+            switch (type) {
                 case "type":
                     typeRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "positive":
                     effectRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "negative":
                     sideEffectRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "trialDesign":
                     trialDesignRepo.findAll(Sort.by(Sort.Direction.ASC, "id"))
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "supplement":
                     supplementRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getKorName())));
                     break;
                 default:
-                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
+                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
             }
-        }
-
         return tag;
     }
 
-    public List<TierTagRequest> get(List<String> type){
-        List<TierTagRequest> tag = new ArrayList<>();
+    public List<TierTagResponse> get(String type){
+        List<TierTagResponse> tag = new ArrayList<>();
         Sort sorting = Sort.by(Sort.Direction.ASC, "id");
 
-        for (String t : type) {
-
-            switch (t) {
+            switch (type) {
                 case "trialDesign":
                     trialDesignRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TierTagRequest.fromEntity(e)));
+                            .forEach(e -> tag.add(TierTagResponse.fromEntity(e)));
                     break;
                 default:
-                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
+                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
             }
-        }
-
         return tag;
     }
 
 
-    public List<TagRequest> search(String keyword, List<String> type, String sort, String direction ){
-        List<TagRequest> tag = new ArrayList<>();
+    public List<TagResponse> search(String keyword, List<String> type, String sort, String direction ){
+        List<TagResponse> tag = new ArrayList<>();
 
         for (String t : type) {
             String actualSort = (t.equals("supplement") && sort.equals("name")) ? "korName" : sort;
@@ -136,19 +132,19 @@ public class TagService {
             switch (t) {
                 case "type":
                     typeRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "positive":
                     effectRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "negative":
                     sideEffectRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
                     break;
                 case "supplement":
                     supplementRepo.findByKorNameContainingIgnoreCaseOrEngNameContainingIgnoreCase(keyword,keyword,sorting)
-                            .forEach(e -> tag.add(TagRequest.fromEntity(e,t)));
+                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getKorName())));
                     break;
                 default:
                     throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
