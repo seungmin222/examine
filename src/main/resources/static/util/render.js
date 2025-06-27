@@ -31,13 +31,13 @@ function renderSupplements(list,supplementMap) {
         row.innerHTML = `
       <td>
       ${editMode
-      ? `<input name="korName" value="${item.korName}" class="long"/>`
+      ? `<input name="korName" value="${item.korName}" class="w-32"/>`
       : `<a href = ${link}>${item.korName}</a>`
       }
       </td>
       <td>
       ${editMode
-      ? `<input name="engName" value="${item.engName}" class="long"/>`
+      ? `<input name="engName" value="${item.engName}" class="w-32"/>`
       : `<a href = ${link}>${item.engName}</a>`
       }
       </td>
@@ -63,7 +63,7 @@ function renderSupplements(list,supplementMap) {
       <td>${effects}</td>
       <td>${sideEffects}</td>
       ${editMode ? `<td>
-      <div class="edit-group">
+      <div class="flex flex-col gap-2">
       <button class="modal-btn">태그</button>
       <button class="save-btn">저장</button>
       </div>
@@ -183,7 +183,7 @@ function renderJournals(list, journalMap) {
 
         tbody.appendChild(row);
         requestAnimationFrame(() => {
-          createTooltip(`tooltip-${item.id}`, item.summary, 'right');
+          createTooltip(`tooltip-${item.id}`, item.summary, 'right' ,'w-1/3');
         });
     });
 }
@@ -234,14 +234,57 @@ function renderDetails(detail) {
 }
 
 function renderButton(boxId, id, text, cls){
+    const box = document.getElementById(boxId);
     const button = document.createElement('button');
-    if(!button){
+    if(!box){
         return;
     }
     button.textContent = text;
     button.id=id;
     button.className = cls;
-    document.getElementById(boxId).appendChild(button);
+    box.appendChild(button);
+}
+
+function renderPages(list,pageMap) {
+    const tbody = document.getElementById('page-body');
+    tbody.innerHTML = '';
+    pageMap.clear();
+    const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
+    const shown = isFolded ? list.slice(0, 5) : list;
+    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
+
+    shown.forEach(item => {
+        pageMap.set(item.id, item);
+        const row = document.createElement('tr');
+        row.dataset.id = item.id;
+        row.innerHTML = `
+      <td>
+      ${editMode
+            ? `<input name="title" value="${item.title}" class="w-32"/>`
+            : `${item.title}`
+       }
+      </td>
+      <td>
+      ${editMode
+            ? `<input name="link" value="${item.link}" class="w-32"/>`
+            : `${item.link}`
+       }
+      </td>
+        <td>${item.viewCount}</td>
+        <td>${item.bookMarkCount}</td>
+      <td>
+      ${editMode
+            ? `<input name="level" value="${item.level}" class="w-16"/>`
+            : `${item.level}`
+       }
+      </td>
+        <td>${item.updatedAt}</td>
+      ${editMode ? `<td>        
+           <button class="save-btn" data-id="${item.id}">저장</button>
+         </td>` : ''}
+      `;
+        tbody.appendChild(row);
+    });
 }
 
 export {
@@ -250,5 +293,6 @@ renderJournals,
 renderTags,
 renderModal,
 renderDetails,
-renderButton
+renderButton,
+renderPages
 };

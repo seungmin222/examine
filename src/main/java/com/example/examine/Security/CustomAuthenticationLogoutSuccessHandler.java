@@ -20,8 +20,8 @@ public class CustomAuthenticationLogoutSuccessHandler implements LogoutSuccessHa
 
     public CustomAuthenticationLogoutSuccessHandler(RedisService redisService,
                                                     JwtParser jwtParser) {
-        this.jwtParser = jwtParser;
         this.redisService = redisService;
+        this.jwtParser = jwtParser;
     }
 
     @Override
@@ -29,37 +29,45 @@ public class CustomAuthenticationLogoutSuccessHandler implements LogoutSuccessHa
                                 HttpServletResponse response,
                                 Authentication authentication) throws IOException, ServletException {
 
-        String token = request.getHeader("Authorization");
+        String token = extractAccessTokenFromCookies(request);
+        String username = null;
 
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // "Bearer " 제거
-            String username = jwtParser.extractUsername(token);
-
-            if (username != null) {
-                redisService.deleteAllTokens(username); // Access + Refresh 삭제
-
-                // Access Token 쿠키 삭제
-                Cookie access = new Cookie("jwt", null);
-                access.setHttpOnly(true);
-                access.setPath("/");
-                access.setMaxAge(0);
-                response.addCookie(access);
-
-                // Refresh Token 쿠키 삭제
-                Cookie refresh = new Cookie("refresh", null);
-                refresh.setHttpOnly(true);
-                refresh.setPath("/");
-                refresh.setMaxAge(0);
-                response.addCookie(refresh);
-            }
+        if (token != null) {
+            username = jwtParser.extractUsername(token);
         }
 
-        String redirect = request.getParameter("redirect");
-        if (redirect != null && !redirect.isBlank()) {
-            response.sendRedirect(redirect);
-        } else {
-            response.sendRedirect("/");
+        // Redis 토큰 삭제 (있을 경우만)
+        if (username != null) {
+            redisService.deleteAllTokens(username);
         }
+
+        // 쿠키는 항상 삭제
+        deleteCookie("access", response);
+        deleteCookie("refresh", response);
+
+        response.setStatus(HttpServletResponse.SC_OK); // 👈 200 명시
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\":\"로그아웃 성공\"}");
+
     }
 
+    private String extractAccessTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("access".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void deleteCookie(String name, HttpServletResponse response) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // 개발 환경에선 false
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
 }

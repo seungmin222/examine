@@ -25,6 +25,7 @@ import com.example.examine.service.util.CalculateScore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -46,6 +47,7 @@ import static com.example.examine.service.llm.LLMService.objectToJsonString;
 
 // 서비스
 @Service
+@RequiredArgsConstructor
 public class JournalService {
     private static final Logger log = LoggerFactory.getLogger(DetailController.class);
 
@@ -62,46 +64,21 @@ public class JournalService {
     private final ClinicalTrialsCrawler clinicalTrialsCrawler;
     private final SemanticScholarCrawler semanticScholarCrawler;
 
-    public JournalService(JournalRepository journalRepo,
-                          TrialDesignRepository trialDesignRepo,
-                          SupplementRepository supplementRepo,
-                          EffectTagRepository effectRepo,
-                          SideEffectTagRepository sideEffectRepo,
-                          SupplementEffectRepository supplementEffectRepo,
-                          SupplementSideEffectRepository supplementSideEffectRepo,
-                          JournalSupplementEffectRepository journalSupplementEffectRepo,
-                          JournalSupplementSideEffectRepository journalSupplementSideEffectRepo,
-                          PubmedCrawler pubmedCrawler,
-                          ClinicalTrialsCrawler clinicalTrialsCrawler,
-                          SemanticScholarCrawler semanticScholarCrawler) {
-        this.journalRepo = journalRepo;
-        this.trialDesignRepo = trialDesignRepo;
-        this.supplementRepo = supplementRepo;
-        this.effectRepo = effectRepo;
-        this.sideEffectRepo = sideEffectRepo;
-        this.supplementEffectRepo = supplementEffectRepo;
-        this.supplementSideEffectRepo = supplementSideEffectRepo;
-        this.journalSupplementEffectRepo = journalSupplementEffectRepo;
-        this.journalSupplementSideEffectRepo = journalSupplementSideEffectRepo;
-        this.pubmedCrawler = pubmedCrawler;
-        this.clinicalTrialsCrawler = clinicalTrialsCrawler;
-        this.semanticScholarCrawler = semanticScholarCrawler;
-    }
-
     @Transactional
-    public ResponseEntity<?> create(JournalRequest dto) {
+    public ResponseEntity<String> create(JournalRequest dto) {
         if (journalRepo.findByLink(dto.link()).isPresent()) {
             return ResponseEntity.badRequest().body("이미 같은 논문이 존재합니다.");
         }
 
-        Journal journal = new Journal();
-        journal.setLink(dto.link());
-        journal.setDurationValue(dto.durationValue());
-        journal.setDurationUnit(dto.durationUnit());
+        Journal journal = Journal.builder()
+                .link(dto.link())
+                .durationValue(dto.durationValue())
+                .durationUnit(dto.durationUnit())
+                .participants(dto.participants())
+                .parallel(dto.parallel())
+                .blind(dto.blind())
+                .build();
         journal.setDurationDays();
-        journal.setParticipants(dto.participants());
-        journal.setParallel(dto.parallel());
-        journal.setBlind(dto.blind());
 
         if (dto.trialDesignId() != null) {
             TrialDesign td = trialDesignRepo.findById(dto.trialDesignId())
@@ -127,7 +104,8 @@ public class JournalService {
         applyAnalysis(journal, result);
 
         journal.setScore();
-        return ResponseEntity.ok(journalRepo.save(journal));
+        journalRepo.save(journal);
+        return ResponseEntity.ok("논문 추가 완료");
     }
 
     public JournalCrawlerMeta crawlJournalMeta(String url) {
@@ -239,7 +217,7 @@ public class JournalService {
 
 
     @Transactional
-    public ResponseEntity<?> update(Long id, JournalRequest dto) {
+    public ResponseEntity<String> update(Long id, JournalRequest dto) {
         Journal journal = journalRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Journal not found"));
         Journal OldJournal = journal;
@@ -309,7 +287,8 @@ public class JournalService {
         syncJSE(journal, OldJournal, dto.effects());
         syncJSSE(journal, OldJournal, dto.sideEffects());
 
-        return ResponseEntity.ok(journalRepo.save(journal));
+        journalRepo.save(journal);
+        return ResponseEntity.ok("논문 추가 완료");
     }
 
     private SupplementEffect findOrCreateSupplementEffect(Long supplementId, Long effectId) {
@@ -545,7 +524,7 @@ public class JournalService {
                 .toList();
     }
 
-    public ResponseEntity<?> delete(Long id) {
+    public ResponseEntity<String> delete(Long id) {
         if (!journalRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

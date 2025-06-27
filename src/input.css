@@ -7,6 +7,20 @@
   :root {
     --navbar-height: 60px;
     --sidebar-width: 10%;
+
+    --z-index-base: 0;
+    --z-index-navbar: 1000;
+    --z-index-sidebar: 600;
+    --z-index-dropdown: 200;
+    --z-index-tooltip: 1000;
+    --z-index-tooltip-body: 800;
+    --z-index-tooltip-tail: 900;
+    --z-index-tooltip-tail-border: 700;
+    --z-index-modal: 400;
+    --z-index-modal-content: 300;
+    --z-index-scroll: 10000;
+
+    /*  */
     --color-background: white;
     --color-1: #ffcfea;
     --color-2: #ffe4ec;
@@ -14,7 +28,10 @@
     --color-bold-text: magenta;
     --color-button: hotpink;
     --color-button-text: white;
-    --color-scroll-button: rgba(186, 104, 200, 0.5);
+    --color-scroll-button: rgba(186, 104, 200, 0.3);
+    --color-scroll-circle: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle-bg: rgba(186, 104, 200, 0.3);
+    --color-arrow: rgba(186, 104, 200, 0.9);
     --color-border: #ff6a9c;
     --color-focus: #fff0f5;
     --color-focus-button: #ff6a9c;
@@ -52,7 +69,10 @@
     --color-bold-text: #0077cc;
     --color-button: #00bfff;
     --color-button-text: white;
-    --color-scroll-button: rgba(100, 181, 246, 0.5);
+    --color-scroll-button: rgba(100, 181, 246, 0.3);
+    --color-scroll-circle: rgba(100, 181, 246, 0.9);
+    --color-scroll-circle-bg: rgba(100, 181, 246, 0.3);
+    --color-arrow: rgba(100, 181, 246, 0.9);
     --color-border: #40a9ff;
     --color-focus: #e0f7ff;
     --color-focus-button: #40a9ff;
@@ -89,7 +109,10 @@
     --color-bold-text: #000;
     --color-button: #888;
     --color-button-text: white;
-    --color-scroll-button: rgba(120, 120, 120, 0.5);
+    --color-scroll-button: rgba(120, 120, 120, 0.3);
+    --color-scroll-circle: rgba(120, 120, 120, 0.9);
+    --color-scroll-circle-bg: rgba(120, 120, 120, 0.3);
+    --color-arrow: rgba(120, 120, 120, 0.9);
     --color-border: #999;
     --color-focus: #ddd;
     --color-focus-button: #999;
@@ -126,7 +149,10 @@
   --color-bold-text: #1b5e20;
   --color-button: #66bb6a;
   --color-button-text: white;
-  --color-scroll-button: rgba(102, 187, 106, 0.5);
+  --color-scroll-button: rgba(124, 245, 130, 0.9);
+  --color-scroll-circle: rgba(102, 187, 106, 0.3);
+  --color-scroll-circle-bg: rgba(102, 187, 106, 0.9);
+  --color-arrow: rgba(102, 187, 106, 0.3);
   --color-border: #388e3c;
   --color-focus: #e8f5e9;
   --color-focus-button: #43a047;
@@ -163,7 +189,10 @@
   --color-bold-text: #4a148c;
   --color-button: #ba68c8;
   --color-button-text: white;
-  --color-scroll-button: rgba(186, 104, 200, 0.5);
+  --color-scroll-button: rgba(186, 104, 200, 0.3);
+  --color-scroll-circle: rgba(186, 104, 200, 0.9);
+  --color-scroll-circle-bg: rgba(186, 104, 200, 0.3);
+  --color-arrow: rgba(186, 104, 200, 0.9);
   --color-border: #ab47bc;
   --color-focus: #f3e5f5;
   --color-focus-button: #ab47bc;
@@ -345,35 +374,10 @@
     left: var(--sidebar-width);
     width: calc(100vw - var(--sidebar-width));
     height: calc(100vh - var(--navbar-height));
-    z-index: 1000;
+    z-index: var(--z-index-modal);
     background-color:var(--color-1);
   }
 
-
-
-  .menu{
-    width: auto;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color:var(--color-background);
-    margin-top:0;
-    align-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    border-color: var(--color-menu-border);
-    padding: 8px;
-    text-align: left;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    z-index: 9999;
-  }
-
-  .menu a.logo{
-    white-space: nowrap;
-    color: var(--color-header);
-  }
 
   .checkbox {
        display: flex;
@@ -475,7 +479,7 @@
     background-color: var(--color-focus-button);
   }
 
-  button.excute {
+  button.execute {
     background-color: var(--color-toggle-button);
   }
 
@@ -495,14 +499,12 @@
 
 
   button.dropdown:hover{
-    background-color: var(--color-background);
+    background-color: var(--color-table-hover);
   }
 
-  svg {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-  }
+
+
+
 
   ul {
    display: grid;
@@ -595,81 +597,98 @@
      color: var(--color-button);
      text-decoration: none;
      white-space: nowrap;
+     padding: 8px;
    }
+
+  a.logo:hover{
+    background-color: var(--color-table-hover);
+  }
 
   /* 툴팁 박스 */
 
-.tooltip-box {
-  display: inline-block;
-  min-height: 10px;
-  position: absolute;
-  top: 100%;       /* 아래로 붙임 */
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--color-tooltip);
-  padding: 6px;
-  border: 1px solid var(--color-tooltip-border);
-  border-radius: 4px;
-  z-index: 9999;
-}
+  .tooltip-box {
+    display: inline-block;
+    min-height: 40px;
+    max-width: 1000px;            /* 최대 너비 제한 */
+    max-height: 400px;           /*  최대 높이 제한 */
+    position: absolute;
+    top: 100%;       /* 아래로 붙임 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-tooltip);
+    padding: 6px;
+    border: 1px solid var(--color-tooltip-border);
+    border-radius: 4px;
+    z-index: var(--z-index-tooltip);
+  }
 
- .tooltip-box.bg{
-   background-color: var(--color-background);
- }
- .tooltip-body{
-   display: block;
-   max-width: 1000px;
-   width: auto;
-   height: auto;
-   position: relative;
-   z-index: 9000;
- }
+  .tooltip-box.bg{
+    background-color: var(--color-background);
+  }
+  .tooltip-body{
+    display: inline-block;
+    max-height: 400px;
+    position: relative;
+    overflow: auto;
+    z-index: var(--z-index-tooltip-body);
+  }
+
 
 .tooltip-tail {
   position: absolute;
   width: 0;
   height: 0;
-  z-index: 9999;
+  z-index: var(--z-index-tooltip-tail);
 }
 
 .tooltip-tail-border {
   position: absolute;
   width: 0;
   height: 0;
-  z-index: 8000;
+  z-index: var(--z-index-tooltip-tail-border);
 }
 
-.tooltip-box[data-position="top"] {
-   top: -50%;
-   left: 50%;
-   transform: translateY(-100%) translateX(-50%);
-}
-.tooltip-box[data-position="top"] .tooltip-tail {
-  bottom: -10.5px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 11px 10px 0 10px;
-  border-style: solid;
-  border-color: var(--color-tooltip-tail) transparent transparent transparent;
-}
+  .tooltip-box[data-popper-placement="top"].stop {
+    top: -50%;
+    left: 50%;
+    transform: translateY(-100%) translateX(-50%);
+  }
 
-.tooltip-box[data-position="top"] .tooltip-tail-border {
-  bottom: -11.5px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 11px 11px 0 11px;
-  border-style: solid;
-  border-color: var(--color-tooltip-border) transparent transparent transparent;
-}
+  .tooltip-box[data-popper-placement="top"] .tooltip-tail {
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 11px 10px 0 10px;
+    border-style: solid;
+    border-color: var(--color-tooltip-tail) transparent transparent transparent;
+  }
+  .tooltip-box.stop[data-popper-placement="top"] .tooltip-tail{
+    bottom: -10.5px;
+    left: 50%;
+  }
 
-  .tooltip-box[data-position="bottom"] {
+  .tooltip-box[data-popper-placement="top"] .tooltip-tail-border {
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 11px 11px 0 11px;
+    border-style: solid;
+    border-color: var(--color-tooltip-border) transparent transparent transparent;
+  }
+
+  .tooltip-box.stop[data-popper-placement="top"] .tooltip-tail-border{
+    bottom: -11.5px;
+    left: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="bottom"].stop {
     top: 100%;
     left: 50%;
     transform: translateY(0) translateX(-50%);
   }
 
-  .tooltip-box[data-position="bottom"] .tooltip-tail {
-    top: -9.5px;
+  .tooltip-box[data-popper-placement="bottom"] .tooltip-tail {
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     border-width: 0 10px 11px 10px;
@@ -677,8 +696,13 @@
     border-color: transparent transparent var(--color-tooltip-tail) transparent;
   }
 
-  .tooltip-box[data-position="bottom"] .tooltip-tail-border {
-    top: -10.5px;
+  .tooltip-box[data-popper-placement="bottom"].stop .tooltip-tail {
+    top: -9.5px;
+    left: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="bottom"] .tooltip-tail-border {
+    top: -1px;
     left: 50%;
     transform: translateX(-50%);
     border-width: 0 11px 11px 11px;
@@ -686,14 +710,19 @@
     border-color: transparent transparent var(--color-tooltip-border) transparent;
   }
 
-  .tooltip-box[data-position="left"] {
+  .tooltip-box[data-popper-placement="bottom"].stop .tooltip-tail-border {
+    top: -10.5px;
+    left: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="left"].stop {
     top: 50%;
     left: -10px;
     transform: translateY(-50%) translateX(-100%);
   }
 
-  .tooltip-box[data-position="left"] .tooltip-tail {
-    left: calc(100% - 1px);
+  .tooltip-box[data-popper-placement="left"] .tooltip-tail {
+    left: 0;
     top: 50%;
     transform: translateY(-50%);
     border-width: 10px 0 10px 11px;
@@ -701,8 +730,13 @@
     border-color: transparent transparent transparent var(--color-tooltip-tail);
   }
 
-  .tooltip-box[data-position="left"] .tooltip-tail-border {
-    left: 100%;
+  .tooltip-box[data-popper-placement="left"].stop .tooltip-tail {
+    left: calc(100% - 1px);
+    top: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="left"] .tooltip-tail-border {
+    left: 1px;
     top: 50%;
     transform: translateY(-50%);
     border-width: 11px 0 11px 11px;
@@ -710,40 +744,80 @@
     border-color: transparent transparent transparent var(--color-tooltip-border);
   }
 
-.tooltip-box[data-position="right"] {
-  top: 50%;
-  left: 100%;
-  transform: translateY(-50%) translateX(0);
-}
+  .tooltip-box[data-popper-placement="left"].stop .tooltip-tail-border {
+    left: 100%;
+    top: 50%;
+  }
 
-.tooltip-box[data-position="right"] .tooltip-tail {
-  left: -9.5px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 10px 11px 10px 0;
-  border-style: solid;
-  border-color: transparent var(--color-tooltip-tail) transparent transparent;
-}
+  .tooltip-box[data-popper-placement="right"].stop {
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%) translateX(0);
+  }
 
-.tooltip-box[data-position="right"] .tooltip-tail-border {
-  left: -10.5px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 11px 11px 11px 0;
-  border-style: solid;
-  border-color: transparent var(--color-tooltip-border) transparent transparent;
-}
+  .tooltip-box[data-popper-placement="right"] .tooltip-tail {
+    left: 0px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 11px 10px 0;
+    border-style: solid;
+    border-color: transparent var(--color-tooltip-tail) transparent transparent;
+  }
 
-  .tooltip-box[data-position="top"] .tooltip-tail.bg{
+  .tooltip-box.stop[data-popper-placement="right"] .tooltip-tail {
+    left: -9.5px;
+    top: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="right"] .tooltip-tail-border {
+    left: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 11px 11px 11px 0;
+    border-style: solid;
+    border-color: transparent var(--color-tooltip-border) transparent transparent;
+  }
+
+  .tooltip-box.stop[data-popper-placement="right"] .tooltip-tail-border {
+    left: -10.5px;
+    top: 50%;
+  }
+
+  .tooltip-box[data-popper-placement="top"] .tooltip-tail-wrapper {
+    bottom: 0px; /* 툴팁 아래에 꼬리 */
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .tooltip-box[data-popper-placement="bottom"] .tooltip-tail-wrapper {
+    top: -10px; /* 툴팁 위에 꼬리 */
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .tooltip-box[data-popper-placement="left"] .tooltip-tail-wrapper {
+    right: -10px; /* 툴팁 오른쪽에 꼬리 */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .tooltip-box[data-popper-placement="right"] .tooltip-tail-wrapper {
+    left: -10px; /* 툴팁 왼쪽에 꼬리 */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+
+  .tooltip-box[data-popper-placement="top"] .tooltip-tail.bg{
     border-color: transparent var(--color-background) transparent transparent;
   }
-  .tooltip-box[data-position="bottom"] .tooltip-tail.bg{
+  .tooltip-box[data-popper-placement="bottom"] .tooltip-tail.bg{
     border-color: transparent transparent var(--color-background) transparent;
   }
-  .tooltip-box[data-position="left"] .tooltip-tail.bg{
+  .tooltip-box[data-popper-placement="left"] .tooltip-tail.bg{
     border-color: transparent transparent transparent var(--color-background);
   }
-  .tooltip-box[data-position="right"] .tooltip-tail.bg{
+  .tooltip-box[data-popper-placement="right"] .tooltip-tail.bg{
     border-color: transparent var(--color-background) transparent transparent;
   }
 
@@ -766,7 +840,6 @@
   nav {
     display: flex;
     position: fixed;
-    z-index: 9000;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
 
@@ -780,6 +853,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 0 1.5rem;
+      z-index: var(--z-index-navbar);
     }
 
   nav.sidebar {
@@ -793,6 +867,7 @@
     gap: 1rem;              /* 항목 간 간격 */
     overflow-y: auto;
     flex-direction: column;
+    z-index: var(--z-index-sidebar);
   }
 
    .logo-icon {
@@ -839,7 +914,7 @@
     position: fixed;       /* 화면 우측 하단 고정 */
     bottom: 2rem;
     right: 2%;
-    z-index: 9999;
+    z-index: var(--z-index-scroll);
     display: flex;
     flex-direction: column; /* ✅ 수직 정렬 */
     gap: 0.5rem;              /* 버튼 사이 간격 */
@@ -851,9 +926,37 @@
       background-color: var(--color-scroll-button); /* 연보라, 50% 투명도 */
    }
 
+  .scroll button svg {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    stroke: var(--color-1);
+  }
+
   .scroll button .icon-wrapper {
     position: relative;   /* ✅ 내부 SVG용 기준 */
   }
+
+  .scroll-progress {
+    transform: rotate(-90deg); /* 시작점을 위쪽으로 회전 */
+    transform-origin: center;
+  }
+
+  .scroll-circle {
+    stroke-dasharray: 283;   /* 약 2 * π * r (r=45) */
+    stroke-dashoffset: 283;
+    transition: stroke-dashoffset 0.2s linear;
+    stroke: var(--color-scroll-circle);
+  }
+
+  .scroll-circle-bg {
+    stroke: var(--color-scroll-circle-bg);
+  }
+
+  path {
+    stroke: var(--color-arrow);
+  }
+
 
   div.line{
     border-top: 1px solid #777;

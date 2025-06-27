@@ -33,23 +33,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // ✅ 최신 방식
+                .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // 전부 허용
+                        .requestMatchers("/static/**", "/api/register", "/api/refresh").permitAll()
+                        .anyRequest().permitAll() // 필요 시 인증 경로 조정
                 )
 
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/api/login") // 여기로 POST 오면 인증 처리
+                        .loginProcessingUrl("/api/login")
                         .successHandler(successHandler)
                         .permitAll()
                 )
+
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
-                        .logoutSuccessHandler(logoutSuccessHandler)      // 🔹 명시적 지정 (기본은 "/logout")
-                        .invalidateHttpSession(true)                 // 세션 무효화
-                        .deleteCookies("JSESSIONID")                 // 쿠키 제거
+                        .logoutSuccessHandler(logoutSuccessHandler)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "access", "refresh")
                         .permitAll()
+                )
+
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"error\": \"unauthorized\"}");
+                        })
                 );
 
         return http.build();

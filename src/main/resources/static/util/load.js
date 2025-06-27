@@ -1,11 +1,16 @@
 import{
   hideClickButton,
-  indexScroll,
+    hideContentButton,
   hideHoverButton,
   pageScroll,
   noteLink,
   themeSelect,
-  logout
+  logout,
+  setupToggleButton,
+  setupPairToggleButton,
+    addBookmark,
+    deleteBookmark,
+    updateScrollProgress,
 } from '/util/event.js';
 
 import{
@@ -15,45 +20,60 @@ import{
     renderButton
 } from '/util/render.js';
 
+
 async function loadNav(){
   await fetch(`/module/nav.html`)
   .then(res => res.text())
-  .then(html => {
-  document.getElementById('load-basic').insertAdjacentHTML('beforeend', html);
-
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = '/module/module.js';
-    document.body.appendChild(script);
+  .then(async html => {
+  document.getElementById('nav').innerHTML = '';
+  document.getElementById('nav').insertAdjacentHTML('beforeend', html);
   });
-  if(await checkLogin()){
-      const userLink = document.getElementById("user");
-      userLink.removeAttribute("href"); // 링크 제거
-      userLink.addEventListener("click", e => e.preventDefault());
-      userLink.querySelector("#user-dropdown-toggle").textContent = "내 정보";
-      hideHoverButton('user-dropdown-toggle','user-dropdown');
-      hideHoverButton('user-info-dropdown-toggle','user-info-dropdown');
-      hideHoverButton('bookmark-dropdown-toggle','bookmark-dropdown');
-      hideHoverButton('memo-dropdown-toggle','memo-dropdown');
-      logout('logout');
-  }
-  document.getElementById('user').href=`/user/login.html?redirect=${encodeURIComponent(window.location.href)}`;
-  hideHoverButton('guide-dropdown-toggle','guide-dropdown');
-  hideHoverButton('table-dropdown-toggle','table-dropdown');
-  hideHoverButton('setting-dropdown-toggle','setting-dropdown');
-  themeSelect('theme-select','icon');
+    loadNavEvent();
 }
+
+async function loadNavEvent(){
+    const userLink = document.getElementById("user");
+    userLink.href=`/user/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+    if (await checkLogin()){
+        userLink.removeAttribute("href"); // 링크 제거
+        userLink.addEventListener("click", e => e.preventDefault());
+        userLink.querySelector("#user-dropdown-toggle").textContent = "내 정보";
+        hideClickButton('user-dropdown-toggle','user-dropdown');
+        hideHoverButton('alarm-dropdown-toggle','alarm-dropdown');
+        hideHoverButton('user-info-dropdown-toggle','user-info-dropdown');
+        hideHoverButton('bookmark-dropdown-toggle','bookmark-dropdown');
+        hideHoverButton('memo-dropdown-toggle','memo-dropdown');
+        await setupToggleButton('bookmark-delete-toggle', loadNavEvent, '삭제','삭제중');
+        await deleteBookmark('bookmark','bookmark-delete-toggle',checkLogin);
+        await addBookmark('bookmark-save',checkLogin);
+        logout('logout');
+    }
+    hideHoverButton('guide-dropdown-toggle','guide-dropdown');
+    hideHoverButton('table-dropdown-toggle','table-dropdown');
+    hideClickButton('setting-dropdown-toggle','setting-dropdown');
+    themeSelect('theme-select','icon');
+}
+
+async function loadPage() {
+    const path = window.location.pathname;
+    const res = await fetch(`/api/pages/current?link=${encodeURIComponent(path)}`)
+
+    if (res.ok) {
+        const id = await res.text();
+        document.getElementById('bookmark').dataset.id = id;
+    } else {
+        console.error("페이지 ID를 불러오지 못했습니다");
+    }
+}
+
+
 
 async function loadIndexNav(){
   await fetch(`/module/index-nav.html`)
   .then(res => res.text())
   .then(html => {
-  document.getElementById('load-basic').insertAdjacentHTML('beforeend', html);
-
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = '/module/module.js';
-    document.body.appendChild(script);
+  document.getElementById('index-nav').innerHTML='';
+  document.getElementById('index-nav').insertAdjacentHTML('beforeend', html);
   });
   renderIndex();
 }
@@ -77,15 +97,12 @@ async function loadScroll(){
   await fetch('/module/scroll-button.html')
   .then(res => res.text())
   .then(html => {
-   document.getElementById('load-basic').insertAdjacentHTML('beforeend', html);
+   document.getElementById('scroll-button').insertAdjacentHTML('beforeend', html);
 
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = '/module/module.js';
-    document.body.appendChild(script);
   });
   pageScroll('top-scroll', 'top');
   pageScroll('bottom-scroll', 'bottom');
+  updateScrollProgress();
 }
 
 async function loadModalController(){
@@ -110,7 +127,7 @@ async function loadTagController(){
 
 function loadFold(){
     for (let i = 1; ; i++) {
-      const success = hideClickButton(`index-${i}`, `content-${i}`);
+      const success = hideContentButton(`index-${i}`, `content-${i}`);
       if (!success) break; // 요소를 못 찾으면 중단
     }
 }
@@ -151,18 +168,32 @@ async function loadLoginInfo() {
     document.body.prepend(container); // 페이지 맨 위에 붙이기 (원하면 다른 위치로 이동 가능)
 }
 
-async function loadButton(){
+async function loadButton(loadFn){
     const level = Number(document.getElementById('user-info').dataset.level);
     if (level>=10){
-        renderButton('button-box','toggle-delete','삭제','');
-    }
-    if (level>=1){
         renderButton('button-box','toggle-change','수정','');
+        renderButton('button-box','toggle-delete','삭제','');
+        setupPairToggleButton('toggle-delete', 'toggle-change', loadFn);
+    }
+    else if (level>=1){
+        renderButton('button-box','toggle-change','수정','');
+        setupToggleButton('toggle-change', loadFn, '수정','수정중');
     }
 }
 
+async function loadModule(){
+    await fetch('/module/module-box.html')
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('load-basic').innerHTML='';
+            document.getElementById('load-basic').insertAdjacentHTML('beforeend', html);
+        });
+}
 
-async function loadBasic(){
+
+//돔 로딩할때 한번만(redis 조회수)
+async function loadBasic(loadFn = () => {}){
+  await loadModule();
   await loadNav(); // 네비게이션바
   loadTheme('selectedTheme','icon','theme-select'); // 테마
   await loadIndexNav(); // 사이드바
@@ -171,7 +202,8 @@ async function loadBasic(){
   await loadTagController(); //태그 리모컨
   await loadFold(); // 콘텐트 숨기기
   renderNote(); //주석 연결
-  await loadButton()
+  await loadButton(loadFn)
+    await loadPage();
 }
 export{
    loadBasic,

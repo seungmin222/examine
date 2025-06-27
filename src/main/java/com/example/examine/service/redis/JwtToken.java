@@ -2,9 +2,12 @@ package com.example.examine.service.redis;
 
 import com.example.examine.entity.User;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -26,6 +29,8 @@ public class JwtToken {
         Date issuedAt = Date.from(now);
         Date expiresAt = Date.from(expiry);
 
+        Key key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)); // ✅ 통일된 방식
+
         return Jwts.builder()
                 .setSubject(String.valueOf(user.getId()))
                 .claim("username", user.getUsername())
@@ -33,7 +38,7 @@ public class JwtToken {
                 .claim("level", user.getLevel())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiresAt)
-                .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -43,12 +48,15 @@ public class JwtToken {
         Date issuedAt = Date.from(now);
         Date expiresAt = Date.from(expiry);
 
+        Key key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)); // ✅ 동일 방식
+
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiresAt)
                 .claim("username", user.getUsername())
-                .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecret())
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
 }

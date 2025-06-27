@@ -5,15 +5,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.examine.entity.EntityTime;
 import com.example.examine.entity.SupplementEffect.SE;
 import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "effect_tag")
-public class EffectTag implements Effect {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class EffectTag extends EntityTime implements Effect {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,10 +34,6 @@ public class EffectTag implements Effect {
     @OneToMany(mappedBy = "effectTag", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<SupplementEffect> se = new ArrayList<>();
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     // Getter, Setter
     @Override

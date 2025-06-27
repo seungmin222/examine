@@ -24,7 +24,8 @@ function setupSortTrigger(selectId, handler) {
   select.addEventListener('change', handler);
 }
 
-function setupToggleButton(buttonId, onText='삭제', offText='삭제중') {
+function setupToggleButton(buttonId, loadFn = () => {}, onText='수정', offText='수정중') {
+  resetEventListener(buttonId);
   const Btn = document.getElementById(buttonId);
 
   if (!Btn) return;
@@ -32,10 +33,11 @@ function setupToggleButton(buttonId, onText='삭제', offText='삭제중') {
   Btn.addEventListener('click', e => {
     Btn.classList.toggle('execute');
     Btn.textContent = Btn.classList.contains('execute') ? `${offText}` : `${onText}`;
+    loadFn();
   });
 }
 
-function setupPairToggleButton(deleteId, changeId, onToggle) {
+function setupPairToggleButton(deleteId, changeId, loadFn = () => {}) {
   const deleteBtn = document.getElementById(deleteId);
   const changeBtn = document.getElementById(changeId);
 
@@ -49,7 +51,7 @@ function setupPairToggleButton(deleteId, changeId, onToggle) {
     changeBtn.classList.remove('execute');
     changeBtn.textContent = '수정';
 
-    onToggle();
+    loadFn();
   });
 
   changeBtn.addEventListener('click', () => {
@@ -59,7 +61,7 @@ function setupPairToggleButton(deleteId, changeId, onToggle) {
     deleteBtn.classList.remove('execute');
     deleteBtn.textContent = '삭제';
 
-    onToggle();
+    loadFn();
   });
 }
 
@@ -167,7 +169,38 @@ function hideHoverButton(btnId, boxId) {
   box.addEventListener('mouseleave', hide);
 }
 
-function hideClickButton(btnId, boxId){
+function hideClickButton(btnId, boxId) {
+  const button = document.getElementById(btnId);
+  const box = document.getElementById(boxId);
+  if (!button || !box) return;
+
+  function show() {
+    box.classList.remove('hidden');
+  }
+
+  function hide() {
+    box.classList.add('hidden');
+  }
+
+  // 버튼 클릭 시 → 토글 (열고 닫기)
+  button.addEventListener('click', (e) => {
+    e.stopPropagation(); // 전파 방지 (닫힘 방지용)
+    box.classList.toggle('hidden');
+  });
+
+  // 박스 클릭 시 → 전파 방지 (닫힘 방지용)
+  box.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // 바깥 클릭 시 → 닫기
+  document.addEventListener('click', () => {
+    hide();
+  });
+}
+
+
+function hideContentButton(btnId, boxId){
     const button = document.getElementById(btnId);
     const hidden = document.getElementById(boxId);
       if (!button || !hidden) {
@@ -231,6 +264,26 @@ function modalScroll(btnId, modalId, direction = 'top', behavior = 'smooth') {
   });
 }
 
+function updateScrollProgress() {
+  const topCircle = document.querySelector('#top-scroll .scroll-circle');
+  const bottomCircle = document.querySelector('#bottom-scroll .scroll-circle');
+
+  if (!topCircle || !bottomCircle) return;
+
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight === 0 ? 0 : scrollTop / docHeight;
+
+    const dash = 283;
+    topCircle.style.strokeDashoffset = dash * (1 - progress);
+    bottomCircle.style.strokeDashoffset = dash * progress;
+  };
+
+  // 초기 적용 + 이벤트 바인딩
+  handleScroll();
+  window.addEventListener('scroll', handleScroll);
+}
 
 
 function noteLink(id, rid){
@@ -285,146 +338,7 @@ function selectChange(boxId){
     });
 }
 
-function journalEvent(journalMap, loadJournals){
-    document.getElementById('journal-body').addEventListener('click', async e => {
-        const row = e.target.closest('tr');
-        const itemId = Number(row?.dataset.id);
-        const item = journalMap.get(itemId);
-        const modal = document.getElementById('modal');
-        const modalId = modal?.dataset.id;
-        if (!row||!itemId) return;
 
-        // 삭제 모드
-        if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
-            e.preventDefault();
-            const title = row.querySelector('a')?.textContent.trim();
-            if (confirm(`'${title}' 논문을 삭제할까요?`)) {
-                await fetch(`/api/journals/${itemId}`, {
-                    method: 'DELETE'
-                });
-                await loadJournals();
-            }
-            return;
-        }
-        // 태그 모달
-        if (e.target.classList.contains('modal-btn')) {
-            if (itemId != modalId) {
-               modal.dataset.id = itemId;
-               renderEffectCache(item);
-            }
-            modal.classList.remove('hidden');
-        }
-
-        // 저장 버튼
-        if (e.target.classList.contains('save-btn')) {
-            let effects, sideEffects;
-
-        if (itemId != modalId) {
-            effects = item.effects;
-            sideEffects = item.sideEffects;
-        } else {
-            effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
-                supplementId: parseInt(e.dataset.supplementId),
-                effectId: parseInt(e.dataset.effectId),
-                size: parseFloat(e.querySelector('input[name="size"]').value)
-            }));
-
-            sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
-                supplementId: parseInt(e.dataset.supplementId),
-                sideEffectId: parseInt(e.dataset.effectId),
-                size: parseFloat(e.querySelector('input[name="size"]').value)
-            }));
-        }
-
-        const updated = {
-            link: item.link,
-            trialDesignId: parseInt(row.querySelector('[name="trialDesign"]').value),
-            blind: parseInt(row.querySelector('[name="blind"]').value),
-            parallel: row.querySelector('[name="parallel"]').value,
-            durationValue: parseInt(row.querySelector('[name="durationValue"]').value),
-            durationUnit: row.querySelector('[name="durationUnit"]').value,
-            participants: parseInt(row.querySelector('[name="participants"]').value),
-            effects,
-            sideEffects
-        };
-
-        const res = await fetch(`/api/journals/${itemId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updated)
-        });
-
-        if (res.ok) {
-            alert("논문이 수정되었습니다.");
-            //모달 초기화 및 테이블 재랜더링
-            loadTags();
-            loadJournals();
-            modal.dataset.id = "0";
-        } else {
-            alert("수정 실패");
-        }
-    }
-    });
-}
-function supplementEvent(supplementMap, loadSupplements) {
-   document.getElementById('supplement-body').addEventListener('click', async e => {
-       const row = e.target.closest('tr');
-       const itemId = Number(row?.dataset.id);
-       const item = supplementMap.get(itemId);
-       const modal = document.getElementById('modal');
-       const modalId = modal?.dataset.id;
-       if (!row||!itemId) {
-           return;
-       }
-       // 삭제 모드
-       if (document.getElementById('toggle-delete') ?.classList.contains('execute')) {
-           e.preventDefault(); // 링크 이동 방지
-           if (confirm(`'${item.korName}' 을 삭제할까요?`)) {
-              await fetch(`/api/supplements/${itemId}`, {
-              method: 'DELETE'
-              });
-              await loadSupplements();
-           }
-            return;
-       }
-
-       // 저장 버튼
-       if (e.target.classList.contains('save-btn')) {
-           const types = ArrayCheckboxesById('type');
-           const updated = {
-                 korName: row.querySelector('[name="korName"]').value,
-                 engName: row.querySelector('[name="engName"]').value,
-                 dosageValue: row.querySelector('[name="dosageValue"]').value,
-                 dosageUnit: row.querySelector('[name="dosageUnit"]').value,
-                 cost: parseFloat(row.querySelector('[name="cost"]').value),
-                 types
-           };
-
-           const res = await fetch(`/api/supplements/${item.id}`, {
-                 method: 'PUT',
-                 headers: {
-                 'Content-Type': 'application/json'
-                 },
-                 body: JSON.stringify(updated)
-           });
-
-           if (res.ok) {
-                 alert('저장되었습니다');
-                 await loadSupplements();
-                 document.getElementById('list-sort')?.dispatchEvent(new Event('change'));
-           } else {
-                 alert('저장 실패');
-           }
-       }
-       // 태그 모달
-       if (e.target.classList.contains('modal-btn')) {
-           //checkCheckboxesById('type', e.taget.types);
-           document.getElementById('modal').classList.remove('hidden');
-       }
-   });
-}
 
 function themeSelect(selectId, iconId) {
   const select = document.getElementById(selectId);
@@ -454,12 +368,107 @@ async function logout(buttonId){
         });
 
         if (res.ok) {
+            alert("로그아웃 성공");
             window.location.reload(); // 또는 원하는 페이지로 리다이렉트
         } else {
+            const errText = await res.text();  // 오류 메세지 확인
+            console.error("로그아웃 실패", errText);
             alert("로그아웃 실패");
         }
     });
 }
+
+async function addBookmark(buttonId, loadFn) {
+  resetEventListener(buttonId);
+  const button = document.getElementById(buttonId);
+  if (!button) {
+    console.warn(`북마크 버튼이 존재하지 않음: ${buttonId}`);
+    return;
+  }
+
+  button.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const pageId = document.getElementById("bookmark").dataset.id;
+
+    try {
+      const res = await fetch(`/api/user/bookmark/${pageId}`, {
+        method: "POST",
+        credentials: "include" // 인증 쿠키 필요 시
+      });
+
+      if (res.ok) {
+        alert("북마크 추가 완료!");
+        loadFn();
+      } else {
+        const msg = await res.text();
+        alert("실패: " + msg);
+      }
+    } catch (err) {
+      console.error("요청 실패:", err);
+      alert("에러 발생");
+    }
+  });
+}
+
+
+  async function deleteBookmark(boxId, deleteId, loadFn) {
+    resetEventListener(boxId);
+    const box = document.getElementById(boxId);
+    const deleteButton = document.getElementById(deleteId);
+
+    if (!box || !deleteButton) {
+      console.warn("해당 요소가 존재하지 않습니다.");
+      return;
+    }
+
+    const deleteMode = deleteButton.classList.contains('execute');
+
+    if (!deleteMode) {
+      return;
+    }
+
+    box.addEventListener('click', async (e) => {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const anchor = e.target.closest('a');
+      if(!anchor){
+        return;
+      }
+      else if (!anchor.dataset.id) {
+        console.warn("페이지 ID가 존재하지 않음");
+        return;
+      }
+
+      const pageId = anchor.dataset.id;
+
+      try {
+        const res = await fetch(`/api/user/bookmark/${pageId}`, {
+          method: "DELETE",
+          credentials: "include", // 로그인 세션 필요 시
+        });
+
+        if (res.ok) {
+          alert("북마크 삭제 완료!");
+          // 선택적으로 DOM에서 항목 제거
+          anchor.remove();
+          loadFn();
+        } else {
+          const msg = await res.text();
+          alert("실패: " + msg);
+        }
+      } catch (err) {
+        console.error("에러 발생:", err);
+        alert("요청 중 오류 발생");
+      }
+    });
+  }
+
+
+
 
 export {
   setupFoldToggle,
@@ -471,6 +480,7 @@ export {
   resetButton,
   hideHoverButton,
   hideClickButton,
+  hideContentButton,
   indexScroll,
   pageScroll,
   modalScroll,
@@ -478,8 +488,9 @@ export {
   onlyOneCheckboxes,
   selectList,
   selectChange,
-  journalEvent,
-  supplementEvent,
   themeSelect,
-  logout
+  logout,
+  addBookmark,
+  deleteBookmark,
+  updateScrollProgress,
 };

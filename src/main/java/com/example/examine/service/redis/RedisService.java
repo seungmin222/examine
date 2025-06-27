@@ -1,35 +1,39 @@
 package com.example.examine.service.redis;
 
+import com.example.examine.controller.DetailController;
+import com.example.examine.entity.Page;
 import com.example.examine.entity.User;
+import com.example.examine.repository.PageRepository;
 import com.example.examine.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
+import java.util.Set;
+
 
 @Service
+@RequiredArgsConstructor
 public class RedisService {
+    private static final Logger log = LoggerFactory.getLogger(DetailController.class);
     private final UserRepository userRepo;
+    private final PageRepository pageRepo;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtParser jwtParser;
     private final JwtToken jwtToken;
     private final JwtProperties jwtProperties;
-
-    public RedisService(RedisTemplate<String, Object> redisTemplate,
-                        JwtParser jwtParser,
-                        JwtToken jwtToken,
-                        JwtProperties jwtProperties,
-                        UserRepository userRepo) {
-        this.redisTemplate = redisTemplate;
-        this.jwtParser = jwtParser;
-        this.jwtToken = jwtToken;
-        this.jwtProperties = jwtProperties;
-        this.userRepo = userRepo;
-    }
+    private final StringRedisTemplate redisViewTemplate;
 
     public void saveToken(String prefix, String username, String token, Duration duration) {
         redisTemplate.opsForValue().set(prefix + ":" + username, token, duration);
@@ -55,7 +59,7 @@ public class RedisService {
     }
 
 
-    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> refresh(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null || jwtParser.isTokenExpired(refreshToken)) {
@@ -111,4 +115,47 @@ public class RedisService {
         }
         return null;
     }
+
+    public void incrementPageView(Long pageId) {
+        String key = "page:views:" + pageId;
+
+        // ✅ Redis에 키 없으면 DB에서 가져와 초기화
+        if (!Boolean.TRUE.equals(redisViewTemplate.hasKey(key))) {
+            Page page = pageRepo.findById(pageId)
+                    .orElseThrow(() -> new RuntimeException("Page not found"));
+            redisViewTemplate.opsForValue().set(key, String.valueOf(page.getViewCount()));
+        }
+
+        // ✅ 키가 있든 없든 증가시킴
+            redisViewTemplate.opsForValue().increment(key);
+    }
+
+
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    @Transactional
+    public void syncViewsToDatabase() {
+        Set<String> keys = redisViewTemplate.keys("page:views:*");
+        if (keys == null) return;
+
+        for (String key : keys) {
+            try {
+                String pageIdStr = key.substring("page:views:".length());
+                Long pageId = Long.valueOf(pageIdStr);
+
+                String countStr = redisViewTemplate.opsForValue().get(key);
+                if (countStr == null) continue;
+
+                Long count = Long.valueOf(countStr);
+
+                pageRepo.findById(pageId).ifPresent(page -> {
+                    page.setViewCount(count);
+                    pageRepo.save(page);
+                    redisViewTemplate.delete(key); // ✅ 삭제 추가
+                });
+            } catch (Exception e) {
+                log.warn("조회수 동기화 실패: key={}, error={}", key, e.getMessage());
+            }
+        }
+    }
+
 }

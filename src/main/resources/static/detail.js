@@ -26,11 +26,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     try {
         await loadAll();
-        await loadBasic();
+        await loadBasic(loadAll);
         supplementEvent();
         journalEvent();
 
-        setupPairToggleButton('toggle-delete', 'toggle-change', loadAll);
+
     } catch (err) {
         document.getElementById('title').textContent = '성분을 불러올 수 없습니다';
         console.error(err);

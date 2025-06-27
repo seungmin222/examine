@@ -20,7 +20,6 @@ import {
     selectList,
     onlyOneCheckboxes,
     selectChange,
-    journalEvent
 } from '/util/event.js';
 
 import {
@@ -33,6 +32,9 @@ import {
     loadBasic
 } from '/util/load.js';
 
+import {
+    journalEvent
+} from '/util/tableEvent.js';
 
 // 전역 맵
 const journalMap = new Map();
@@ -40,7 +42,7 @@ const journalMap = new Map();
 // 초기 로딩
 document.addEventListener('DOMContentLoaded', async () => {
 
-    await loadBasic();
+    await loadBasic(loadJournals);
     await loadJournals();
     await loadTags();
    // 테이블 클릭 이벤트리스너, 이벤트 위임이므로 한번만 추가
@@ -56,8 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSortTrigger('modal-sort', loadTags);
 
     // 삭제 / 수정 토글
-    setupPairToggleButton('toggle-delete', 'toggle-change', loadJournals);
-    setupToggleButton('cash-toggle-delete')
+    setupToggleButton('cash-toggle-delete',()=>{}, '삭제', '삭제중')
 
     // 모달 열고 닫기
     setupModalOpenClose('modal-open', 'modal-close', 'modal');

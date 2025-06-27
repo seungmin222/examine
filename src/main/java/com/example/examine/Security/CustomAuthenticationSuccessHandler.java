@@ -1,6 +1,8 @@
 package com.example.examine.Security;
 
 import com.example.examine.entity.User;
+import com.example.examine.repository.UserRepository;
+import com.example.examine.service.EntityService.UserService;
 import com.example.examine.service.redis.JwtProperties;
 import com.example.examine.service.redis.JwtToken;
 import com.example.examine.service.redis.RedisService;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -22,49 +25,47 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final JwtToken jwtToken;
     private final JwtProperties jwtProperties;
     private final RedisService redisService;
+    private final UserRepository userRepository; // ✅ UserService 대신 이것만 주입
 
-    public CustomAuthenticationSuccessHandler(JwtToken jwtToken,
-                                              JwtProperties jwtProperties,
-                                              RedisService redisService) {
+    public CustomAuthenticationSuccessHandler(
+            JwtToken jwtToken,
+            JwtProperties jwtProperties,
+            RedisService redisService,
+            UserRepository userRepository
+    ) {
         this.jwtToken = jwtToken;
         this.jwtProperties = jwtProperties;
         this.redisService = redisService;
+        this.userRepository = userRepository;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        // 로그인한 사용자 정보 가져오기
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
 
-        // JWT 생성
-        String token = jwtToken.createAccessToken((User) userDetails); // 필요하면 UserDetails → User 변환
+        // ✅ 직접 User 조회
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 없음"));
 
-        // Redis에 토큰 저장
-        redisService.saveToken("access",username, token, jwtProperties.getAccessExpiration());
+        String accessToken = jwtToken.createAccessToken(user);
+        String refreshToken = jwtToken.createRefreshToken(user);
 
-        // JWT를 쿠키에 담기
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);         // JavaScript에서 접근 못하게
-        cookie.setPath("/");              // 전체 경로에서 쿠키 사용 가능
-        cookie.setMaxAge((int) jwtProperties.getAccessExpiration().getSeconds());    // 2시간 (초 단위)
-
-        cookie.setSecure(true); // HTTPS 환경에서만 전송하고 싶으면 true
-        response.addCookie(cookie); // 응답에 쿠키 추가
-
-        String refreshToken = jwtToken.createRefreshToken((User) userDetails);
+        redisService.saveToken("access", username, accessToken, jwtProperties.getAccessExpiration());
         redisService.saveToken("refresh", username, refreshToken, jwtProperties.getRefreshExpiration());
 
-        Cookie refreshCookie = new Cookie("refresh", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge((int) jwtProperties.getRefreshExpiration().getSeconds());
-        response.addCookie(refreshCookie);
+        // Access 토큰
+        Cookie access = createCookie("access", accessToken, (int) jwtProperties.getAccessExpiration().getSeconds());
+        response.addCookie(access);
+
+// Refresh 토큰
+        Cookie refresh = createCookie("refresh", refreshToken, (int) jwtProperties.getRefreshExpiration().getSeconds());
+        response.addCookie(refresh);
 
 
-        // 리다이렉트 처리
         String redirect = request.getParameter("redirect");
         if (redirect != null && !redirect.isBlank()) {
             response.sendRedirect(redirect);
@@ -72,5 +73,16 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             response.sendRedirect("/");
         }
     }
+    private Cookie createCookie(String name, String value, int maxAgeSeconds) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);       // XSS 방지
+        cookie.setSecure(false);        // 개발 환경일 경우 false
+        cookie.setPath("/");            // 전체 경로에서 유효
+        cookie.setMaxAge(maxAgeSeconds); // 유효 시간 (초 단위)
+        return cookie;
+    }
+
 }
+
+
 

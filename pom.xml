@@ -112,8 +112,27 @@
 			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Hibernate Validator -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>8.0.1.Final</version> <!-- 또는 최신 안정 버전 -->
+		</dependency>
 
-	</dependencies>
+		<!-- Jakarta EL (표현식 언어 - 필요 시) -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+			<version>1.18.38</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
 
 
 	<build>

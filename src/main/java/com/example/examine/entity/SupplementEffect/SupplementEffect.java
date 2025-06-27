@@ -3,18 +3,29 @@ package com.example.examine.entity.SupplementEffect;
 import com.example.examine.entity.Effect.Effect;
 import com.example.examine.entity.Effect.EffectTag;
 import com.example.examine.entity.Supplement;
+import com.example.examine.entity.EntityTime;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 import com.example.examine.service.util.CalculateScore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
 @Table(name = "supplement_effect")
-public class SupplementEffect implements SE {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class SupplementEffect extends EntityTime implements SE {
 
     @EmbeddedId
     private SupplementEffectId id = new SupplementEffectId();
@@ -40,9 +51,6 @@ public class SupplementEffect implements SE {
 
     @Column(name = "final_score", nullable = false)
     private BigDecimal finalScore = BigDecimal.ZERO;       // totalScoreSum / totalParticipants
-
-
-    public SupplementEffect() {}
 
     public SupplementEffect(Supplement supplement, EffectTag effectTag) {
         this.supplement = supplement;

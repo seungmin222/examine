@@ -58,7 +58,7 @@
     <div>
         <h2 id="index-2" class="text-center">논문 추가</h2>
     <form id="insert-form" class="items-start gap-2">
-        <input name="link" placeholder="링크" class="w-48"/>
+        <input name="link" placeholder="링크는 필수 입력값입니다." class="w-48"/>
         <div class="flex">
         <input type="number" name="durationValue" placeholder="기간"/>
         <select class="w-28" name="durationUnit">
@@ -69,7 +69,7 @@
         </select>
         </div>
         <select name="trialDesign" class="w-48">
-            <option value="" class="F w-48">Unknown</option>
+            <option value="" class="F w-48">null</option>
             <option value="1" class="A w-48">Meta-analysis</option>
             <option value="20" class="A w-48">Systematic Review</option>
             <option value="21" class="B w-48">RCT</option>
@@ -82,13 +82,13 @@
             <option value="28" class="F w-48">In-vitro Study</option>
         </select>
         <select name="blind" class="w-32">
-            <option value="" class="w-32">Unknown</option>
+            <option value="" class="w-32">null</option>
             <option value="0" class="w-32">open-label</option>
             <option value="1" class="B w-32">single-blind</option>
             <option value="2" class="A w-32">double-blind</option>
         </select>
         <select name="parallel" class="w-32">
-           <option value="" class="w-32">Unknown</option>
+           <option value="" class="w-32">null</option>
            <option value="true" class="w-32">parallel</option>
            <option value="false" class="w-32">cross-over</option>
         </select>
@@ -165,14 +165,16 @@
                     <tbody id="mapping-cash"></tbody>
                 </table>
                <p>
-                   성분과 효과를 하나씩 선택하고 연구에서의 효과 크기를 선택하면
-                   효과 크기(성분이 피험자에게 끼치는 영향의 퍼센테이지), 연구 설계, 맹검 방법, 참가자, 기간에 따라 자동으로
-                   점수가 산출됩니다. 다만 효과 크기, 설계 특성을 제외한 다른 값들이 null이
-                   아니어야 합니다. (효과 크기는 0, 설계특성은 open-label, parallel가 기본값으로 설정되어 있습니다.)
+                   성분과 효과를 하나씩 선택하고 연구에서의 효과 크기(성분이 피험자에게 끼치는 영향의 퍼센테이지)를 선택하면
+                   효과 크기, 연구 설계, 맹검 방법, 참가자, 기간에 따라 자동으로 점수가 산출됩니다. 이 중 입력되지 않은 수치들은
+                   크롤링된 초록을 llm에 넣어 산출된 값으로 자동 매핑되며 초록의 정보 부족, 혹은 ai 성능 한계로 null 값이 들어간 경우
+                   점수엔 기본값이 대신 반영됩니다.(효과크기:0%, 참가자:1명, 기간:1일, 맹검:오픈 라벨, 설계:시험관 실험)
                </p>
+               <div class="line"></div>
                <p>
                    효과 크기, 기간은 범위로 설정되어 있는 경우가 많습니다. 이 경우 일반적으로
                    산술평균, 중앙값, 혹은 본인이 적절하다고 생각하는 값을 임의로 넣어주시면 됩니다.
+                   메타분석에서의 맹검도 최빈값 혹은 적절하다고 생각하는 값을 넣어주세요.
                </p>
         </div>
     </div>

@@ -9,6 +9,7 @@ import com.example.examine.entity.*;
 import com.example.examine.entity.Effect.EffectTag;
 import com.example.examine.entity.Effect.SideEffectTag;
 import com.example.examine.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TagService {
     private static final Logger log = LoggerFactory.getLogger(DetailController.class);
 
@@ -27,19 +29,8 @@ public class TagService {
     private final EffectTagRepository effectRepo;
     private final SideEffectTagRepository sideEffectRepo;
     private final TrialDesignRepository trialDesignRepo;
-    public TagService(SupplementRepository supplementRepo,
-                             TypeTagRepository typeRepo,
-                             EffectTagRepository effectRepo,
-                             SideEffectTagRepository sideEffectRepo,
-                             TrialDesignRepository trialDesignRepo) {
-        this.supplementRepo = supplementRepo;
-        this.typeRepo = typeRepo;
-        this.effectRepo = effectRepo;
-        this.sideEffectRepo = sideEffectRepo;
-        this.trialDesignRepo = trialDesignRepo;
-    }
 
-    public ResponseEntity<?> create(TagRequest dto) {
+    public ResponseEntity<String> create(TagRequest dto) {
         switch (dto.type()) {
             case "type" -> {
                 TypeTag tag = new TypeTag();
@@ -156,7 +147,7 @@ public class TagService {
 
 
 
-    public ResponseEntity<?> delete(String type, Long id ){
+    public ResponseEntity<String> delete(String type, Long id ){
         boolean[] removed = {false}; // 람다 안에서 값 수정 위해 배열 사용
 
         switch (type) {

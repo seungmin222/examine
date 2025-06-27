@@ -1,13 +1,22 @@
 package com.example.examine.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "supplement_detail")
-public class SupplementDetail {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class SupplementDetail extends EntityTime {
     @Id
     private Long supplementId; // 직접 ID 필드로 사용
 
@@ -21,44 +30,5 @@ public class SupplementDetail {
     private String negative;
     private String mechanism;
     private String dosage;
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
-    public String getIntro() {
-        return intro;
-    }
-    public void setIntro(String intro) {
-        this.intro = intro;
-    }
-    public String getPositive() {
-        return positive;
-    }
-    public void setPositive(String positive) {
-        this.positive = positive;
-    }
-    public String getNegative() {
-        return negative;
-    }
-    public void setNegative(String negative) {
-        this.negative = negative;
-    }
-    public String getMechanism() {
-        return mechanism;
-    }
-    public void setMechanism(String mechanism) {
-        this.mechanism = mechanism;
-    }
-    public String getDosage() {
-        return dosage;
-    }
-    public void setDosage(String dosage) {
-        this.dosage = dosage;
-    }
-    public Supplement getSupplement() {
-        return supplement;
-    }
-    public void setSupplement(Supplement supplement) {
-        this.supplement = supplement;
-    }
 }

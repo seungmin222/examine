@@ -12,6 +12,7 @@ import com.example.examine.repository.*;
 import com.example.examine.service.llm.LLMResponse;
 import com.example.examine.service.llm.LLMService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -28,6 +29,7 @@ import java.util.*;
 
 // 서비스
 @Service
+@RequiredArgsConstructor
 public class SupplementService {
     private static final Logger log = LoggerFactory.getLogger(DetailController.class);
 
@@ -39,23 +41,7 @@ public class SupplementService {
     private final JournalSupplementEffectRepository journalSupplementEffectRepo;
     private final JournalSupplementSideEffectRepository journalSupplementSideEffectRepo;
 
-    public SupplementService(SupplementRepository supplementRepo,
-                             TypeTagRepository typeRepo,
-                             SupplementDetailRepository supplementDetailRepo,
-                             SupplementEffectRepository supplementEffectRepo,
-                             SupplementSideEffectRepository supplementSideEffectRepo,
-                             JournalSupplementEffectRepository journalSupplementEffectRepo,
-                             JournalSupplementSideEffectRepository journalSupplementSideEffectRepo) {
-        this.supplementRepo = supplementRepo;
-        this.typeRepo = typeRepo;
-        this.supplementDetailRepo = supplementDetailRepo;
-        this.supplementEffectRepo = supplementEffectRepo;
-        this.supplementSideEffectRepo = supplementSideEffectRepo;
-        this.journalSupplementEffectRepo = journalSupplementEffectRepo;
-        this.journalSupplementSideEffectRepo = journalSupplementSideEffectRepo;
-    }
-
-    public ResponseEntity<?> create(SupplementRequest dto) {
+    public ResponseEntity<String> create(SupplementRequest dto) {
         if (supplementRepo.findByKorNameAndEngName(dto.korName(), dto.engName()).isPresent()) {
             return ResponseEntity.badRequest().body("이미 같은 이름의 성분이 존재합니다.");
         }
@@ -63,13 +49,13 @@ public class SupplementService {
             return ResponseEntity.badRequest().body("이름을 입력해 주세요.");
         }
 
-        Supplement supplement = new Supplement();
-
-        supplement.setKorName(dto.korName());
-        supplement.setEngName(dto.engName());
-        supplement.setDosageValue(dto.dosageValue());
-        supplement.setDosageUnit(dto.dosageUnit());
-        supplement.setCost(dto.cost());
+        Supplement supplement = Supplement.builder()
+                .korName(dto.korName())
+                .engName(dto.engName())
+                .dosageValue(dto.dosageValue())
+                .dosageUnit(dto.dosageUnit())
+                .cost(dto.cost())
+                .build();
 
         List<TypeTag> newTypes = dto.typeIds() != null
                 ? new ArrayList<>(typeRepo.findAllById(dto.typeIds()))
@@ -80,7 +66,8 @@ public class SupplementService {
         SupplementAnalysis result = analyze(supplement.getEngName(),supplement.getKorName());
         applyAnalysis(supplement, result);
 
-        return ResponseEntity.ok(supplementRepo.save(supplement));
+        supplementRepo.save(supplement);
+        return ResponseEntity.ok("성분 추가 완료");
     }
 
     public SupplementAnalysis analyze(String engName, String korName) {
@@ -175,7 +162,7 @@ public class SupplementService {
     }
 
 
-    public ResponseEntity<?> update(Long id, SupplementRequest dto) {
+    public ResponseEntity<String> update(Long id, SupplementRequest dto) {
 
         Optional<Supplement> opt = supplementRepo.findById(id);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
@@ -194,8 +181,8 @@ public class SupplementService {
         supplement.getTypes().clear(); // 기존 컬렉션 유지
         supplement.getTypes().addAll(newTypes); // 내부만 갱신
 
-        Supplement updated = supplementRepo.save(supplement);
-        return ResponseEntity.ok(updated);
+        supplementRepo.save(supplement);
+        return ResponseEntity.ok("성분 업데이트 완료");
     }
 
     public List<SupplementResponse> findAll(Sort sort){
@@ -246,7 +233,7 @@ public class SupplementService {
                 .toList();
     }
 
-    public ResponseEntity<?> delete(Long id) {
+    public ResponseEntity<String> delete(Long id) {
         if (!supplementRepo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -265,7 +252,7 @@ public class SupplementService {
     }
 
 
-    public ResponseEntity<?> detailUpdate(@PathVariable Long id, @RequestBody DetailRequest dto) {
+    public ResponseEntity<String> detailUpdate(@PathVariable Long id, @RequestBody DetailRequest dto) {
         log.info("🔄 수정 요청 들어옴 - ID: {}", id);
         log.info("📥 받은 데이터: {}", dto);
 
@@ -279,8 +266,8 @@ public class SupplementService {
         s.setMechanism(dto.mechanism());
         s.setDosage(dto.dosage());
 
-        SupplementDetail updated = supplementDetailRepo.save(s);
-        return ResponseEntity.ok(updated);
+        supplementDetailRepo.save(s);
+        return ResponseEntity.ok("성분 업데이트 완료");
     }
 
 }

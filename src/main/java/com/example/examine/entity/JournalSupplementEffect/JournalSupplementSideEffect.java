@@ -2,13 +2,18 @@ package com.example.examine.entity.JournalSupplementEffect;
 
 import com.example.examine.entity.Effect.Effect;
 import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.entity.EntityTime;
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.Supplement;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,7 +22,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "journal_supplement_side_effect")
-public class JournalSupplementSideEffect implements JSE {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class JournalSupplementSideEffect extends EntityTime implements JSE {
 
     @EmbeddedId
     private JournalSupplementSideEffectId id = new JournalSupplementSideEffectId();
@@ -43,12 +52,6 @@ public class JournalSupplementSideEffect implements JSE {
 
     @Column(precision = 8, scale = 4)
     private BigDecimal score;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    public JournalSupplementSideEffect() {}
 
     public JournalSupplementSideEffect(Journal journal,
             Supplement supplement,

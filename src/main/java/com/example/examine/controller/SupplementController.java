@@ -4,6 +4,7 @@ import com.example.examine.dto.request.SupplementRequest;
 import com.example.examine.dto.response.SupplementResponse;
 import com.example.examine.repository.*;
 import com.example.examine.service.EntityService.SupplementService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/supplements")
+@RequiredArgsConstructor
 public class SupplementController {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementController.class);
@@ -23,15 +25,9 @@ public class SupplementController {
     private final SupplementRepository supplementRepo;
     private final SupplementService supplementService;
 
-    public SupplementController(SupplementRepository supplementRepo,
-                                SupplementService supplementService) {
-        this.supplementRepo = supplementRepo;
-        this.supplementService = supplementService;
-    }
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody SupplementRequest dto) {
+    public ResponseEntity<String> create(@RequestBody SupplementRequest dto) {
        log.info("📥 받은 데이터: {}", dto);
        return supplementService.create(dto);
     }
@@ -39,7 +35,7 @@ public class SupplementController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SupplementRequest dto) {
+    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody SupplementRequest dto) {
         log.info("🔄 수정 요청 들어옴 - ID: {}", id);
         log.info("📥 받은 데이터: {}", dto);
         return supplementService.update(id, dto);

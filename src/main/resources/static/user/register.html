@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
-  <title>회원가입</title>
+  <title>로그인</title>
   <link href="/dist/output.css" rel="stylesheet">
   <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
   <script src="/headScript.js"></script>
 </head>
-
 <body>
 <div id="load-basic"></div>
 <div class="w-[90%] ml-auto mr-0">
   <!--background-->
   <div class="w-[95%] mx-auto">
     <!--main-content-->
-    <h2>회원가입</h2>
-    <form method="post" action="/api/user/register">
-      <label>아이디: <input type="text" name="username" required></label><br>
-      <label>비밀번호: <input type="password" name="password" required></label><br>
-      <button type="submit">가입하기</button>
-    </form>
-    <div class="flex items-center">
-      <span>이미 계정이 있으신가요? <a href="/user/login.html">로그인</a></span>
-    </div>
+    <div class="flex justify-center">
+      <form id="register-form" class="w-72 gap-4">
+        <h2 class="text-center">회원가입</h2>
+        <div class="flex flex-col items-end w-full">
+        <div class="flex w-fit">
+            <input id="username" class="w-32" type="text" name="username" placeholder="아이디"/>
+            <button id="duplicate-button" type="click" data-check="false" data-username="">중복확인</button>
+        </div>
+        </div>
+        <input class="w-32" type="password" name="password" placeholder="비밀번호"/>
+        <input class="w-32" type="password" name="check" placeholder="비밀번호 확인"/>
+        <button type="submit">회원가입</button>
+        <p>이미 회원이신가요? <a href="/user/login.html">로그인</a></p>
+      </form>
+    </div>>
   </div>
 </div>
-<script type="module" src="login.js"></script>
+<script type="module" src="register.js"></script>
 </body>
 
 </html>

@@ -1,13 +1,23 @@
 
 <div id="page-scroll-remote" class="scroll">
-<button id="top-scroll" type="button">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
-        <path d="m18 15-6-6-6 6"></path>
-    </svg>
-</button>
-<button id="bottom-scroll" type="button">
-    <svg class="rotate-180" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
-        <path d="m18 15-6-6-6 6"></path>
-    </svg>
-</button>
+    <button id="top-scroll" type="button">
+        <svg class="scroll-progress" width="40" height="40" viewBox="0 0 100 100">
+            <!-- 배경 원 -->
+            <circle class="scroll-circle-bg" cx="50" cy="50" r="45" stroke="rgba(0,0,0,0.1)" stroke-width="10" fill="none" />
+            <!-- 채워지는 원 -->
+            <circle class="scroll-circle" cx="50" cy="50" r="45" stroke="currentColor" stroke-width="10" fill="none" />
+            <!-- 아이콘 (위쪽 화살표) -->
+            <path d="M40 30 L60 50 L40 70" stroke="black" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
+    <button id="bottom-scroll" type="button">
+        <svg class="scroll-progress rotate-270" width="40" height="40" viewBox="0 0 100 100">
+            <!-- 배경 원 -->
+            <circle class="scroll-circle-bg" cx="50" cy="50" r="45" stroke="rgba(0,0,0,0.1)" stroke-width="10" fill="none" />
+            <!-- 채워지는 원 -->
+            <circle class="scroll-circle" cx="50" cy="50" r="45" stroke="currentColor" stroke-width="10" fill="none" />
+            <!-- 아이콘 (위쪽 화살표) -->
+            <path d="M60 30 L40 50 L60 70" stroke="black" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
 </div>

@@ -9,11 +9,9 @@ import {
     setupFoldToggle,
     setupSortTrigger,
     setupToggleButton,
-    setupPairToggleButton,
     setupModalOpenClose,
     setupSearchForm,
     resetButton,
-    supplementEvent,
     selectList
 } from '/util/event.js';
 
@@ -27,12 +25,16 @@ import {
     loadBasic
 } from '/util/load.js';
 
+import {
+    supplementEvent
+} from '/util/tableEvent.js';
+
 const supplementMap = new Map();
 
 // 초기 로딩
 document.addEventListener('DOMContentLoaded', async e => {
 
-    await loadBasic();
+    await loadBasic(loadSupplements);
     await loadSupplements();
     await loadTags();
     // 테이블 수정, 삭제
@@ -48,8 +50,7 @@ document.addEventListener('DOMContentLoaded', async e => {
     setupSortTrigger('modal-sort', loadTags);
 
     // 삭제 / 수정 토글
-    setupPairToggleButton('toggle-delete', 'toggle-change', loadSupplements);
-    setupPairToggleButton('tag-toggle-delete', '', loadTags); // 수정버튼 없는 경우도 처리 가능 // 단독 토글일 경우 self로 전달
+    setupToggleButton('tag-toggle-delete', loadTags, '삭제', '삭제중'); // 수정버튼 없는 경우도 처리 가능 // 단독 토글일 경우 self로 전달
 
     // 모달 열고 닫기
     setupModalOpenClose('modal-open', 'modal-close', 'modal');

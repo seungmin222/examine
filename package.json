@@ -15,6 +15,7 @@
     "tailwindcss": "^3.4.1"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "browserslist": "^4.25.0",
     "caniuse-lite": "^1.0.30001720",
     "electron-to-chromium": "^1.5.161",

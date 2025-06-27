@@ -8,6 +8,7 @@ import com.example.examine.dto.request.TierTagRequest;
 import com.example.examine.dto.response.TagResponse;
 import com.example.examine.dto.response.TierTagResponse;
 import com.example.examine.service.EntityService.TagService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,19 +17,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tags")
+@RequiredArgsConstructor
 public class TagController {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementController.class);
 
     private final TagService tagService;
 
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
-    }
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<?> addTag(@RequestBody TagRequest dto) {
+    public ResponseEntity<String> addTag(@RequestBody TagRequest dto) {
         log.info("📥 받은 데이터: {}", dto);
         return tagService.create(dto);
     }
@@ -61,7 +59,7 @@ public class TagController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{type}/{id}")
-    public ResponseEntity<?> deleteTag(@PathVariable String type, @PathVariable Long id) {
+    public ResponseEntity<String> deleteTag(@PathVariable String type, @PathVariable Long id) {
         return tagService.delete(type, id);
     }
 

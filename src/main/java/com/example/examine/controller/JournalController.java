@@ -4,6 +4,7 @@ import com.example.examine.dto.request.JournalRequest;
 import com.example.examine.dto.response.JournalResponse;
 import com.example.examine.repository.*;
 import com.example.examine.service.EntityService.JournalService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,26 +14,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/journals")
+@RequiredArgsConstructor
 public class JournalController {
 
     private final JournalRepository journalRepo;
     private final JournalService journalService;
 
-    public JournalController(JournalRepository journalRepo,
-                             JournalService journalService) {
-        this.journalRepo = journalRepo;
-        this.journalService = journalService;
-    }
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody JournalRequest dto) {
+    public ResponseEntity<String> create(@RequestBody JournalRequest dto) {
         return journalService.create(dto);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody JournalRequest dto) {
+    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody JournalRequest dto) {
         return journalService.update(id, dto);
     }
 
@@ -70,7 +66,7 @@ public class JournalController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         return journalService.delete(id);
     }
 

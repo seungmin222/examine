@@ -2,18 +2,29 @@ package com.example.examine.entity.SupplementEffect;
 
 import com.example.examine.entity.Effect.Effect;
 import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.entity.EntityTime;
 import com.example.examine.entity.Supplement;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.example.examine.service.util.CalculateScore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 
 @Entity
 @Table(name = "supplement_side_effect")
-public class SupplementSideEffect implements SE {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class SupplementSideEffect extends EntityTime implements SE {
 
     @EmbeddedId
     private SupplementSideEffectId id = new SupplementSideEffectId();
@@ -39,9 +50,6 @@ public class SupplementSideEffect implements SE {
 
     @Column(name = "final_score", nullable = false)
     private BigDecimal finalScore = BigDecimal.ZERO;
-
-
-    public SupplementSideEffect() {}
 
     public SupplementSideEffect(Supplement supplement, SideEffectTag sideEffectTag) {
         this.supplement = supplement;

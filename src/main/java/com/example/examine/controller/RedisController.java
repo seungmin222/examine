@@ -3,6 +3,7 @@ package com.example.examine.controller;
 import com.example.examine.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +13,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/redis")
+@RequiredArgsConstructor
 public class RedisController {
 
     private final RedisService redisService;
 
-    public RedisController(RedisService redisService) {
-        this.redisService = redisService;
-    }
 
     @PostMapping("/save")
     public ResponseEntity<Map<String, String>> saveValue(
@@ -46,8 +45,8 @@ public class RedisController {
         return ResponseEntity.ok(Map.of("result", value, "key", fullKey));
     }
 
-    @PostMapping("/api/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refresh(HttpServletRequest request, HttpServletResponse response) {
         return redisService.refresh(request, response);
     }
 }

@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 username,
                 password,
                 redirect
-            })
+            }),
+            credentials: "include"
         });
 
         if (res.ok) {

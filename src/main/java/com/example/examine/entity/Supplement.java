@@ -8,11 +8,20 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "supplement", uniqueConstraints = @UniqueConstraint(columnNames = {"korName", "engName"}))
-public class Supplement {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class Supplement extends EntityTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,95 +64,7 @@ public class Supplement {
     @JsonIgnore
     private List<Journal> journals = new ArrayList<>();
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
  // detail 클래스를 supplement 엔티티에 직접 추가하면 자원낭비
  // detail에서 id 받는게 적절
 
-    public List<Journal> getJournals() {
-        return journals;
-    }
-
-    public void setJournals(List<Journal> journals) {
-        this.journals = journals;
-    }
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getKorName() {
-        return korName;
-    }
-
-    public void setKorName(String korName) {
-        this.korName = korName;
-    }
-
-    public String getEngName() {
-        return engName;
-    }
-
-    public void setEngName(String engName) {
-        this.engName = engName;
-    }
-
-    public String getDosageUnit() {
-        return dosageUnit;
-    }
-
-    public void setDosageUnit(String dosageUnit) {
-        this.dosageUnit = dosageUnit;
-    }
-
-    public BigDecimal getCost() {
-        return cost;
-    }
-
-    public void setCost(BigDecimal cost) {
-        this.cost = cost;
-    }
-
-    public List<TypeTag> getTypes() {
-        return types;
-    }
-
-    public void setTypes(List<TypeTag> types) {
-        this.types = types;
-    }
-
-    public List<SupplementEffect> getEffects() {
-        return effects;
-    }
-
-    public void setEffects(List<SupplementEffect> effectMappings) {
-        this.effects = effectMappings;
-    }
-
-    public List<SupplementSideEffect> getSideEffects() {
-        return sideEffects;
-    }
-
-    public void setSideEffects(List<SupplementSideEffect> sideEffectMappings) {this.sideEffects = sideEffectMappings;}
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public BigDecimal getDosageValue() {
-        return dosageValue;
-    }
-
-    public void setDosageValue(BigDecimal dosageValue) {
-        this.dosageValue = dosageValue;
-    }
 }

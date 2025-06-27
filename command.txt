@@ -6,3 +6,6 @@ git commit -m "변경 내용 메시지"
 git push                        # 원격 저장소로 푸시
 
 npx tailwindcss -i src/input.css -o src/main/resources/static/dist/output.css --watch
+
+
+docker exec -it 86af032b8af2120333b4904c12e03a00d264b2059d554956ac4c6e8ae85c9691 redis-cli

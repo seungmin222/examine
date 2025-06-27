@@ -55,3 +55,10 @@ void deleteAllByJournalId(@Param("journalId") Long journalId);
 랭킹	ZSET 사용해서 실시간 인기순
 알림 큐	List로 작업 저장 후 worker가 처리
 방문자 수	HyperLogLog로 유니크 카운트 추정
+
+join 필드들은 getset 같은 걸로 호출 되는 시점에 로딩되는구나. id나 다른 db 칼럼에 직접있는 필드들은 바로 로딩되고?
+lazy 로딩되는 필드들 트랜잭션이랑 join fetch 중 고민
+-> 트랜잭션: 유지보수/ join fetch: 성능
+
+최대한 모듈화 해서 책임 분할 -> ex) 모듈 로딩할때 html 코드 랜더링, js 이벤트 랜더링 나눠서 관리(html은 그대로 상태유지)
+z인덱스 뿐만 아니라 랜더링 순서에도 요소 높이 결정

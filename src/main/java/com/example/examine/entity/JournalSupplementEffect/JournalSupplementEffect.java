@@ -2,21 +2,26 @@ package com.example.examine.entity.JournalSupplementEffect;
 
 import com.example.examine.entity.Effect.Effect;
 import com.example.examine.entity.Effect.EffectTag;
+import com.example.examine.entity.EntityTime;
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.Supplement;
-import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "journal_supplement_effect")
-public class JournalSupplementEffect implements JSE {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+public class JournalSupplementEffect extends EntityTime implements JSE {
 
     @EmbeddedId
     private JournalSupplementEffectId id = new JournalSupplementEffectId();
@@ -42,12 +47,6 @@ public class JournalSupplementEffect implements JSE {
 
     @Column(precision = 8, scale = 4)
     private BigDecimal score;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    public JournalSupplementEffect() {}
 
     public JournalSupplementEffect(Journal journal
             , Supplement supplement
