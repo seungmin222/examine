@@ -1,12 +1,10 @@
-package com.example.examine.entity;
+package com.example.examine.entity.detail;
 
+import com.example.examine.entity.extend.EntityTime;
+import com.example.examine.entity.Tag.Supplement;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "supplement_detail")
@@ -25,10 +23,22 @@ public class SupplementDetail extends EntityTime {
     @JoinColumn(name = "supplement_id")
     private Supplement supplement;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String overview;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String intro;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String positive;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String negative;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String mechanism;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String dosage;
 
 }

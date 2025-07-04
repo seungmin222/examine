@@ -10,6 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         // 모든 /detail/*.html 요청을 detail.html로 포워딩
-        registry.addViewController("/detail/{name}.html").setViewName("forward:/detail.html");
+        registry.addViewController("/detail/{korName}.html").setViewName("forward:/detail.html");
     }
 }

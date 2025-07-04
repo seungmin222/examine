@@ -1,4 +1,8 @@
-function journalEvent(journalMap, loadJournals){
+import {
+    renderEffectCache
+} from '/util/utils.js';
+
+function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
     document.getElementById('journal-body').addEventListener('click', async e => {
         const row = e.target.closest('tr');
         const itemId = Number(row?.dataset.id);
@@ -39,13 +43,17 @@ function journalEvent(journalMap, loadJournals){
                 effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
                     supplementId: parseInt(e.dataset.supplementId),
                     effectId: parseInt(e.dataset.effectId),
-                    size: parseFloat(e.querySelector('input[name="size"]').value)
+                    cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
+                    pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
+                    pValue: parseFloat(e.querySelector('input[name="p"]').value)
                 }));
 
                 sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
                     supplementId: parseInt(e.dataset.supplementId),
                     sideEffectId: parseInt(e.dataset.effectId),
-                    size: parseFloat(e.querySelector('input[name="size"]').value)
+                    cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
+                    pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
+                    pValue: parseFloat(e.querySelector('input[name="p"]').value)
                 }));
             }
 
@@ -187,8 +195,30 @@ function pageEvent(pageMap, loadPages){
     });
 }
 
+function tagTableEvent(loadEffects,type){
+    document.getElementById('tag-body').addEventListener('click', async e => {
+        const row = e.target.closest('tr');
+        const itemId = Number(row?.dataset.id)
+        if (!row||!itemId) return;
+
+        // 삭제 모드
+        if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
+            e.preventDefault();
+            const name = row.querySelector('[name="korName"]')?.textContent.trim();
+            if (confirm(`'${name}' 태그를 삭제할까요?`)) {
+                await fetch(`/api/tags/${type}/${itemId}`, {
+                    method: 'DELETE'
+                });
+                await loadEffects();
+            }
+            return;
+        }
+    });
+}
+
 export {
     supplementEvent,
     journalEvent,
-    pageEvent
+    pageEvent,
+    tagTableEvent
 };

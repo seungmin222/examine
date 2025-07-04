@@ -22,21 +22,21 @@
 
     /*  */
     --color-background: white;
-    --color-1: #ffcfea;
+    --color-1: #f8e0f0; /* #ffcfea;*/
     --color-2: #ffe4ec;
-    --color-text: gray;
-    --color-bold-text: magenta;
+    --color-text: #c2185b;
+    --color-bold-text: #880e4f;
     --color-button: hotpink;
     --color-button-text: white;
     --color-scroll-button: rgba(186, 104, 200, 0.3);
     --color-scroll-circle: rgba(186, 104, 200, 0.9);
-    --color-scroll-circle-bg: rgba(186, 104, 200, 0.3);
-    --color-arrow: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
     --color-border: #ff6a9c;
     --color-focus: #fff0f5;
     --color-focus-button: #ff6a9c;
     --color-toggle-button: red;
-    --color-selected: #DDA0DD;
+    --color-selected: #ffcfea;
     --color-checked: #ff6a9c;
     --color-tier-s: magenta;
     --color-tier-a: blue;
@@ -46,39 +46,38 @@
     --color-tier-f: gray;
     --color-tier-null: gray;
     --color-table-header: var(--color-2);
-    --color-table-hover: var(--color-2);
-    --color-tooltip: var(--color-2);
+    --color-table-hover: #ffcfea; /* #ffcfea;*/
+    --color-tooltip: var(--color-sidebar);
     --color-tooltip-border: var(--color-border);
-    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail: var(--color-sidebar);
     --color-tooltip-tail-border: var(--color-border);
     --color-header: #ff00ff;
-    --color-link: #ff00ff;
+    --color-link: #e600e6;
     --color-link-hover: #ff1493;
     --color-menu-border: rgba(206, 212, 218, 1);
     --color-scroll-line: #777;
-    --color-sidebar: #f8f8f8;
+    --color-sidebar: #fef0f5;
     --color-sidebar-border: #ddd;
   }
 
-
-  :root.theme-blue {
+  :root.theme-lavender {
     --color-background: white;
-    --color-1: #c2e9fb;
-    --color-2: #e6f7ff;
-    --color-text: #444;
-    --color-bold-text: #0077cc;
-    --color-button: #00bfff;
+    --color-1: #ecd7ef; /*#e1bee7;*/
+    --color-2: #f8eafa;
+    --color-text: #6a1b9a;
+    --color-bold-text: #4a148c;
+    --color-button: #ba68c8;
     --color-button-text: white;
-    --color-scroll-button: rgba(100, 181, 246, 0.3);
-    --color-scroll-circle: rgba(100, 181, 246, 0.9);
-    --color-scroll-circle-bg: rgba(100, 181, 246, 0.3);
-    --color-arrow: rgba(100, 181, 246, 0.9);
-    --color-border: #40a9ff;
-    --color-focus: #e0f7ff;
-    --color-focus-button: #40a9ff;
-    --color-toggle-button: #1e88e5;
-    --color-selected: #add8e6;
-    --color-checked: #40a9ff;
+    --color-scroll-button: rgba(186, 104, 200, 0.3);
+    --color-scroll-circle: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
+    --color-border: #ab47bc;
+    --color-focus: #f3e5f5;
+    --color-focus-button: #ab47bc;
+    --color-toggle-button: #8e24aa;
+    --color-selected: #ce93d8;
+    --color-checked: #ab47bc;
     --color-tier-s: magenta;
     --color-tier-a: blue;
     --color-tier-b: red;
@@ -88,18 +87,104 @@
     --color-tier-null: gray;
     --color-table-header: var(--color-2);
     --color-table-hover: var(--color-2);
-    --color-tooltip: var(--color-2);
+    --color-tooltip: var(--color-sidebar);
     --color-tooltip-border: var(--color-border);
-    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail: var(--color-sidebar);
     --color-tooltip-tail-border: var(--color-border);
-    --color-header: #0077cc;
-    --color-link: #0077cc;
-    --color-link-hover: #005999;
-    --color-menu-border: rgba(180, 220, 240, 1);
-    --color-scroll-line: #77aaff;
-    --color-sidebar: #f0faff;
-    --color-sidebar-border: #bbdefb;
+    --color-header: #4a148c;
+    --color-link: #6a1b9a;
+    --color-link-hover: #4a148c;
+    --color-menu-border: rgba(186, 104, 200, 0.5);
+    --color-scroll-line: #ab47bc;
+    --color-sidebar: #f9f0ff;
+    --color-sidebar-border: #d1c4e9;
   }
+
+
+  :root.theme-blue {
+    --color-background: white;
+
+    --color-1: 	#d6f1fd; /*#c2e9fb;*/
+    --color-2: #e0f7fa; /*#e0f7fa;연한 민트 계열로 살짝 그린 느낌 섞음 */
+
+    --color-text: #1565c0;
+    --color-bold-text: #0d47a1;
+    --color-button: #4fc3f7; /* 스카이블루 */
+    --color-button-text: white;
+
+    --color-scroll-button: rgba(77, 182, 172, 0.3); /* 청록 계열 */
+    --color-scroll-circle: rgba(77, 182, 172, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
+
+    --color-border: #4fc3f7;
+    --color-focus: #e1f5fe;
+    --color-focus-button: #4fc3f7;
+    --color-toggle-button: #0288d1;
+
+    --color-selected: #b2ebf2;
+    --color-checked: #4fc3f7;
+
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-sidebar);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-sidebar);
+    --color-tooltip-tail-border: var(--color-border);
+
+    --color-header: #01579b;
+    --color-link: #0288d1;
+    --color-link-hover: #01579b;
+
+    --color-menu-border: rgba(129, 212, 250, 0.5);
+    --color-scroll-line: #4fc3f7;
+    --color-sidebar: #eaf8fe;
+    --color-sidebar-border: #b3e5fc;
+  }
+
+  :root.theme-green {
+    --color-background: white;
+
+    --color-1: #d0f4de; /* 연한 민트 계열 섞음 */
+    --color-2: #e6f9e5;
+
+    --color-text: #2e7d32;
+    --color-bold-text: #1b5e20;
+    --color-button: #81c784; /* 기존보다 밝고 부드럽게 */
+    --color-button-text: white;
+
+    --color-scroll-button: rgba(129, 212, 212, 0.5); /* 파랑 느낌 살짝 넣음 */
+    --color-scroll-circle: rgba(129, 212, 212, 1.0);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
+
+    --color-border: #66bb6a;
+    --color-focus: #e8f5e9;
+    --color-focus-button: #66bb6a;
+    --color-toggle-button: #388e3c;
+
+    --color-selected: #c8e6c9;
+    --color-checked: #66bb6a;
+
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-sidebar);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-sidebar);
+    --color-tooltip-tail-border: var(--color-border);
+
+    --color-header: #1b5e20;
+    --color-link: #2e7d32;
+    --color-link-hover: #1b5e20;
+
+    --color-menu-border: rgba(165, 214, 167, 0.5);
+    --color-scroll-line: #81c784;
+    --color-sidebar: #ecfef4;
+    --color-sidebar-border: #c8e6c9;
+  }
+
+
+
 
   :root.theme-gray {
     --color-background: white;
@@ -109,10 +194,10 @@
     --color-bold-text: #000;
     --color-button: #888;
     --color-button-text: white;
-    --color-scroll-button: rgba(120, 120, 120, 0.3);
-    --color-scroll-circle: rgba(120, 120, 120, 0.9);
-    --color-scroll-circle-bg: rgba(120, 120, 120, 0.3);
-    --color-arrow: rgba(120, 120, 120, 0.9);
+    --color-scroll-button: rgba(100, 181, 246, 0.3);
+    --color-scroll-circle: rgba(100, 181, 246, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
     --color-border: #999;
     --color-focus: #ddd;
     --color-focus-button: #999;
@@ -128,9 +213,9 @@
     --color-tier-null: gray;
     --color-table-header: var(--color-2);
     --color-table-hover: var(--color-2);
-    --color-tooltip: var(--color-2);
+    --color-tooltip: var(--color-sidebar);
     --color-tooltip-border: var(--color-border);
-    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail: var(--color-sidebar);
     --color-tooltip-tail-border: var(--color-border);
     --color-header: #111;
     --color-link: #333;
@@ -140,87 +225,6 @@
     --color-sidebar: #efefef;
     --color-sidebar-border: #ccc;
   }
-
-:root.theme-green {
-  --color-background: white;
-  --color-1: #c8e6c9;
-  --color-2: #dcedc8;
-  --color-text: #2e7d32;
-  --color-bold-text: #1b5e20;
-  --color-button: #66bb6a;
-  --color-button-text: white;
-  --color-scroll-button: rgba(124, 245, 130, 0.9);
-  --color-scroll-circle: rgba(102, 187, 106, 0.3);
-  --color-scroll-circle-bg: rgba(102, 187, 106, 0.9);
-  --color-arrow: rgba(102, 187, 106, 0.3);
-  --color-border: #388e3c;
-  --color-focus: #e8f5e9;
-  --color-focus-button: #43a047;
-  --color-toggle-button: #2e7d32;
-  --color-selected: #a5d6a7;
-  --color-checked: #43a047;
-  --color-tier-s: magenta;
-  --color-tier-a: blue;
-  --color-tier-b: red;
-  --color-tier-c: #B8860B;
-  --color-tier-d: green;
-  --color-tier-f: gray;
-  --color-tier-null: gray;
-  --color-table-header: var(--color-2);
-  --color-table-hover: var(--color-2);
-  --color-tooltip: var(--color-2);
-  --color-tooltip-border: var(--color-border);
-  --color-tooltip-tail: var(--color-2);
-  --color-tooltip-tail-border: var(--color-border);
-  --color-header: #1b5e20;
-  --color-link: #2e7d32;
-  --color-link-hover: #1b5e20;
-  --color-menu-border: rgba(76, 175, 80, 0.5);
-  --color-scroll-line: #66bb6a;
-  --color-sidebar: #f1f8e9;
-  --color-sidebar-border: #c5e1a5;
-}
-
-:root.theme-lavender {
-  --color-background: white;
-  --color-1: #e1bee7;
-  --color-2: #f8eafa;
-  --color-text: #6a1b9a;
-  --color-bold-text: #4a148c;
-  --color-button: #ba68c8;
-  --color-button-text: white;
-  --color-scroll-button: rgba(186, 104, 200, 0.3);
-  --color-scroll-circle: rgba(186, 104, 200, 0.9);
-  --color-scroll-circle-bg: rgba(186, 104, 200, 0.3);
-  --color-arrow: rgba(186, 104, 200, 0.9);
-  --color-border: #ab47bc;
-  --color-focus: #f3e5f5;
-  --color-focus-button: #ab47bc;
-  --color-toggle-button: #8e24aa;
-  --color-selected: #ce93d8;
-  --color-checked: #ab47bc;
-  --color-tier-s: magenta;
-  --color-tier-a: blue;
-  --color-tier-b: red;
-  --color-tier-c: #B8860B;
-  --color-tier-d: green;
-  --color-tier-f: gray;
-  --color-tier-null: gray;
-  --color-table-header: var(--color-2);
-  --color-table-hover: var(--color-2);
-  --color-tooltip: var(--color-2);
-  --color-tooltip-border: var(--color-border);
-  --color-tooltip-tail: var(--color-2);
-  --color-tooltip-tail-border: var(--color-border);
-  --color-header: #4a148c;
-  --color-link: #6a1b9a;
-  --color-link-hover: #4a148c;
-  --color-menu-border: rgba(186, 104, 200, 0.5);
-  --color-scroll-line: #ab47bc;
-  --color-sidebar: #f9f0ff;
-  --color-sidebar-border: #d1c4e9;
-}
-
 
 
   body {
@@ -544,7 +548,7 @@
   span {
     position : relative;
     scroll-margin-top:70px;
-    background-color: var(--color-background);
+    background-color: inherit;
     width: auto;
     height: auto;
   }
@@ -616,7 +620,7 @@
     left: 50%;
     transform: translateX(-50%);
     background-color: var(--color-tooltip);
-    padding: 6px;
+
     border: 1px solid var(--color-tooltip-border);
     border-radius: 4px;
     z-index: var(--z-index-tooltip);
@@ -630,6 +634,7 @@
     max-height: 400px;
     position: relative;
     overflow: auto;
+    padding: 6px;
     z-index: var(--z-index-tooltip-body);
   }
 

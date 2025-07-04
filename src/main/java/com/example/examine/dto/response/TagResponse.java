@@ -1,16 +1,22 @@
 package com.example.examine.dto.response;
 
-import com.example.examine.dto.request.TagRequest;
-import com.example.examine.entity.Effect.EffectTag;
-import com.example.examine.entity.Effect.SideEffectTag;
-import com.example.examine.entity.Supplement;
-import com.example.examine.entity.TypeTag;
+import com.example.examine.entity.Tag.Tag;
 
 public record TagResponse(
         Long id,
-        String name
+        String korName,
+        String engName,
+        String tier
 ) {
-    public static TagResponse fromEntity(Long id, String name) {
-        return new TagResponse(id, name);
+    public static TagResponse fromEntity(Tag tag) {
+        if(tag == null) {
+            return null;
+        }
+        return new TagResponse(
+                tag.getId(),
+                tag.getKorName(),
+                tag.getEngName(),
+                tag.getTier()
+        );
     }
 }

@@ -51,7 +51,7 @@
 
     <!-- ➕ 성분/태그 추가 -->
 
-    <div name="journal-container" class="flex justify-between items-start mb-4 flex-wrap gap-5">
+    <div class="flex justify-between items-start mb-4 flex-wrap gap-5">
       <!--container-->
       <!-- 성분 추가 -->
       <div>
@@ -80,8 +80,8 @@
         <form id="tag-form" class="gap-2">
           <select name="tagType" required>
             <option value="type">분류</option>
-            <option value="positive">기대효과</option>
-            <option value="negative">부작용</option>
+            <option value="effect">기대효과</option>
+            <option value="sideEffect">부작용</option>
           </select>
           <input name="tagName" placeholder="태그 이름" required />
           <button type="submit">태그 추가</button>
@@ -94,11 +94,11 @@
       </div>
       <div>
         <h2 class="text-center">기대효과</h2>
-        <ul id="positive-list"></ul>
+        <ul id="effect-list"></ul>
       </div>
       <div>
         <h2 class="text-center">부작용</h2>
-        <ul id="negative-list"></ul>
+        <ul id="sideEffect-list"></ul>
       </div>
       <div>
         <h2 class="text-center">티어</h2>

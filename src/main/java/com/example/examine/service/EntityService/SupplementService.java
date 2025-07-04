@@ -5,9 +5,9 @@ import com.example.examine.dto.request.DetailRequest;
 import com.example.examine.dto.request.SupplementRequest;
 import com.example.examine.dto.response.*;
 import com.example.examine.entity.*;
-import com.example.examine.entity.SupplementEffect.SE;
-import com.example.examine.entity.SupplementEffect.SupplementEffect;
-import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
+import com.example.examine.entity.Tag.Supplement;
+import com.example.examine.entity.Tag.TypeTag;
+import com.example.examine.entity.detail.SupplementDetail;
 import com.example.examine.repository.*;
 import com.example.examine.service.llm.LLMResponse;
 import com.example.examine.service.llm.LLMService;
@@ -38,8 +38,9 @@ public class SupplementService {
     private final SupplementDetailRepository supplementDetailRepo;
     private final SupplementEffectRepository supplementEffectRepo;
     private final SupplementSideEffectRepository supplementSideEffectRepo;
-    private final JournalSupplementEffectRepository journalSupplementEffectRepo;
-    private final JournalSupplementSideEffectRepository journalSupplementSideEffectRepo;
+    private final JournalSupplementEffectRepository jseRepo;
+    private final JournalSupplementSideEffectRepository jsseRepo;
+    private final JournalService journalService;
 
     public ResponseEntity<String> create(SupplementRequest dto) {
         if (supplementRepo.findByKorNameAndEngName(dto.korName(), dto.engName()).isPresent()) {
@@ -67,6 +68,17 @@ public class SupplementService {
         applyAnalysis(supplement, result);
 
         supplementRepo.save(supplement);
+        SupplementDetail supplementDetail = SupplementDetail.builder()
+                .supplement(supplement)
+                .overview("")
+                .intro("")
+                .positive("")
+                .negative("")
+                .mechanism("")
+                .dosage("")
+                .build();
+        supplementDetailRepo.save(supplementDetail);
+
         return ResponseEntity.ok("성분 추가 완료");
     }
 
@@ -186,7 +198,7 @@ public class SupplementService {
     }
 
     public List<SupplementResponse> findAll(Sort sort){
-        return supplementRepo.findAll(sort)
+        return supplementRepo.findAllWithRelations(sort)
                 .stream()
                 .map(SupplementResponse::fromEntity)
                 .toList();
@@ -201,8 +213,7 @@ public class SupplementService {
 
 
     public List<SupplementResponse> search(String keyword, Sort sort){
-        return supplementRepo.findByKorNameContainingIgnoreCaseOrEngNameContainingIgnoreCase(
-                keyword, keyword, sort)
+        return supplementRepo.searchWithRelations(keyword, sort)
                 .stream()
                 .map(SupplementResponse::fromEntity)
                 .toList();
@@ -221,16 +232,14 @@ public class SupplementService {
                 .toList();
     }
 
-    public List<JournalResponse> journals(Long id) {
-        Set<Journal> journalSet = new HashSet<>();
-        journalSupplementEffectRepo.findAllBySupplementId(id)
-                .forEach(e -> journalSet.add(e.getJournal()));
-        journalSupplementSideEffectRepo.findAllBySupplementId(id)
-                .forEach(e -> journalSet.add(e.getJournal()));
+    public List<JournalResponse> journals(Long id, Sort sort) {
 
-        return journalSet.stream()
-                .map(JournalResponse::fromEntity)
-                .toList();
+        Set<Journal> journalSet = new HashSet<>();
+        journalSet.addAll(jseRepo.findJournalsBySupplementId(id, sort));
+        journalSet.addAll(jsseRepo.findJournalsBySupplementId(id, sort));
+
+        return journalService.toJournalResponses(journalSet.stream().toList());
+
     }
 
     public ResponseEntity<String> delete(Long id) {
@@ -252,11 +261,11 @@ public class SupplementService {
     }
 
 
-    public ResponseEntity<String> detailUpdate(@PathVariable Long id, @RequestBody DetailRequest dto) {
-        log.info("🔄 수정 요청 들어옴 - ID: {}", id);
+    public ResponseEntity<String> detailUpdate(@RequestBody DetailRequest dto) {
+        log.info("🔄 수정 요청 들어옴 - ID: {}", dto.id());
         log.info("📥 받은 데이터: {}", dto);
 
-        Optional<SupplementDetail> opt = supplementDetailRepo.findById(id);
+        Optional<SupplementDetail> opt = supplementDetailRepo.findById(dto.id());
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         SupplementDetail s = opt.get();

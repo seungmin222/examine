@@ -1,55 +1,63 @@
 package com.example.examine.service.EntityService;
 
-import com.example.examine.controller.DetailController;
-import com.example.examine.dto.response.JournalAnalysis;
+import com.example.examine.dto.request.LLMJSERequest;
+import com.example.examine.dto.response.JSEResponse;
+import com.example.examine.dto.response.LLM.JournalAnalysis;
 import com.example.examine.dto.request.JSERequest;
 import com.example.examine.dto.response.JournalResponse;
+import com.example.examine.dto.response.LLM.LLMJSE;
+import com.example.examine.dto.response.LLM.LLMJSEId;
 import com.example.examine.entity.*;
 import com.example.examine.dto.request.JournalRequest;
-import com.example.examine.entity.Effect.EffectTag;
-import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.entity.SupplementEffect.SupplementEffectId;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffectId;
+import com.example.examine.entity.Tag.Effect.EffectTag;
+import com.example.examine.entity.Tag.Effect.SideEffectTag;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffectId;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffect;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffectId;
 import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
+import com.example.examine.entity.Tag.Supplement;
+import com.example.examine.entity.Tag.Tag;
+import com.example.examine.entity.Tag.TrialDesign;
 import com.example.examine.repository.*;
 import com.example.examine.service.crawler.ClinicalTrialsCrawler;
 import com.example.examine.service.crawler.JournalCrawlerMeta;
 import com.example.examine.service.crawler.PubmedCrawler;
 import com.example.examine.service.crawler.SemanticScholarCrawler;
-import com.example.examine.service.llm.LLMResponse;
 import com.example.examine.service.llm.LLMService;
+import com.example.examine.service.similarity.TextSimilarity;
 import com.example.examine.service.util.CalculateScore;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.example.examine.service.llm.LLMService.objectToJsonString;
+import java.util.stream.Stream;
 
 // 서비스
 @Service
 @RequiredArgsConstructor
 public class JournalService {
-    private static final Logger log = LoggerFactory.getLogger(DetailController.class);
+    private static final Logger log = LoggerFactory.getLogger(JournalService.class);
 
     private final JournalRepository journalRepo;
     private final TrialDesignRepository trialDesignRepo;
@@ -58,11 +66,14 @@ public class JournalService {
     private final SideEffectTagRepository sideEffectRepo;
     private final SupplementEffectRepository supplementEffectRepo;
     private final SupplementSideEffectRepository supplementSideEffectRepo;
-    private final JournalSupplementEffectRepository journalSupplementEffectRepo;
-    private final JournalSupplementSideEffectRepository journalSupplementSideEffectRepo;
+    private final JournalSupplementEffectRepository jseRepo;
+    private final JournalSupplementSideEffectRepository jsseRepo;
     private final PubmedCrawler pubmedCrawler;
     private final ClinicalTrialsCrawler clinicalTrialsCrawler;
     private final SemanticScholarCrawler semanticScholarCrawler;
+    private final LLMService llmService;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public ResponseEntity<String> create(JournalRequest dto) {
@@ -78,6 +89,7 @@ public class JournalService {
                 .parallel(dto.parallel())
                 .blind(dto.blind())
                 .build();
+        journalRepo.save(journal);
         journal.setDurationDays();
 
         if (dto.trialDesignId() != null) {
@@ -88,8 +100,9 @@ public class JournalService {
             journal.setTrialDesign(null);
         }
 
-        syncJSE(journal, null, dto.effects());
-        syncJSSE(journal, null, dto.sideEffects());
+
+        syncJSE(journal, dto.effects());
+        syncJSSE(journal, dto.sideEffects());
 
         JournalCrawlerMeta meta = crawlJournalMeta(dto.link());
 
@@ -102,6 +115,7 @@ public class JournalService {
 
         JournalAnalysis result = analyze(journal.getTitle(), journal.getSummary());
         applyAnalysis(journal, result);
+
 
         journal.setScore();
         journalRepo.save(journal);
@@ -125,74 +139,54 @@ public class JournalService {
         return new JournalCrawlerMeta(null,null,null,null);
     }
 
-
     public JournalAnalysis analyze(String title, String abstractText) {
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        ObjectMapper mapper = new ObjectMapper();
 
         String prompt = """
-        You will be given an abstract of a scientific paper. Your task is to extract the following fields in strict JSON format with no explanation or commentary. If a value is not found, use null.
-
-        No explanation, no preamble, no code block.
-        Return only valid compact JSON. :
-
-        {
-          "participants": (integer or null),
-          "durationValue": (integer or null),
-          "durationUnit": "day" | "week" | "month" | "year" | null,
-          "blind": (0=open-label, 1=single-blind, 2=double-blind, or null),
-          "parallel": (true/false/null),
-          "design": one of the following strings, or null:
-            [
-              "Meta-analysis", "Systematic Review", "RCT", "Non-RCT",
-              "Cohort", "Case-control", "Cross-sectional", "Case Report",
-              "Animal Study", "In-vitro Study", "Unknown"
-            ]
-        }
-
-        Title: %s
-        
-        Abstract: %s
+                You will be given the title and abstract of a scientific paper.
+                
+                Your task is to extract the following fields in **strict compact JSON** format with **no explanation or commentary**.
+                If a value is not found, use null. Return only valid JSON (no code block, no preamble).
+                
+                {
+                  "participants": (integer or null),
+                  "durationValue": (integer or null),
+                  "durationUnit": "day" | "week" | "month" | "year" | null,
+                  "blind": 0 | 1 | 2 | null,  // 0=open-label, 1=single-blind, 2=double-blind
+                  "parallel": true | false | null,
+                  "design": one of [
+                  "Meta-analysis", "Systematic Review", "RCT", "Non-RCT",
+                  "Cohort", "Case-control", "Cross-sectional", "Case Report",
+                  "Animal Study", "In-vitro Study"
+                  ] | null,
+                  "effects": [
+                     {
+                       "supplement": string,              // name of the supplement used (e.g., "N-acetylcysteine")
+                        "effect": string,                 // observed effect as a concise noun phrase (e.g., "anxiety", "memory improvement")
+                        "cohenD": number or null,         // Only a single numeric value. No ranges, strings, or text.
+                        "pearsonR": number or null,       // Must be a valid float number (e.g., 0.56). Do NOT use ranges like "0.5–0.8"
+                        "pValue": number or null          // Must be a valid numeric p-value like 0.001. Do NOT use strings.
+                     },
+                     ...
+                  ]
+                }
+                
+                Title: %s
+                
+                Abstract: %s
+                
         """.formatted(title, abstractText);
-
         try {
-            String jsonPrompt = LLMService.objectToJsonString(prompt);
-
-            String requestBody = """
-        {
-          "model": "llama3",
-          "prompt": %s,
-          "stream": false
-        }
-        """.formatted(jsonPrompt);
-
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    "http://localhost:11434/api/generate", entity, String.class);
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            LLMResponse wrapper = mapper.readValue(response.getBody(), LLMResponse.class);
-
-            String raw = wrapper.response;
-            if (!raw.trim().endsWith("}")) {
-                raw += "}";
-            }
-
-            System.out.println("LLM 응답: " + raw);
-            return mapper.readValue(raw, JournalAnalysis.class);
-
+            String response = llmService.callLLM(prompt);
+            return mapper.readValue(response, JournalAnalysis.class);
         } catch (Exception e) {
-            log.error("LLM 분석 실패", e);// 혹은 logger.error("LLM 분석 실패", e);
+            // 예외 로깅하고, 실패 시 기본 객체 반환
+            log.error("LLM 분석 실패", e);
+            return new JournalAnalysis(null, null, null, null, null, null, null);
         }
-        return new JournalAnalysis(null,null,null,null,null,null);
     }
-
-
-
-
 
     // 🔸 applyAnalysisToJournal(): 값이 없을 경우만 반영
     private void applyAnalysis(Journal journal, JournalAnalysis result) {
@@ -211,10 +205,136 @@ public class JournalService {
             journal.setParallel(result.parallel());
         }
         if (journal.getTrialDesign() == null && result.design() !=null){
-            journal.setTrialDesign(trialDesignRepo.findByName(result.design()).orElse(null));
+            journal.setTrialDesign(trialDesignRepo.findByEngName(result.design()).orElse(null));
+        }
+        journal.setScore();
+        if (journal.getJournalSupplementEffects().isEmpty() && journal.getJournalSupplementSideEffects().isEmpty()) {
+            List<JSERequest> effectRequests = new ArrayList<>();
+            List<JSERequest> sideEffectRequests = new ArrayList<>();
+
+            if (result.effects() != null) {
+                for (LLMJSE jse : result.effects()) {
+                    String supplementKey = jse.supplement();
+                    String effectKey = jse.effect();
+
+                    List<LLMJSERequest> supplements = findTopKSuggestions(supplementKey, supplementRepo, "supplement");
+                    List<LLMJSERequest> effects = findTopKSuggestions(effectKey, effectRepo, "positive");
+                    List<LLMJSERequest> sideEffects = findTopKSuggestions(effectKey, sideEffectRepo, "negative");
+
+                    List<LLMJSERequest> allEffects = Stream.concat(effects.stream(), sideEffects.stream())
+                            .toList();
+
+                    LLMJSEId mapped = LLMMapping(supplementKey, effectKey, supplements, allEffects);
+                    JSERequest request = JSERequest.fromEntity(mapped, jse);
+
+                    if (Objects.equals(mapped.effectType(), "positive")) {
+                        effectRequests.add(request);
+                    } else {
+                        sideEffectRequests.add(request);
+                    }
+                }
+
+                syncJSE(journal, effectRequests);
+                syncJSSE(journal, sideEffectRequests);
+            }
         }
     }
 
+    private List<LLMJSERequest> findTopKSuggestions(
+            String targetText,
+            TagRepository<? extends Tag> repository,
+            String type
+    ) {
+        int k = 10;
+        double threshold = 0.5;
+
+        PriorityQueue<AbstractMap.SimpleEntry<LLMJSERequest, Double>> pq = new PriorityQueue<>(
+                Comparator.comparingDouble(AbstractMap.SimpleEntry::getValue)
+        );
+
+        repository.findAll().forEach(tag -> {
+            double score = TextSimilarity.combinedScore(tag.getEngName(), targetText);
+            LLMJSERequest req = new LLMJSERequest(tag.getId(), tag.getEngName(), type);
+            pqAddTopK(pq, req, score, k);
+        });
+
+        return pq.stream()
+                .filter(entry -> entry.getValue() >= threshold)
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue())) // 높은 순으로
+                .map(AbstractMap.SimpleEntry::getKey)
+                .toList();
+    }
+
+
+    private void pqAddTopK(
+            PriorityQueue<AbstractMap.SimpleEntry<LLMJSERequest, Double>> pq,
+            LLMJSERequest item,
+            double score,
+            int k
+    ) {
+        if (pq.size() < k) {
+            pq.add(new AbstractMap.SimpleEntry<>(item, score));
+        } else if (pq.peek().getValue() < score) {
+            pq.poll();
+            pq.add(new AbstractMap.SimpleEntry<>(item, score));
+        }
+    }
+
+    public LLMJSEId LLMMapping(
+            String originalSupplement,
+            String originalEffect,
+            List<LLMJSERequest> supplements,
+            List<LLMJSERequest> allEffects
+    ) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode root = mapper.createObjectNode();
+
+        root.put("targetSupplement", originalSupplement);
+        root.put("targetEffect", originalEffect);
+
+        ArrayNode supplementArray = mapper.createArrayNode();
+        for (LLMJSERequest s : supplements) {
+            ObjectNode o = mapper.createObjectNode();
+            o.put("id", s.id());
+            o.put("name", s.name());
+            o.put("type", s.type());
+            supplementArray.add(o);
+        }
+        root.set("supplementCandidates", supplementArray);
+
+        ArrayNode effectArray = mapper.createArrayNode();
+        for (LLMJSERequest e : allEffects) {
+            ObjectNode o = mapper.createObjectNode();
+            o.put("id", e.id());
+            o.put("name", e.name());
+            o.put("type", e.type());
+            effectArray.add(o);
+        }
+        root.set("effectCandidates", effectArray);
+
+        String prompt = """
+    You are given a target supplement and effect extracted from a scientific paper, along with candidate matches from a database.
+
+    Match the most likely supplement and effect (or side effect) from the candidate lists.
+    Return only valid JSON in this format(no code block, no preamble).:
+    {
+      "supplementId": number or null,
+      "effectId": number or null,
+      "effectType": "positive" | "negative" | null
+    }
+
+    Input:
+    %s
+    """.formatted(root.toString());
+
+        try {
+            String response = llmService.callLLM(prompt);
+            return mapper.readValue(response, LLMJSEId.class);
+        } catch (Exception e) {
+            log.error("LLM 호출 실패", e);
+            throw new RuntimeException("Failed to parse LLM response", e);
+        }
+    }
 
     @Transactional
     public ResponseEntity<String> update(Long id, JournalRequest dto) {
@@ -266,26 +386,18 @@ public class JournalService {
 
 
         if (journalChanged) {
-            List<JournalSupplementEffect> effects = journalSupplementEffectRepo.findAllByJournalId(id);
-            List<JournalSupplementSideEffect> sideEffects = journalSupplementSideEffectRepo.findAllByJournalId(id);
+            List<JournalSupplementEffect> effects = jseRepo.findByJournalId(id);
+            List<JournalSupplementSideEffect> sideEffects = jsseRepo.findAllByJournalId(id);
             for (JournalSupplementEffect jse : effects) {
-                SupplementEffect se = findOrCreateSupplementEffect(
-                        jse.getSupplement().getId(),
-                        jse.getEffect().getId()
-                );
                 jse.setScore(); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
             }
             for (JournalSupplementSideEffect jse : sideEffects) {
-                SupplementSideEffect se = findOrCreateSupplementSideEffect(
-                        jse.getSupplement().getId(),
-                        jse.getEffect().getId()
-                );
                 jse.setScore(); // 내부에서 재계산, setScore() 내부에서 SupplementEffect에 영향 반영
             }
         }
 
-        syncJSE(journal, OldJournal, dto.effects());
-        syncJSSE(journal, OldJournal, dto.sideEffects());
+        syncJSE(journal, dto.effects());
+        syncJSSE(journal, dto.sideEffects());
 
         journalRepo.save(journal);
         return ResponseEntity.ok("논문 추가 완료");
@@ -329,185 +441,103 @@ public class JournalService {
         };
     }
 
-    private void syncJSE(Journal journal, Journal oldJournal, List<JSERequest> requests) {
-        // 데이터 미리 로딩
-        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
-                        requests.stream().map(JSERequest::supplementId).toList())
-                .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
-
-        Map<Long, EffectTag> effectMap = effectRepo.findAllById(
-                        requests.stream().map(JSERequest::effectId).toList())
-                .stream().collect(Collectors.toMap(EffectTag::getId, Function.identity()));
-
-        if (oldJournal == null) {
-            for (JSERequest req : requests) {
-                JournalSupplementEffectId id = new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId());
-                SupplementEffect se = findOrCreateSupplementEffect(
-                        req.supplementId(),
-                        req.effectId()
-                );
-                Supplement s = supplementMap.get(id.getSupplementId());
-                EffectTag t = effectMap.get(id.getEffectId());
-                if (s == null || t == null) {
-                    throw new IllegalArgumentException("Invalid supplement/effect ID");
-                }
-                JournalSupplementEffect newEffect = new JournalSupplementEffect(journal, s, t, req.size());
-                newEffect.setScore();
-                CalculateScore.addScore(se, newEffect);
-                journalSupplementEffectRepo.save(newEffect);
-            }
-            return;
-        }
-
-        Map<JournalSupplementEffectId, JournalSupplementEffect> existingMap = journal.getJournalSupplementEffects().stream()
-                .collect(Collectors.toMap(JournalSupplementEffect::getId, Function.identity()));
-
-        Set<JournalSupplementEffectId> newIdSet = requests.stream()
-                .map(req -> new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId()))
-                .collect(Collectors.toSet());
-
-        // 삭제
-        Set<JournalSupplementEffectId> toDelete = new HashSet<>(existingMap.keySet());
-        toDelete.removeAll(newIdSet);
-        toDelete.forEach(id -> {
-            JournalSupplementEffect jse = existingMap.get(id);
-            SupplementEffect se = findOrCreateSupplementEffect(
-                    jse.getSupplement().getId(),
-                    jse.getEffect().getId()
-            );
-            if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+    private void syncJSE(Journal journal, List<JSERequest> requests) {
+        // 기존 JSE 전부 제거
+        journal.getJournalSupplementEffects().forEach(jse -> {
+            SupplementEffect se = jse.getSE();
+            if (!CalculateScore.deleteScore(se, jse)) {
                 supplementEffectRepo.deleteById(se.getId());
             }
-            journal.getJournalSupplementEffects().remove(jse);
-            journalSupplementEffectRepo.deleteById(id);
+            jseRepo.delete(jse);
         });
+        jseRepo.flush(); // DB에 삭제 즉시 반영(request.effect랑 겹칠 경우 업데이트로 로직 분리도 고려)
+        entityManager.clear(); // 세션 초기화
+        journal.getJournalSupplementEffects().clear();
 
-        // 삽입 또는 갱신
+        Set<SupplementEffectId> idSet = new HashSet<>();
         for (JSERequest req : requests) {
-            JournalSupplementEffectId id = new JournalSupplementEffectId(journal.getId(), req.supplementId(), req.effectId());
-            SupplementEffect se = findOrCreateSupplementEffect(
-                    req.supplementId(),
-                    req.effectId()
-            );
-            if (existingMap.containsKey(id)) {
-                JournalSupplementEffect jse = existingMap.get(id);
-                if (!CalculateScore.deleteScore(se, jse, oldJournal)){
-                    supplementEffectRepo.deleteById(se.getId());
-                }
-                jse.setSize(req.size());
-                jse.setScore();
-                CalculateScore.addScore(se, jse);
-            } else {
-                Supplement s = supplementMap.get(req.supplementId());
-                EffectTag t = effectMap.get(req.effectId());
-                if (s == null || t == null) throw new IllegalArgumentException("Invalid supplement/effect ID");
-                JournalSupplementEffect newEffect = new JournalSupplementEffect(journal, s, t, req.size());
-                newEffect.setScore();
-                CalculateScore.addScore(se, newEffect);
-                journalSupplementEffectRepo.save(newEffect);
+            if(req.supplementId()==null || req.effectId()==null) {
+                continue;
             }
+            SupplementEffectId id = new SupplementEffectId(req.supplementId(), req.effectId());
+            if (!idSet.add(id)) {
+                continue;
+            }
+            SupplementEffect se = findOrCreateSupplementEffect(req.supplementId(), req.effectId());
+
+            JournalSupplementEffect newJSE = new JournalSupplementEffect(journal, se, req.cohenD(), req.pearsonR(), req.pValue());
+            newJSE.setParticipants(journal.getParticipants());
+            newJSE.setScore();
+            CalculateScore.addScore(se, newJSE);
+            journal.getJournalSupplementEffects().add(newJSE); // 양방향 연관관계 유지
+            jseRepo.save(newJSE);
         }
     }
 
-
-    private void syncJSSE(Journal journal, Journal oldJournal, List<JSERequest> requests) {
-        // 데이터 미리 로딩
-        Map<Long, Supplement> supplementMap = supplementRepo.findAllById(
-                        requests.stream().map(JSERequest::supplementId).toList())
-                .stream().collect(Collectors.toMap(Supplement::getId, Function.identity()));
-
-        Map<Long, SideEffectTag> effectMap = sideEffectRepo.findAllById(
-                        requests.stream().map(JSERequest::effectId).toList())
-                .stream().collect(Collectors.toMap(SideEffectTag::getId, Function.identity()));
-
-        if (oldJournal == null) {
-            for (JSERequest req : requests) {
-                JournalSupplementSideEffectId id = new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId());
-                SupplementSideEffect se = findOrCreateSupplementSideEffect(
-                        req.supplementId(),
-                        req.effectId()
-                );
-                Supplement s = supplementMap.get(id.getSupplementId());
-                SideEffectTag t = effectMap.get(id.getEffectId());
-                if (s == null || t == null) {
-                    throw new IllegalArgumentException("Invalid supplement/sideEffect ID");
-                }
-                JournalSupplementSideEffect newEffect = new JournalSupplementSideEffect(journal, s, t, req.size());
-                newEffect.setScore();
-                CalculateScore.addScore(se, newEffect);
-                journalSupplementSideEffectRepo.save(newEffect);
-            }
-            return;
-        }
-
-        Map<JournalSupplementSideEffectId, JournalSupplementSideEffect> existingMap = journal.getJournalSupplementSideEffects().stream()
-                .collect(Collectors.toMap(JournalSupplementSideEffect::getId, Function.identity()));
-
-        Set<JournalSupplementSideEffectId> newIdSet = requests.stream()
-                .map(req -> new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId()))
-                .collect(Collectors.toSet());
-
-        // 삭제
-        Set<JournalSupplementSideEffectId> toDelete = new HashSet<>(existingMap.keySet());
-        toDelete.removeAll(newIdSet);
-        toDelete.forEach(id -> {
-            JournalSupplementSideEffect jse = existingMap.get(id);
-            SupplementSideEffect se = findOrCreateSupplementSideEffect(
-                    jse.getSupplement().getId(),
-                    jse.getEffect().getId()
-            );
-            if (!CalculateScore.deleteScore(se, jse, oldJournal)){
+    private void syncJSSE(Journal journal, List<JSERequest> requests) {
+        // 기존 JSSE 전부 제거
+        journal.getJournalSupplementSideEffects().forEach(jsse -> {
+            SupplementSideEffect se = jsse.getSE();
+            if (!CalculateScore.deleteScore(se, jsse)) {
                 supplementSideEffectRepo.deleteById(se.getId());
             }
-            journal.getJournalSupplementSideEffects().remove(jse);
-            journalSupplementSideEffectRepo.deleteById(id);
+            jsseRepo.delete(jsse);
         });
+        jsseRepo.flush(); // 삭제 즉시 반영
+        entityManager.clear(); // 세션 초기화
+        journal.getJournalSupplementSideEffects().clear();
 
-
-        // 삽입 또는 갱신
+        Set<SupplementSideEffectId> idSet = new HashSet<>();
         for (JSERequest req : requests) {
-            JournalSupplementSideEffectId id = new JournalSupplementSideEffectId(journal.getId(), req.supplementId(), req.effectId());
-            SupplementSideEffect se = findOrCreateSupplementSideEffect(
-                    req.supplementId(),
-                    req.effectId()
-            );
-            if (existingMap.containsKey(id)) {
-                JournalSupplementSideEffect jse = existingMap.get(id);
-                if (!CalculateScore.deleteScore(se, jse, oldJournal)){
-                    supplementSideEffectRepo.deleteById(se.getId());
-                }
-                jse.setSize(req.size());
-                jse.setScore();
-                CalculateScore.addScore(se, jse);
-            } else {
-                Supplement s = supplementMap.get(req.supplementId());
-                SideEffectTag t = effectMap.get(req.effectId());
-                if (s == null || t == null) throw new IllegalArgumentException("Invalid supplement/sideEffect ID");
-                JournalSupplementSideEffect newEffect = new JournalSupplementSideEffect(journal, s, t, req.size());
-                newEffect.setScore();
-                CalculateScore.addScore(se, newEffect);
-                journalSupplementSideEffectRepo.save(newEffect);
+            if(req.supplementId()==null || req.effectId()==null) {
+                continue;
             }
+            SupplementSideEffectId id = new SupplementSideEffectId(req.supplementId(), req.effectId());
+            if (!idSet.add(id)) {
+                continue;
+            }
+            SupplementSideEffect se = findOrCreateSupplementSideEffect(req.supplementId(), req.effectId());
+
+            JournalSupplementSideEffect newJSSE = new JournalSupplementSideEffect(journal, se, req.cohenD(), req.pearsonR(), req.pValue());
+            newJSSE.setParticipants(journal.getParticipants());
+            newJSSE.setScore();
+            CalculateScore.addScore(se, newJSSE);
+            journal.getJournalSupplementSideEffects().add(newJSSE);
+            jsseRepo.save(newJSSE);
         }
     }
 
+
+    public List<JournalResponse> toJournalResponses(List<Journal> journals) {
+        if (journals.isEmpty()) return List.of();
+
+        List<Long> journalIds = journals.stream().map(Journal::getId).toList();
+
+        Map<Long, List<JSEResponse>> jseMap = jseRepo.findAllByJournalIdIn(journalIds).stream()
+                .collect(Collectors.groupingBy(JSEResponse::journalId));
+
+        Map<Long, List<JSEResponse>> jsseMap = jsseRepo.findAllByJournalIdIn(journalIds).stream()
+                .collect(Collectors.groupingBy(JSEResponse::journalId));
+
+        return journals.stream()
+                .map(j -> JournalResponse.fromEntity(
+                        j,
+                        jseMap.getOrDefault(j.getId(), List.of()),
+                        jsseMap.getOrDefault(j.getId(), List.of())
+                ))
+                .toList();
+    }
 
 
     public List<JournalResponse> sort(Sort sort) {
-        return journalRepo.findAll(sort)
-                .stream()
-                .map(JournalResponse::fromEntity)
-                .toList();
+        List<Journal> journals = journalRepo.findAllBasic(sort);
+        return toJournalResponses(journals);
     }
 
     public List<JournalResponse> search(String keyword, Sort sort) {
-        return journalRepo.findByTitleContainingIgnoreCase(
-                keyword, sort).
-                stream()
-                .map(JournalResponse::fromEntity)
-                .toList();
+        List<Journal> journals = journalRepo.findByTitleContainingIgnoreCase(keyword, sort);
+        return toJournalResponses(journals);
     }
-
 
     public List<JournalResponse> findFiltered(
             List<Long> trialDesign,
@@ -518,11 +548,12 @@ public class JournalService {
             List<Long> sideEffectIds,
             Sort sort
     ) {
-        return journalRepo.findFiltered(trialDesign, blind, parallel, supplementIds, effectIds, sideEffectIds, sort)
-                .stream()
-                .map(JournalResponse::fromEntity)
-                .toList();
+        List<Journal> journals = journalRepo.findFiltered(
+                trialDesign, blind, parallel, supplementIds, effectIds, sideEffectIds, sort
+        );
+        return toJournalResponses(journals);
     }
+
 
     public ResponseEntity<String> delete(Long id) {
         if (!journalRepo.existsById(id)) {

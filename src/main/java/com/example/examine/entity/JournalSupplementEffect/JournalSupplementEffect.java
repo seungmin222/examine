@@ -1,10 +1,9 @@
 package com.example.examine.entity.JournalSupplementEffect;
 
-import com.example.examine.entity.Effect.Effect;
-import com.example.examine.entity.Effect.EffectTag;
-import com.example.examine.entity.EntityTime;
+import com.example.examine.entity.SupplementEffect.SE;
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
+import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.entity.Journal;
-import com.example.examine.entity.Supplement;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,33 +32,38 @@ public class JournalSupplementEffect extends EntityTime implements JSE {
     private Journal journal;
 
     @ManyToOne
-    @MapsId("supplementId")
-    @JoinColumn(name = "supplement_id")
-    private Supplement supplement;
+    @MapsId("supplementEffectId")
+    @JoinColumns({
+            @JoinColumn(name = "supplement_id", referencedColumnName = "supplement_id"),
+            @JoinColumn(name = "effect_tag_id", referencedColumnName = "effect_tag_id")
+    })
+    private SupplementEffect SE;
 
-    @ManyToOne
-    @MapsId("effectTagId")
-    @JoinColumn(name = "effect_tag_id")
-    private EffectTag effectTag;
+    @Column(name = "cohen_d", precision = 5, scale = 3)
+    private BigDecimal cohenD;
 
-    @Column(precision = 5, scale = 3)
-    private BigDecimal size;
+    @Column(name = "pearson_r", precision = 5, scale = 3)
+    private BigDecimal pearsonR;
+
+    @Column(name = "p_value", precision = 6, scale = 5)
+    private BigDecimal pValue;
 
     @Column(precision = 8, scale = 4)
     private BigDecimal score;
 
-    public JournalSupplementEffect(Journal journal
-            , Supplement supplement
-            , EffectTag effectTag
-            , BigDecimal size) {
+    @Column(length = 2, nullable = false)
+    private String tier = "D";
+
+    private Integer participants;
+
+    public JournalSupplementEffect(Journal journal, SupplementEffect se, BigDecimal d, BigDecimal r, BigDecimal p) {
         this.journal = journal;
-        this.supplement = supplement;
-        this.effectTag = effectTag;
-        this.size = size;
-        this.id = new JournalSupplementEffectId(journal.getId(),supplement.getId(), effectTag.getId());
+        this.SE = se;
+        this.cohenD = d;
+        this.pearsonR = r;
+        this.pValue = p;
+        this.id = new JournalSupplementEffectId(journal.getId(), se.getId());
     }
-
-
 
     // getter/setter
     @Override
@@ -83,33 +87,43 @@ public class JournalSupplementEffect extends EntityTime implements JSE {
     }
 
     @Override
-    public Supplement getSupplement() {
-        return supplement;
+    public SupplementEffect getSE() {
+        return SE;
     }
 
     @Override
-    public void setSupplement(Supplement supplement) {
-        this.supplement = supplement;
+    public void setSE(SE se) {
+        this.SE = (SupplementEffect)se;
     }
 
     @Override
-    public EffectTag getEffect() {
-        return effectTag;
+    public BigDecimal getCohenD() {
+        return cohenD;
     }
 
     @Override
-    public void setEffect(Effect effect) {
-        this.effectTag = (EffectTag)effect;
+    public void setCohenD(BigDecimal cohenD) {
+        this.cohenD = cohenD;
     }
 
     @Override
-    public BigDecimal getSize() {
-        return size;
+    public BigDecimal getPearsonR() {
+        return pearsonR;
     }
 
     @Override
-    public void setSize(BigDecimal size) {
-        this.size = size;
+    public void setPearsonR(BigDecimal pearsonR) {
+        this.pearsonR = pearsonR;
+    }
+
+    @Override
+    public BigDecimal getPValue() {
+        return pValue;
+    }
+
+    @Override
+    public void setPValue(BigDecimal pValue) {
+        this.pValue = pValue;
     }
 
     @Override
@@ -119,10 +133,26 @@ public class JournalSupplementEffect extends EntityTime implements JSE {
 
     @Override
     public void setScore() {
-        this.score = CalculateScore.calculateJournalSupplementScore(this.size, this.journal.getScore());
-        return;
+        this.score = CalculateScore.calculateJournalSupplementScore(this.cohenD, this.pearsonR, this.pValue, this.journal.getScore());
+    }
+    @Override
+    public String getTier() {
+        return tier;
     }
 
+    @Override
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
 
+    @Override
+    public Integer getParticipants() {
+        return participants;
+    }
+
+    @Override
+    public void setParticipants(Integer participants) {
+        this.participants = participants;
+    }
 }
 

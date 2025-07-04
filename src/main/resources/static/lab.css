@@ -1,0 +1,91 @@
+:root.theme-lavender {
+    --color-background: white;
+
+    --color-1: #f8e0f0; /* 연분홍빛으로 살짝 더 밝게 */
+    --color-2: #f3e5f5; /* 기존보다 채도 낮춰서 부드럽게 */
+
+    --color-text: #6a1b9a; /* 보라 텍스트 유지 */
+    --color-bold-text: #ad1457; /* 진한 자주색으로 변경 */
+    --color-button: #ec407a; /* 핑크 계열 버튼 */
+    --color-button-text: white;
+
+    --color-scroll-button: rgba(244, 143, 177, 0.3); /* 핑크빛으로 변경 */
+    --color-scroll-circle: rgba(244, 143, 177, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
+
+    --color-border: #f06292; /* 핑크빛 경계선 */
+    --color-focus: #fce4ec;
+    --color-focus-button: #ec407a;
+    --color-toggle-button: #ab47bc; /* 기존 유지 */
+
+    --color-selected: #f48fb1; /* 분홍 계열로 통일감 */
+    --color-checked: #ec407a;
+
+    --color-tier-s: #d81b60; /* 진한 자주 */
+    --color-tier-a: #7b1fa2; /* 자주빛 보라 */
+    --color-tier-b: #c2185b;
+    --color-tier-c: #B8860B;
+    --color-tier-d: #43a047;
+    --color-tier-f: gray;
+    --color-tier-null: gray;
+
+    --color-table-header: var(--color-2);
+    --color-table-hover: #fce4ec;
+    --color-tooltip: #fce4ec;
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-tooltip);
+    --color-tooltip-tail-border: var(--color-border);
+
+    --color-header: #ad1457; /* 진한 자주 */
+    --color-link: #ec407a;   /* 링크도 분홍으로 */
+    --color-link-hover: #d81b60;
+
+    --color-menu-border: rgba(240, 98, 146, 0.5); /* 기존보다 부드러운 핑크 경계 */
+    --color-scroll-line: #ba68c8;
+    --color-sidebar: #fef0f5;
+    --color-sidebar-border: #f8bbd0;
+}
+
+
+:root.theme-lavender {
+    --color-background: white;
+    --color-1: #e1bee7;
+    --color-2: #f8eafa;
+    --color-text: #6a1b9a;
+    --color-bold-text: #4a148c;
+    --color-button: #ba68c8;
+    --color-button-text: white;
+    --color-scroll-button: rgba(186, 104, 200, 0.3);
+    --color-scroll-circle: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle-bg: var(--color-scroll-button);
+    --color-arrow: var(--color-scroll-circle);
+    --color-border: #ab47bc;
+    --color-focus: #f3e5f5;
+    --color-focus-button: #ab47bc;
+    --color-toggle-button: #8e24aa;
+    --color-selected: #ce93d8;
+    --color-checked: #ab47bc;
+    --color-tier-s: magenta;
+    --color-tier-a: blue;
+    --color-tier-b: red;
+    --color-tier-c: #B8860B;
+    --color-tier-d: green;
+    --color-tier-f: gray;
+    --color-tier-null: gray;
+    --color-table-header: var(--color-2);
+    --color-table-hover: var(--color-2);
+    --color-tooltip: var(--color-2);
+    --color-tooltip-border: var(--color-border);
+    --color-tooltip-tail: var(--color-2);
+    --color-tooltip-tail-border: var(--color-border);
+    --color-header: #4a148c;
+    --color-link: #6a1b9a;
+    --color-link-hover: #4a148c;
+    --color-menu-border: rgba(186, 104, 200, 0.5);
+    --color-scroll-line: #ab47bc;
+    --color-sidebar: #f9f0ff;
+    --color-sidebar-border: #d1c4e9;
+}
+
+

@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadJournals();
     await loadTags();
    // 테이블 클릭 이벤트리스너, 이벤트 위임이므로 한번만 추가
-    journalEvent(journalMap, loadJournals);
+    journalEvent(journalMap, loadJournals, loadTags);
 
     // 접기 토글
     setupFoldToggle('toggle-fold', loadJournals);
@@ -68,11 +68,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadTags();
     });
 
-    setupSearchForm("tags", "tag-search-form", "tag-sort", ["supplement", "positive", "negative"], renderTags);
-    setupSearchForm("tags", "modal-search-form", "modal-sort", ["supplement", "positive", "negative"], renderModal);
+    setupSearchForm("tags", "tag-search-form", "tag-sort", ["supplement", "effect", "sideEffect"], renderTags);
+    setupSearchForm("tags", "modal-search-form", "modal-sort", ["supplement", "effect", "sideEffect"], renderModal);
     setupSearchForm("journals", "search-form", "list-sort", null, renderJournals);
 
-    selectList(["trialDesign", "blind", "parallel", "supplement", "positive", "negative"],filterByTag);
+    selectList(["trialDesign", "blind", "parallel", "supplement", "effect", "sideEffect"],filterByTag);
     selectChange('journal-body');
     selectChange('insert-form');
 });
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadJournals() {
     const sort = document.getElementById('list-sort').value;
     let dir = 'desc';
-    if (sort==='title'){
+    if (sort === 'title'){
        dir = 'asc';
     }
     const res = await fetch(`/api/journals?sort=${sort}&direction=${dir}`);
@@ -93,22 +93,24 @@ async function loadJournals() {
 // 태그 로딩
 async function loadTags() {
     const sort = document.getElementById('tag-sort').value;
-    const allTypes = ['positive', 'negative', 'supplement'];
-    const allTierTypes = ['trialDesign'];
-    for (let type of allTypes) {
-        const res = await fetch(`/api/tags?type=${type}&sort=${encodeURIComponent(sort)}&direction=asc`);
-        const list = await res.json();
+    const allTypes = ['effect', 'sideEffect', 'supplement', 'trialDesign'];
+    const query = new URLSearchParams({
+        type: allTypes.join(','), // 👉
+        sort: sort,
+        direction: 'asc'
+    }).toString();
+
+    const res = await fetch(`/api/tags?${query}`);
+    const tagMap = await res.json();
+
+    for (const [type, list] of Object.entries(tagMap)) {
         renderTags(type, list);
-        renderModal(type, list);
-    }
-    for (let type of allTierTypes) {
-        const res = await fetch(`/api/tags/tier?type=${type}`);
-        const list = await res.json();
-        renderTags(type, list);
-        renderModal(type, list);
+        if(type !== 'trialDesign'){
+            renderModal(type, list);
+        }
     }
      onlyOneCheckboxes(['supplement']);
-     onlyOneCheckboxes(['positive', 'negative']);
+     onlyOneCheckboxes(['effect', 'sideEffect']);
      document.getElementById('mapping-cash').innerHTML = '';
 }
 
@@ -124,8 +126,8 @@ async function filterByTag() {
         const blind = selected.filter(e => e.dataset.type === 'blind').map(e => e.dataset.id);
         const parallel = selected.filter(e => e.dataset.type === 'parallel').map(e => e.dataset.id);
         const supplementIds = selected.filter(e => e.dataset.type === 'supplement').map(e => e.dataset.id);
-        const effectIds = selected.filter(e => e.dataset.type === 'positive').map(e => e.dataset.id);
-        const sideEffectIds = selected.filter(e => e.dataset.type === 'negative').map(e => e.dataset.id);
+        const effectIds = selected.filter(e => e.dataset.type === 'effect').map(e => e.dataset.id);
+        const sideEffectIds = selected.filter(e => e.dataset.type === 'sideEffect').map(e => e.dataset.id);
         const params = new URLSearchParams();
 
         trialDesign.forEach(id => params.append('trialDesign', id));
@@ -147,8 +149,8 @@ document.getElementById('cash-insert').addEventListener('click', async e => {
     e.preventDefault();
 
     const supplement = ArrayCheckboxesByName('supplement');
-    const effect = ArrayCheckboxesByName('positive');
-    const sideEffect = ArrayCheckboxesByName('negative');
+    const effect = ArrayCheckboxesByName('effect');
+    const sideEffect = ArrayCheckboxesByName('sideEffect');
 
     if (supplement.length !== 1 || effect.length + sideEffect.length !== 1) {
         alert("성분과 효과를 하나씩 선택해 주세요.");
@@ -184,24 +186,40 @@ document.getElementById('cash-insert').addEventListener('click', async e => {
     td2.textContent = selected.name;
 
     const td3 = document.createElement('td');
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('flex');
+    const cohenD = document.createElement('input');
+    cohenD.name = 'cohenD';
+    cohenD.type = 'number';
+    cohenD.classList.add('w-16');
+    cohenD.value = '';
+    cohenD.step = '0.1';
+    cohenD.placeholder = "null";
+    td3.appendChild(cohenD);
 
-    const size = document.createElement('input');
-    size.name = 'size';
-    size.type = 'number';
-    size.classList.add('wid-60px');
-    size.value = "0";
+    const td4 = document.createElement('td');
+    const pearsonR = document.createElement('input');
+    pearsonR.name = 'pearsonR';
+    pearsonR.type = 'number';
+    pearsonR.classList.add('w-16');
+    pearsonR.value = '';
+    pearsonR.step = '0.1';
+    pearsonR.placeholder = "null";
+    td4.appendChild(pearsonR);
 
-    const percent = document.createElement('span');
-
-    wrapper.appendChild(size);
-    wrapper.appendChild(percent);
-    td3.appendChild(wrapper);
+    const td5 = document.createElement('td');
+    const pValue = document.createElement('input');
+    pValue.name = 'pValue';
+    pValue.type = 'number';
+    pValue.classList.add('w-24');
+    pValue.value = '';
+    pValue.step = "0.001";
+    pValue.placeholder = "null";
+    td5.appendChild(pValue);
 
     row.appendChild(td1);
     row.appendChild(td2);
     row.appendChild(td3);
+    row.appendChild(td4);
+    row.appendChild(td5);
 
     document.getElementById('mapping-cash').appendChild(row);
 });
@@ -227,13 +245,17 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
    const effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
      supplementId: parseInt(e.dataset.supplementId),
      effectId: parseInt(e.dataset.effectId),
-     size: parseFloat(e.querySelector('input[name="size"]').value)
+     cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
+     pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
+     pValue: parseFloat(e.querySelector('input[name="p"]').value)
    }));
 
    const sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
      supplementId: parseInt(e.dataset.supplementId),
      sideEffectId: parseInt(e.dataset.effectId),
-     size: parseFloat(e.querySelector('input[name="size"]').value)
+     cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
+     pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
+     pValue: parseFloat(e.querySelector('input[name="p"]').value)
    }));
 
     const data = {

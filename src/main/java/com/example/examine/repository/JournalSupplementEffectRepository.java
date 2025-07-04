@@ -1,7 +1,10 @@
 package com.example.examine.repository;
 
+import com.example.examine.dto.response.JSEResponse;
+import com.example.examine.entity.Journal;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,9 +22,41 @@ public interface JournalSupplementEffectRepository extends JpaRepository<Journal
 
     Optional<JournalSupplementEffect> findById(JournalSupplementEffectId id);
 
-    // 혹은 존재 여부만 빠르게 확인할 수도 있어
     boolean existsById(JournalSupplementEffectId id);
 
-    List<JournalSupplementEffect> findAllByJournalId(Long journalId);
-    List<JournalSupplementEffect> findAllBySupplementId(Long supplementId);
+    @Query("""
+    SELECT DISTINCT jse.journal 
+    FROM JournalSupplementEffect jse
+    WHERE jse.id.supplementEffectId.effectTagId = :effectId
+""")
+    List<Journal> findJournalsByEffectId(@Param("effectId") Long effectId, Sort sort);
+
+    @Query("""
+    SELECT DISTINCT jse.journal 
+    FROM JournalSupplementEffect jse
+    WHERE jse.id.supplementEffectId.supplementId = :supplementId
+""")
+    List<Journal> findJournalsBySupplementId(@Param("supplementId") Long supplementId, Sort sort);
+
+    @Query("""
+    SELECT new com.example.examine.dto.response.JSEResponse(
+        jse.journal.id,
+        se.supplement.id,
+        se.effectTag.id,
+        se.supplement.korName,
+        se.supplement.engName,
+        se.effectTag.korName,
+        se.effectTag.engName,
+        jse.cohenD,
+        jse.pearsonR,
+        jse.pValue,
+        jse.score
+    )
+    FROM JournalSupplementEffect jse
+    JOIN jse.SE se
+    WHERE jse.journal.id IN :journalIds
+""")
+    List<JSEResponse> findAllByJournalIdIn(@Param("journalIds") List<Long> journalIds);
+
+    List<JournalSupplementEffect> findByJournalId(Long journalId);
 }

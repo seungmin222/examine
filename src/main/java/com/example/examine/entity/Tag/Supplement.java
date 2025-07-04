@@ -1,16 +1,20 @@
-package com.example.examine.entity;
+package com.example.examine.entity.Tag;
 
+import com.example.examine.entity.detail.SupplementDetail;
+import com.example.examine.entity.extend.EntityTime;
+import com.example.examine.entity.Journal;
 import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -21,7 +25,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class Supplement extends EntityTime {
+public class Supplement extends EntityTime implements Tag{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,13 +51,15 @@ public class Supplement extends EntityTime {
             joinColumns = @JoinColumn(name = "supplement_id"),
             inverseJoinColumns = @JoinColumn(name = "type_tag_id")
     )
+
+    @Builder.Default
     private List<TypeTag> types = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SupplementEffect> effects = new ArrayList<>();
+    private Set<SupplementEffect> effects = new HashSet<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SupplementSideEffect> sideEffects = new ArrayList<>();
+    private Set<SupplementSideEffect> sideEffects = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -62,9 +68,45 @@ public class Supplement extends EntityTime {
             inverseJoinColumns = @JoinColumn(name = "journal_id")
     )
     @JsonIgnore
+    @Builder.Default
     private List<Journal> journals = new ArrayList<>();
 
- // detail 클래스를 supplement 엔티티에 직접 추가하면 자원낭비
- // detail에서 id 받는게 적절
+    @Builder.Default
+    @Column(nullable = false)
+    private String tier = "D";
 
+    @Override
+    public Long getId() {
+     return id;
+ }
+
+    @Override
+    public String getKorName() {
+        return korName;
+    }
+
+    @Override
+    public void setKorName(String korName) {
+        this.korName = this.korName;
+    }
+
+    @Override
+    public String getEngName() {
+        return engName;
+    }
+
+    @Override
+    public void setEngName(String korName) {
+        this.engName = this.engName;
+    }
+
+    @Override
+    public String getTier() {
+        return tier;
+    }
+
+    @Override
+    public void setTier(String tier) {
+        this.tier = this.tier;
+    }
 }

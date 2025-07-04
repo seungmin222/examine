@@ -1,23 +1,22 @@
 package com.example.examine.entity.JournalSupplementEffect;
 
-import com.example.examine.entity.Effect.Effect;
-import com.example.examine.entity.Effect.SideEffectTag;
-import com.example.examine.entity.EntityTime;
-import com.example.examine.entity.Journal;
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.SupplementEffect.SE;
+import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
+import com.example.examine.entity.Tag.Effect.Effect;
+import com.example.examine.entity.Tag.Effect.SideEffectTag;
+import com.example.examine.entity.extend.EntityTime;
+import com.example.examine.entity.Journal;
+import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
 
 
 @Entity
@@ -38,41 +37,48 @@ public class JournalSupplementSideEffect extends EntityTime implements JSE {
     private Journal journal;
 
     @ManyToOne
-    @MapsId("supplementId")
-    @JoinColumn(name = "supplement_id")
-    private Supplement supplement;
+    @MapsId("supplementSideEffectId")
+    @JoinColumns({
+            @JoinColumn(name = "supplement_id", referencedColumnName = "supplement_id"),
+            @JoinColumn(name = "side_effect_tag_id", referencedColumnName = "side_effect_tag_id")
+    })
+    private SupplementSideEffect SE;
 
-    @ManyToOne
-    @MapsId("sideEffectTagId")
-    @JoinColumn(name = "side_effect_tag_id")
-    private SideEffectTag sideEffectTag;
+    public JournalSupplementSideEffect(Journal journal, SupplementSideEffect se, BigDecimal d, BigDecimal r, BigDecimal p) {
+        this.journal = journal;
+        this.SE = se;
+        this.cohenD = d;
+        this.pearsonR = r;
+        this.pValue = p;
+        this.id = new JournalSupplementSideEffectId(journal.getId(), se.getId());
+    }
 
-    @Column(precision = 5, scale = 3)
-    private BigDecimal size;
+    @Column(name = "cohen_d", precision = 5, scale = 3)
+    private BigDecimal cohenD;
+
+    @Column(name = "pearson_r", precision = 5, scale = 3)
+    private BigDecimal pearsonR;
+
+    @Column(name = "p_value", precision = 6, scale = 5)
+    private BigDecimal pValue;
 
     @Column(precision = 8, scale = 4)
     private BigDecimal score;
 
-    public JournalSupplementSideEffect(Journal journal,
-            Supplement supplement,
-            SideEffectTag sideEffectTag,
-            BigDecimal size) {
-        this.journal = journal;
-        this.supplement = supplement;
-        this.sideEffectTag = sideEffectTag;
-        this.size = size;
-        this.id = new JournalSupplementSideEffectId(journal.getId(), supplement.getId(), sideEffectTag.getId());
-    }
+    @Column(length = 2, nullable = false)
+    private String tier = "D";
 
-    // getter/setter
+    private Integer participants;
+
+    // ==== Getter / Setter ====
+
     @Override
     public JournalSupplementSideEffectId getId() {
         return id;
     }
 
     @Override
-    public void setId(
-            JSEId id) {
+    public void setId(JSEId id) {
         this.id = (JournalSupplementSideEffectId) id;
     }
 
@@ -87,33 +93,43 @@ public class JournalSupplementSideEffect extends EntityTime implements JSE {
     }
 
     @Override
-    public Supplement getSupplement() {
-        return supplement;
+    public SupplementSideEffect getSE() {
+        return SE;
     }
 
     @Override
-    public void setSupplement(Supplement supplement) {
-        this.supplement = supplement;
+    public void setSE(SE SE) {
+        this.SE = (SupplementSideEffect) SE;
     }
 
     @Override
-    public SideEffectTag getEffect() {
-        return sideEffectTag;
+    public BigDecimal getCohenD() {
+        return cohenD;
     }
 
     @Override
-    public void setEffect(Effect effect) {
-        this.sideEffectTag = (SideEffectTag) effect;
+    public void setCohenD(BigDecimal cohenD) {
+        this.cohenD = cohenD;
     }
 
     @Override
-    public BigDecimal getSize() {
-        return size;
+    public BigDecimal getPearsonR() {
+        return pearsonR;
     }
 
     @Override
-    public void setSize(BigDecimal size) {
-        this.size = size;
+    public void setPearsonR(BigDecimal pearsonR) {
+        this.pearsonR = pearsonR;
+    }
+
+    @Override
+    public BigDecimal getPValue() {
+        return pValue;
+    }
+
+    @Override
+    public void setPValue(BigDecimal pValue) {
+        this.pValue = pValue;
     }
 
     @Override
@@ -123,8 +139,28 @@ public class JournalSupplementSideEffect extends EntityTime implements JSE {
 
     @Override
     public void setScore() {
-        this.score = CalculateScore.calculateJournalSupplementScore(this.size, this.journal.getScore());
-        return;
+        this.score = CalculateScore.calculateJournalSupplementScore(
+                this.cohenD, this.pearsonR, this.pValue, this.journal.getScore()
+        );
+    }
+
+    @Override
+    public String getTier() {
+        return tier;
+    }
+
+    @Override
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
+
+    @Override
+    public Integer getParticipants() {
+        return participants;
+    }
+
+    @Override
+    public void setParticipants(Integer participants) {
+        this.participants = participants;
     }
 }
-

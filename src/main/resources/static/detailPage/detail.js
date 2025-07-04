@@ -4,10 +4,9 @@ import {
 } from '/util/load.js';
 
 import {
-    setupPairToggleButton,
     journalEvent,
     supplementEvent
-} from '/util/event.js';
+} from '/util/tableEvent.js';
 
 
 import {
@@ -17,6 +16,10 @@ import {
     renderButton
 } from '/util/render.js';
 
+const journalMap = new Map();
+const supplementMap = new Map();
+
+
 const params = new URLSearchParams(window.location.search);
 const supplementId = params.get('id');
 
@@ -25,11 +28,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     try {
-        await loadAll();
         await loadBasic(loadAll);
-        supplementEvent();
-        journalEvent();
+        await loadAll();
+        supplementEvent(supplementMap,loadSupplements);
+        journalEvent(journalMap,loadJournals);
 
+        document.getElementById('toggle-change').addEventListener('click',e=> {
+            const editMode = e.target.classList.contains('execute');
+            if(editMode) {
+                enableEditMode();
+            }
+            else {
+                disableEditMode();
+            }
+        });
+
+        document.getElementById('save-button').addEventListener('click',e=>{
+            const editMode = document.getElementById('toggle-change').classList.contains('execute');
+            if(editMode) {
+                saveDetail();
+            }
+        });
 
     } catch (err) {
         document.getElementById('title').textContent = '성분을 불러올 수 없습니다';
@@ -37,22 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-document.getElementById('toggle-change').addEventListener('click',e=> {
-    const editMode = e.target.classList.contains('execute');
-    if(editMode) {
-       disableEditMode();
-    }
-    else {
-       enableEditMode();
-    }
-});
 
-document.getElementById('save-button').addEventListener('click',e=>{
-   const editMode = document.getElementById('toggle-change').classList.contains('execute');
-   if(editMode) {
-      saveDetail();
-   }
-});
 
 // 🟢 수정모드 진입: p 태그 contenteditable 활성화 + 스타일 변경
 function enableEditMode() {
@@ -103,14 +107,13 @@ async function saveDetail() {
 async function loadJournals(){
     const res = await fetch(`/api/details/${supplementId}/journals`);
     const journals = await res.json();
-    const journalMap = new Map(); // 그냥 매개변수 채우는 용
     renderJournals(journals, journalMap);
 }
 
 async function loadSupplements(){
     const res = await fetch(`/api/supplements/${supplementId}`);
     const supplements = await res.json();
-    renderSupplements(supplements);
+    renderSupplements(supplements, supplementMap);
     const title = document.getElementById('title');
     const subTitle = document.getElementById('index-1');
     title.innerHTML = `${supplements[0].korName}`;

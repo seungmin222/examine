@@ -5,22 +5,26 @@ import {
 function createTagList(type, list) {
   const liList = list.map(tag => {
     const li = document.createElement('li');
-    li.textContent = tag.name;
+    li.textContent = tag.korName;
+    li.dataset.name = tag.engName;
     li.dataset.id = tag.id;
     li.dataset.type = type;
+    li.classList.add(tag.tier[0]);
     return li;
   });
-
-  if (type === 'trialDesign') {
-    liList.forEach((li, i) => {
-      const tier = list[i]?.tier;
-      if (tier) {
-        li.classList.add(tier[0]);
-      }
-    });
-  }
-
   return liList;
+}
+
+function switchTagList(type) {
+  const list = document.getElementById(`${type}-list`);
+  if (!list) return;
+
+  // li 요소들 순회
+  list.querySelectorAll('li').forEach(li => {
+    const text = li.textContent;
+    li.textContent = li.dataset.name;
+    li.dataset.name = text;
+  });
 }
 
 // tag 배열 받아서 한꺼번에 만들기
@@ -34,7 +38,7 @@ function createCheckbox(tag, prefix) {
 
 function createLabelText(tag) {
   const span = document.createElement('span');
-  span.textContent = tag.name;
+  span.textContent = tag.korName;
   const tier = tag?.tier;
     if (tier) {
       span.classList.add(tier[0]);
@@ -85,7 +89,9 @@ function createTooltip(anchorId, text, position = 'top', cls = '') {
 
   const tooltip = document.createElement('div');
   tooltip.className = 'tooltip-box hidden';
-  tooltip.classList.add(cls);
+  if (cls) {
+    tooltip.classList.add(cls);
+  }
   tooltip.innerHTML = `
     <div class="tooltip-body">${text}</div>
     <div class="tooltip-tail-wrapper" data-popper-arrow>
@@ -192,79 +198,61 @@ function renderEffectCache(item) {
   const container = document.getElementById('mapping-cash');
   container.innerHTML = ''; // ✅ 초기화
 
-  // ✅ 효과(effect) 캐시
-  item.effects?.forEach(effect => {
-    const row = document.createElement('tr');
-    row.classList.add('effect-cash');
-    row.dataset.supplementId = effect.supplementId;
-    row.dataset.effectId = effect.effectId;
+  renderCash(item.effects,'effect-cash');
+  renderCash(item.sideEffects,'sideEffect-cash');
 
-    const td1 = document.createElement('td');
-    td1.textContent = effect.supplementName;
+  function renderCash(list, cls){
+    list?.forEach(effect => {
+      const row = document.createElement('tr');
+      row.classList.add(cls);
+      row.dataset.supplementId = effect.supplementId;
+      row.dataset.effectId = effect.effectId;
 
-    const td2 = document.createElement('td');
-    td2.textContent = effect.effectName;
+      const td1 = document.createElement('td');
+      td1.textContent = effect.supplementKorName;
 
-    const td3 = document.createElement('td');
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('flex');
+      const td2 = document.createElement('td');
+      td2.textContent = effect.effectKorName;
 
-    const size = document.createElement('input');
-    size.name = 'size';
-    size.type = 'number';
-    size.classList.add('wid-60px');
-    size.value = effect.size ?? '';
+      const td3 = document.createElement('td');
+      const cohenD = document.createElement('input');
+      cohenD.name = 'cohenD';
+      cohenD.type = 'number';
+      cohenD.classList.add('w-16');
+      cohenD.value = effect.cohenD;
+      cohenD.step = '0.1';
+      cohenD.placeholder = "null";
+      td3.appendChild(cohenD);
 
-    const percent = document.createElement('span');
-    percent.textContent = ' %';
+      const td4 = document.createElement('td');
+      const pearsonR = document.createElement('input');
+      pearsonR.name = 'pearsonR';
+      pearsonR.type = 'number';
+      pearsonR.classList.add('w-16');
+      pearsonR.value = effect.pearsonR;
+      pearsonR.step = '0.1';
+      pearsonR.placeholder = "null";
+      td4.appendChild(pearsonR);
 
-    wrapper.appendChild(size);
-    wrapper.appendChild(percent);
-    td3.appendChild(wrapper);
+      const td5 = document.createElement('td');
+      const pValue = document.createElement('input');
+      pValue.name = 'pValue';
+      pValue.type = 'number';
+      pValue.classList.add('w-24');
+      pValue.value = effect.pValue;
+      pValue.step = "0.001";
+      pValue.placeholder = "null";
+      td5.appendChild(pValue);
 
-    row.appendChild(td1);
-    row.appendChild(td2);
-    row.appendChild(td3);
+      row.appendChild(td1);
+      row.appendChild(td2);
+      row.appendChild(td3);
+      row.appendChild(td4);
+      row.appendChild(td5);
 
-    container.appendChild(row);
-  });
-
-  // ✅ 부작용(sideEffect) 캐시
-  item.sideEffects?.forEach(effect => {
-    const row = document.createElement('tr');
-    row.classList.add('sideEffect-cash');
-    row.dataset.supplementId = effect.supplementId;
-    row.dataset.effectId = effect.sideEffectId;
-
-    const td1 = document.createElement('td');
-    td1.textContent = effect.supplementName;
-
-    const td2 = document.createElement('td');
-    td2.textContent = effect.sideEffectName;
-
-    const td3 = document.createElement('td');
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('flex');
-
-    const size = document.createElement('input');
-    size.name = 'size';
-    size.type = 'number';
-    size.classList.add('wid-60px');
-    size.value = effect.size ?? '';
-
-    const percent = document.createElement('span');
-    percent.textContent = ' %';
-
-    wrapper.appendChild(size);
-    wrapper.appendChild(percent);
-    td3.appendChild(wrapper);
-
-    row.appendChild(td1);
-    row.appendChild(td2);
-    row.appendChild(td3);
-
-    container.appendChild(row);
-  });
+      container.appendChild(row);
+    });
+  }
 }
 
 
@@ -337,6 +325,7 @@ export {
   createTierSelectBox,
   createModalInner,
   createTagList,
+    switchTagList,
   checkCheckboxes,
   checkCheckboxesById,
   ArrayCheckboxesById,

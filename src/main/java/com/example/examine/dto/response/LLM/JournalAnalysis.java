@@ -1,4 +1,8 @@
-package com.example.examine.dto.response;
+package com.example.examine.dto.response.LLM;
+
+import com.example.examine.dto.response.JSEResponse;
+
+import java.util.List;
 
 public record JournalAnalysis (
         Integer participants,
@@ -6,7 +10,7 @@ public record JournalAnalysis (
         String durationUnit,
         Integer blind,
         Boolean parallel,
-        String design
-        // 추후 성분-효과-효과 크기 쌍도 추가
+        String design,
+        List<LLMJSE> effects
 ){
 }

@@ -1,5 +1,6 @@
 package com.example.examine.entity;
 
+import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -27,12 +28,15 @@ public class Page extends EntityTime {
     @Column(length = 255, nullable = false)
     private String title;
 
+    @Builder.Default
     @Column(name = "view_count", nullable = false)
     private Long viewCount = 0L;
 
+    @Builder.Default
     @Column(name = "bookmark_count", nullable = false)
     private Long bookmarkCount = 0L;
 
+    @Builder.Default
     @Column(name = "level", nullable = false)
     private int level = 0;
 

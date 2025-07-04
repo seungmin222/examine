@@ -16,7 +16,7 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
         LEFT JOIN FETCH j.journalSupplementEffects
         WHERE j.id = :id
     """)
-    Optional<Journal> findWithEffectsById(@Param("id") Long id);
+    Optional<Journal> findWithEffectsById(@Param("id") Long id, Sort sort);
 
     @Query("""
         SELECT j FROM Journal j
@@ -25,26 +25,28 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
     """)
     Optional<Journal> findWithSideEffectsById(@Param("id") Long id);
     Optional<Journal> findByLink(String Link);
-    List<Journal> findByTitleContainingIgnoreCase(
-            String title, Sort sort
-    );
-
     @Query("""
-        SELECT DISTINCT s FROM Journal s
-        LEFT JOIN s.trialDesign t
-        LEFT JOIN s.journalSupplementEffects e
-        LEFT JOIN s.journalSupplementSideEffects se
-        WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)
-         AND (:blind IS NULL OR s.blind IN :blind)
-         AND (:parallel IS NULL OR s.parallel IN :parallel)
-         AND (
-              :supplementIds IS NULL OR
-               e.supplement.id IN :supplementIds OR
-               se.supplement.id IN :supplementIds
-              )
-          AND (:effectIds IS NULL OR e.effectTag.id IN :effectIds)
-          AND (:sideEffectIds IS NULL OR se.sideEffectTag.id IN :sideEffectIds)
-        """)
+    SELECT j FROM Journal j
+    LEFT JOIN FETCH j.trialDesign
+    WHERE LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+""")
+    List<Journal> findByTitleContainingIgnoreCase(@Param("keyword") String keyword, Sort sort);
+    @Query("""
+    SELECT DISTINCT s FROM Journal s
+    LEFT JOIN FETCH s.trialDesign t
+    LEFT JOIN s.journalSupplementEffects e
+    LEFT JOIN s.journalSupplementSideEffects se
+    WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)
+     AND (:blind IS NULL OR s.blind = :blind)
+     AND (:parallel IS NULL OR s.parallel = :parallel)
+     AND (
+          :supplementIds IS NULL OR
+           e.id.supplementEffectId.supplementId IN :supplementIds OR
+           se.id.supplementSideEffectId.supplementId IN :supplementIds
+          )
+      AND (:effectIds IS NULL OR e.id.supplementEffectId.effectTagId IN :effectIds)
+      AND (:sideEffectIds IS NULL OR se.id.supplementSideEffectId.sideEffectTagId IN :sideEffectIds)
+""")
     List<Journal> findFiltered(
             @Param("trialDesign") List<Long> trialDesign,
             @Param("blind") Integer blind,
@@ -54,4 +56,10 @@ public interface JournalRepository extends JpaRepository<Journal, Long> {
             @Param("sideEffectIds") List<Long> sideEffectIds,
             Sort sort
     );
+
+    @Query("""
+    SELECT j FROM Journal j
+    LEFT JOIN FETCH j.trialDesign
+""")
+    List<Journal> findAllBasic(Sort sort);
 }

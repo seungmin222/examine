@@ -7,6 +7,7 @@ import com.example.examine.dto.response.JournalResponse;
 import com.example.examine.entity.*;
 import com.example.examine.service.EntityService.SupplementService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,10 @@ public class DetailController {
     private final SupplementService supplementService;
 
 
-    @PutMapping ("/{id}")
+    @PutMapping
     @Transactional
-    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody DetailRequest dto) {
-        return supplementService.detailUpdate(id,dto);
+    public ResponseEntity<String> update(@RequestBody DetailRequest dto) {
+        return supplementService.detailUpdate(dto);
     }
 
     @GetMapping("/{id}")
@@ -33,8 +34,11 @@ public class DetailController {
     }
 
     @GetMapping("/{id}/journals")
-    public List<JournalResponse> journals(@PathVariable Long id) {
-        return supplementService.journals(id);
+    public List<JournalResponse> journals(@PathVariable Long id,
+                                          @RequestParam(defaultValue = "title") String sort,
+                                          @RequestParam(defaultValue = "asc") String direction) {
+        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
+        return supplementService.journals(id, sorting);
     }
 
 }

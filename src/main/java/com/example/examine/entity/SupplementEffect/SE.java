@@ -1,7 +1,7 @@
 package com.example.examine.entity.SupplementEffect;
 
-import com.example.examine.entity.Effect.Effect;
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.Tag.Effect.Effect;
+import com.example.examine.entity.Tag.Supplement;
 
 import java.math.BigDecimal;
 
@@ -26,4 +26,17 @@ public interface SE {
 
     String getTier();
     void setTier(String tier);
+
+    String getSupplementKorName();
+    void setSupplementKorName(String name);
+
+    String getSupplementEngName();
+    void setSupplementEngName(String name);
+
+    String getEffectKorName();
+    void setEffectKorName(String name);
+
+    String getEffectEngName();
+    void setEffectEngName(String name);
+
 }

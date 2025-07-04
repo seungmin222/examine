@@ -1,27 +1,39 @@
 package com.example.examine.entity.JournalSupplementEffect;
 
-import com.example.examine.entity.Effect.Effect;
+import com.example.examine.entity.SupplementEffect.SE;
+import com.example.examine.entity.Tag.Effect.Effect;
 import com.example.examine.entity.Journal;
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.Tag.Supplement;
 
 import java.math.BigDecimal;
 
 public interface JSE {
+
     JSEId getId();
     void setId(JSEId id);
 
     Journal getJournal();
     void setJournal(Journal journal);
 
-    Supplement getSupplement();
-    void setSupplement(Supplement supplement);
+    SE getSE();
 
-    Effect getEffect();
-    void setEffect(Effect effect);
+    void setSE(SE se);
 
-    BigDecimal getSize();
-    void setSize(BigDecimal size);
+    BigDecimal getCohenD();
+    void setCohenD(BigDecimal cohenD);
+
+    BigDecimal getPearsonR();
+    void setPearsonR(BigDecimal pearsonR);
+
+    BigDecimal getPValue();
+    void setPValue(BigDecimal pValue);
 
     BigDecimal getScore();
     void setScore();
+
+    String getTier();
+    void setTier(String tier);
+
+    public Integer getParticipants();
+    public void setParticipants(Integer participants);
 }

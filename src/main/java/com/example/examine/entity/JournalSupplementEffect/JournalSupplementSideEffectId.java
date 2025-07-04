@@ -1,26 +1,24 @@
 package com.example.examine.entity.JournalSupplementEffect;
 
+import com.example.examine.entity.SupplementEffect.SEId;
+import com.example.examine.entity.SupplementEffect.SupplementSideEffectId;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
+@NoArgsConstructor
+@AllArgsConstructor
 public class JournalSupplementSideEffectId implements Serializable,JSEId {
 
     private Long journalId;
-    private Long supplementId;
-    private Long sideEffectTagId;
 
-    // 기본 생성자
-    public JournalSupplementSideEffectId() {}
-
-    // 필드 초기화 생성자
-    public JournalSupplementSideEffectId(Long journalId, Long supplementId, Long effectTagId) {
-        this.journalId = journalId;
-        this.supplementId = supplementId;
-        this.sideEffectTagId = sideEffectTagId;
-    }
+    @Embedded
+    private SupplementSideEffectId supplementSideEffectId;
 
     // Getter & Setter
     @Override
@@ -34,23 +32,13 @@ public class JournalSupplementSideEffectId implements Serializable,JSEId {
     }
 
     @Override
-    public Long getSupplementId() {
-        return supplementId;
+    public SupplementSideEffectId getSEId() {
+        return supplementSideEffectId;
     }
 
     @Override
-    public void setSupplementId(Long SupplementId) {
-        this.supplementId = SupplementId;
-    }
-
-    @Override
-    public Long getEffectId() {
-        return sideEffectTagId;
-    }
-
-    @Override
-    public void setEffectId(Long sideEffectTagId) {
-        this.sideEffectTagId = sideEffectTagId;
+    public void setSEId(SEId seId) {
+        this.supplementSideEffectId = (SupplementSideEffectId)seId;
     }
 
     // equals
@@ -60,13 +48,14 @@ public class JournalSupplementSideEffectId implements Serializable,JSEId {
         if (!(o instanceof JournalSupplementSideEffectId)) return false;
         JournalSupplementSideEffectId that = (JournalSupplementSideEffectId) o;
         return Objects.equals(journalId, that.journalId)
-                && Objects.equals(supplementId, that.supplementId)
-                && Objects.equals(sideEffectTagId, that.sideEffectTagId);
+                && Objects.equals(supplementSideEffectId, that.supplementSideEffectId);
     }
 
     // hashCode
     @Override
     public int hashCode() {
-        return Objects.hash(journalId, supplementId, sideEffectTagId);
+        return Objects.hash(journalId, supplementSideEffectId);
     }
+
+
 }

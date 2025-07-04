@@ -2,19 +2,18 @@ package com.example.examine.entity;
 
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementEffect;
 import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideEffect;
+import com.example.examine.entity.Tag.TrialDesign;
+import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.service.EntityService.JournalService;
 import com.example.examine.service.util.CalculateScore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "journal")
@@ -40,7 +39,7 @@ public class Journal extends EntityTime {
 
     @ManyToOne
     @JoinColumn(name = "trial_design_id")
-    private TrialDesign trialDesign; // 이미 nullable (nullable=true가 default)
+    private TrialDesign trialDesign;
 
     @Column(nullable = true)
     private Integer durationValue;
@@ -66,17 +65,23 @@ public class Journal extends EntityTime {
     @Column(nullable = true)
     private BigDecimal score;
 
-    @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<JournalSupplementEffect> journalSupplementEffects = new ArrayList<>();
+    @Builder.Default
+    @Column(nullable = false)
+    private String tier = "D";
 
+    @Builder.Default
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<JournalSupplementSideEffect> journalSupplementSideEffects = new ArrayList<>();
+    private Set<JournalSupplementEffect> journalSupplementEffects = new HashSet<>();;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<JournalSupplementSideEffect> journalSupplementSideEffects = new HashSet<>();
 
     public void setDurationDays() {
         this.durationDays = JournalService.toDays(this.durationValue, this.durationUnit);
     }
 
     public void setScore() {
-        this.score = CalculateScore.calculateJournalScore(participants,durationDays,trialDesign.getName(),blind);
+        this.score = CalculateScore.calculateJournalScore(participants,durationDays,trialDesign,blind);
     }
 }

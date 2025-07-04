@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>통합검색</title>
+    <link href="/dist/output.css" rel="stylesheet">
+    <link id="favicon" rel="icon" type="image/png" href="../image/icon-pink.png" />
+    <script src="/headScript.js"></script>
+</head>
+<body>
+<div id="load-basic"></div>
+<div class="w-[90%] ml-auto mr-0">
+    <!--background-->
+    <div class="w-[95%] mx-auto">
+        <!--main-content-->
+        <div class="flex justify-center">
+            <form id="search-form" class="w-64 gap-4">
+                <h2 class="text-center">통합검색</h2>
+                <input class="w-48" type="text" name="search" placeholder="아이디"/>
+                <button type="submit">로그인</button>
+            </form>
+        </div>
+        <div id="search-result"></div>
+    </div>
+</div>
+<script type="module" src="search.js"></script>
+</body>
+
+</html>

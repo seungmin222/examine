@@ -1,6 +1,6 @@
 package com.example.examine.dto.response;
 import com.example.examine.entity.Journal;
-import com.example.examine.entity.TrialDesign;
+import com.example.examine.entity.Tag.TrialDesign;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,46 +12,35 @@ public record JournalResponse(
         List<JSEResponse> effects,
         List<JSEResponse> sideEffects,
         String summary,
-        TierTagResponse trialDesign,
+        TagResponse trialDesign,
         String blind,
         Boolean parallel,
         DurationResponse duration,
         Integer participants,
         LocalDate date
 ) {
-    private static final String[] blindLabel = {
-            "open-label", "single-blind", "double-blind"
-    };
-
-    public static JournalResponse fromEntity(Journal journal) {
-        TrialDesign td = journal.getTrialDesign();
-        TierTagResponse tierTagResponse = td != null
-                ? new TierTagResponse(td.getId(), td.getName(), td.getTier())
-                : null;
-
-        Integer blindNum = journal.getBlind();
-        String blind = (blindNum != null && blindNum >= 0 && blindNum < blindLabel.length)
-                ? blindLabel[blindNum]
-                : "unknown";
-
+    public static JournalResponse fromEntity(
+            Journal j,
+            List<JSEResponse> effects,
+            List<JSEResponse> sideEffects
+    ) {
+        int blind = (j.getBlind() != null ? j.getBlind() : -1);
+        String blindStr = switch (blind) {
+            case 0 -> "open-label";
+            case 1 -> "single-blind";
+            case 2 -> "double-blind";
+            default -> "unknown";
+        };
 
         return new JournalResponse(
-                journal.getId(),
-                journal.getTitle(),
-                journal.getLink(),
-                journal.getJournalSupplementEffects().stream()
-                        .map(JSEResponse::fromEntity)
-                        .toList(),
-                journal.getJournalSupplementSideEffects().stream()
-                        .map(JSEResponse::fromEntity)
-                        .toList(),
-                journal.getSummary(),
-                tierTagResponse,
-                blind,
-                journal.getParallel(),
-                new DurationResponse(journal.getDurationValue(), journal.getDurationUnit(), journal.getDurationDays()),
-                journal.getParticipants(),
-                journal.getDate()
+                j.getId(), j.getTitle(), j.getLink(),
+                effects, sideEffects,
+                j.getSummary(),
+                TagResponse.fromEntity(j.getTrialDesign()),
+                blindStr, j.getParallel(),
+                new DurationResponse(j.getDurationValue(), j.getDurationUnit(), j.getDurationDays()),
+                j.getParticipants(), j.getDate()
         );
     }
 }
+

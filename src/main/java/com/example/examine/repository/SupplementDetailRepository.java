@@ -1,7 +1,7 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.SupplementDetail;
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.detail.SupplementDetail;
+import com.example.examine.entity.Tag.Supplement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

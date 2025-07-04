@@ -1,8 +1,10 @@
 package com.example.examine.dto.response;
 
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.Tag.Supplement;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public record SupplementResponse(
@@ -17,7 +19,22 @@ public record SupplementResponse(
         List<SEResponse> sideEffects
 ) {
     public static SupplementResponse fromEntity(Supplement supplement) {
+        List<SEResponse> effects = new ArrayList<>(
+                supplement.getEffects().stream()
+                        .map(SEResponse::fromEntity)
+                        .toList()
+        );
+        effects.sort(Comparator.comparing(SEResponse::finalScore).reversed());
+
+        List<SEResponse> sideEffects = new ArrayList<>(
+                supplement.getSideEffects().stream()
+                        .map(SEResponse::fromEntity)
+                        .toList()
+        );
+        sideEffects.sort(Comparator.comparing(SEResponse::finalScore).reversed());
+
         return new SupplementResponse(
+
                 supplement.getId(),
                 supplement.getKorName(),
                 supplement.getEngName(),
@@ -25,16 +42,10 @@ public record SupplementResponse(
                 supplement.getDosageUnit(),
                 supplement.getCost(),
                 supplement.getTypes().stream()
-                        .map(e->new TagResponse(e.getId(),e.getName()))
+                        .map(TagResponse::fromEntity)
                         .toList(),
-                supplement.getEffects().stream()
-                        .map(e -> new SEResponse(
-                                e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
-                        .toList(),
-                supplement.getSideEffects().stream()
-                        .map(e -> new SEResponse(
-                                e.getEffect().getId(), e.getEffect().getName(), e.getTier()))
-                        .toList()
+                effects,
+                sideEffects
         );
     }
 }

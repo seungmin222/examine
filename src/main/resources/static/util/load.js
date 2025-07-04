@@ -191,7 +191,7 @@ async function loadModule(){
 }
 
 
-//돔 로딩할때 한번만(redis 조회수)
+//돔 로딩할때 한번만
 async function loadBasic(loadFn = () => {}){
   await loadModule();
   await loadNav(); // 네비게이션바

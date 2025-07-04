@@ -24,9 +24,9 @@ function renderSupplements(list,supplementMap) {
         const row = document.createElement('tr');
         row.dataset.id = item.id;
         const types = item.types?.map(e => e.name).join(', ') || '';
-        const effects = item.effects?.map(e => `<span class="${e.tier}">${e.effectName} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.sideEffectName} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const link = `http://localhost:8080/detail.html?id=${item.id}`;
+        const effects = item.effects?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const link = `http://localhost:8080/detailPage/detail.html?id=${item.id}`;
 
         row.innerHTML = `
       <td>
@@ -101,11 +101,11 @@ function renderJournals(list, journalMap) {
         row.dataset.id = item.id; // ✅ 여기 추가
 
         const supplements = [...new Set([
-          ...(item.effects?.map(e => e.supplementName) || []),
-          ...(item.sideEffects?.map(e => e.supplementName) || [])
+          ...(item.effects?.map(e => e.supplementKorName) || []),
+          ...(item.sideEffects?.map(e => e.supplementKorName) || [])
         ])].join(', ') || '';
-        const effects = [...new Set(item.effects?.map(e => e.effectName) || [])].join(', ') || '';
-        const sideEffects = [...new Set(item.sideEffects?.map(e => e.sideEffectName) || [])].join(', ') || '';
+        const effects = [...new Set(item.effects?.map(e => e.effectKorName) || [])].join(', ') || '';
+        const sideEffects = [...new Set(item.sideEffects?.map(e => e.effectKorName) || [])].join(', ') || '';
         let blindClass = ""
         if (item.blind === 'double-blind') {
             blindClass = 'A';
@@ -130,7 +130,7 @@ function renderJournals(list, journalMap) {
                ? `<select name="trialDesign" class="w-32 ${item.trialDesign?.tier[0]}">
                       ${trialDesignSelectOptions}
                    </select>`
-               : `${item.trialDesign?.name}`
+               : `${item.trialDesign?.engName}`
              }
           </td>
           <td>
@@ -154,7 +154,7 @@ function renderJournals(list, journalMap) {
           </td>
           <td>
             ${editMode
-              ? `<input name="durationValue" type="number" value="${item.duration.value}"/>
+              ? `<input name="durationValue" type="number" value="${item.duration?.value ?? ''}"/>
                  <select name="durationUnit">
                     <option value="day" ${item.duration.unit === 'day' ? 'selected' : ''}>day</option>
                     <option value="week" ${item.duration.unit === 'week' ? 'selected' : ''}>week</option>
@@ -166,7 +166,7 @@ function renderJournals(list, journalMap) {
           </td>
           <td>
             ${editMode
-              ? `<input type="number" value="${item.participants}" class="w-24" name="participants"/>`
+              ? `<input type="number" value="${item.participants ?? ''}" class="w-24" name="participants"/>`
               : item.participants}
           </td>
           <td>${supplements}</td>
@@ -220,17 +220,25 @@ function renderModal(type, list) {
 }
 
 function renderDetails(detail) {
-
+    const overview = document.getElementById('overview');
     const intro = document.getElementById('intro');
     const positive = document.getElementById('positive');
     const negative = document.getElementById('negative');
     const mechanism = document.getElementById('mechanism');
     const dosage = document.getElementById('dosage');
-    intro.innerHTML = `${detail.intro}`;
-    positive.innerHTML = `${detail.positive}`;
-    negative.innerHTML = `${detail.negative}`;
-    mechanism.innerHTML = `${detail.mechanism}`;
-    dosage.innerHTML = `${detail.dosage}`;
+    overview.innerHTML = detail.overview || '';
+    intro.innerHTML = detail.intro || '';
+    positive.innerHTML = detail.positive || '';
+    negative.innerHTML = detail.negative || '';
+    mechanism.innerHTML = detail.mechanism || '';
+    dosage.innerHTML = detail.dosage || '';
+}
+
+function renderTagDetails(detail) {
+    const overview = document.getElementById('overview');
+    const intro = document.getElementById('intro');
+    overview.innerHTML = detail.overview || '';
+    intro.innerHTML = detail.intro || '';
 }
 
 function renderButton(boxId, id, text, cls){
@@ -287,12 +295,34 @@ function renderPages(list,pageMap) {
     });
 }
 
+function renderTagTable(list) {
+    const tbody = document.getElementById('tag-body');
+    tbody.innerHTML = '';
+    const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
+    const shown = isFolded ? list.slice(0, 5) : list;
+
+    shown.forEach(item => {
+        const row = document.createElement('tr');
+        row.dataset.id = item.id;
+        const supplements = item.supplements?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
+
+        row.innerHTML = `
+         <td name="korName">${item.korName}</td>
+         <td name="engName">${item.engName}</td>
+         <td>${supplements}</td>
+       `;
+        tbody.appendChild(row);
+    });
+}
+
 export {
 renderSupplements,
 renderJournals,
 renderTags,
 renderModal,
 renderDetails,
+renderTagDetails,
 renderButton,
-renderPages
+renderPages,
+    renderTagTable
 };

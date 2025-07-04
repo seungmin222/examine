@@ -1,13 +1,15 @@
 package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
+import com.example.examine.dto.request.TagDetailRequest;
 import com.example.examine.dto.request.TagRequest;
-import com.example.examine.dto.request.TierTagRequest;
-import com.example.examine.dto.response.TagResponse;
-import com.example.examine.dto.response.TierTagResponse;
-import com.example.examine.entity.*;
-import com.example.examine.entity.Effect.EffectTag;
-import com.example.examine.entity.Effect.SideEffectTag;
+import com.example.examine.dto.response.*;
+import com.example.examine.entity.Tag.Effect.EffectTag;
+import com.example.examine.entity.Tag.Effect.SideEffectTag;
+import com.example.examine.entity.Tag.TypeTag;
+import com.example.examine.entity.detail.EffectDetail;
+import com.example.examine.entity.detail.SideEffectDetail;
+import com.example.examine.entity.detail.TypeDetail;
 import com.example.examine.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,8 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,33 +30,55 @@ public class TagService {
     private final EffectTagRepository effectRepo;
     private final SideEffectTagRepository sideEffectRepo;
     private final TrialDesignRepository trialDesignRepo;
+    private final EffectDetailRepository effectDetailRepo;
+    private final SideEffectDetailRepository sideEffectDetailRepo;
+    private final TypeDetailRepository typeDetailRepo;
+    private final SupplementEffectRepository supplementEffectRepo;
+    private final SupplementSideEffectRepository supplementSideEffectRepo;
+    private final JournalSupplementEffectRepository jseRepo;
+    private final JournalSupplementSideEffectRepository jsseRepo;
+    private final JournalService journalService;
 
     public ResponseEntity<String> create(TagRequest dto) {
         switch (dto.type()) {
             case "type" -> {
                 TypeTag tag = new TypeTag();
-                tag.setName(dto.name());
+                tag.setKorName(dto.korName());
+                tag.setEngName(dto.engName()); // ✅ 추가
                 typeRepo.save(tag);
+
+                TypeDetail detail = TypeDetail.builder()
+                        .typeTag(tag)
+                        .overview("")
+                        .intro("")
+                        .build();
+                typeDetailRepo.save(detail);
             }
-            case "positive" -> {
+            case "effect" -> {
                 EffectTag tag = new EffectTag();
-                tag.setName(dto.name());
+                tag.setKorName(dto.korName());
+                tag.setEngName(dto.engName()); // ✅ 추가
                 effectRepo.save(tag);
+
+                EffectDetail detail = EffectDetail.builder()
+                        .effectTag(tag)
+                        .overview("")
+                        .intro("")
+                        .build();
+                effectDetailRepo.save(detail);
             }
-            case "negative" -> {
+            case "sideEffect" -> {
                 SideEffectTag tag = new SideEffectTag();
-                tag.setName(dto.name());
+                tag.setKorName(dto.korName());
+                tag.setEngName(dto.engName()); // ✅ 추가
                 sideEffectRepo.save(tag);
-            }
-            case "trialDesign" -> {
-                TrialDesign tag = new TrialDesign();
-                tag.setName(dto.name());
-                trialDesignRepo.save(tag);
-            }
-            case "supplement" -> {
-                Supplement tag = new Supplement();
-                tag.setKorName(dto.name()); // 이름이 korName임에 주의
-                supplementRepo.save(tag);
+
+                SideEffectDetail detail = SideEffectDetail.builder()
+                        .sideEffectTag(tag)
+                        .overview("")
+                        .intro("")
+                        .build();
+                sideEffectDetailRepo.save(detail);
             }
             default -> {
                 return ResponseEntity.badRequest().body("지원하지 않는 태그 타입입니다: " + dto.type());
@@ -65,87 +88,187 @@ public class TagService {
         return ResponseEntity.ok().build();
     }
 
-    // 지금까지 타입을 여러개씩 받고 있었음-> 하나로 변경하니 프론트도 확인 필요
-    public List<TagResponse> get(String type, String sort, String direction ){
-        List<TagResponse> tag = new ArrayList<>();
 
-            String actualSort = (type.equals("supplement") && sort.equals("name")) ? "korName" : sort;
-            Sort sorting = Sort.by(Sort.Direction.fromString(direction), actualSort);
-            switch (type) {
-                case "type":
-                    typeRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "positive":
-                    effectRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "negative":
-                    sideEffectRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "trialDesign":
-                    trialDesignRepo.findAll(Sort.by(Sort.Direction.ASC, "id"))
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "supplement":
-                    supplementRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getKorName())));
-                    break;
-                default:
-                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+    public ResponseEntity<String> updateDetail(TagDetailRequest dto) {
+        switch (dto.type()) {
+            case "type" -> {
+                TypeDetail detail = typeDetailRepo.findById(dto.id())
+                        .orElseThrow(() -> new NoSuchElementException("effect detail not found"));
+                detail.setIntro(dto.intro());
+                detail.setOverview(dto.overview());
+                typeDetailRepo.save(detail);
+                return ResponseEntity.ok().build();
             }
-        return tag;
-    }
-
-    public List<TierTagResponse> get(String type){
-        List<TierTagResponse> tag = new ArrayList<>();
-        Sort sorting = Sort.by(Sort.Direction.ASC, "id");
-
-            switch (type) {
-                case "trialDesign":
-                    trialDesignRepo.findAll(sorting)
-                            .forEach(e -> tag.add(TierTagResponse.fromEntity(e)));
-                    break;
-                default:
-                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+            case "effect" -> {
+                EffectDetail detail = effectDetailRepo.findById(dto.id())
+                        .orElseThrow(() -> new NoSuchElementException("effect detail not found"));
+                detail.setIntro(dto.intro());
+                detail.setOverview(dto.overview());
+                effectDetailRepo.save(detail);
+                effectDetailRepo.save(detail);
+                return ResponseEntity.ok().build();
             }
-        return tag;
-    }
-
-
-    public List<TagResponse> search(String keyword, List<String> type, String sort, String direction ){
-        List<TagResponse> tag = new ArrayList<>();
-
-        for (String t : type) {
-            String actualSort = (t.equals("supplement") && sort.equals("name")) ? "korName" : sort;
-            Sort sorting = Sort.by(Sort.Direction.fromString(direction), actualSort);
-            switch (t) {
-                case "type":
-                    typeRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "positive":
-                    effectRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "negative":
-                    sideEffectRepo.findByNameContaining(keyword,sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getName())));
-                    break;
-                case "supplement":
-                    supplementRepo.findByKorNameContainingIgnoreCaseOrEngNameContainingIgnoreCase(keyword,keyword,sorting)
-                            .forEach(e -> tag.add(TagResponse.fromEntity(e.getId(),e.getKorName())));
-                    break;
-                default:
-                    throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
+            case "sideEffect" -> {
+                SideEffectDetail detail = sideEffectDetailRepo.findById(dto.id())
+                        .orElseThrow(() -> new NoSuchElementException("effect detail not found"));
+                detail.setIntro(dto.intro());
+                detail.setOverview(dto.overview());
+                sideEffectDetailRepo.save(detail);
+                sideEffectDetailRepo.save(detail);
+                return ResponseEntity.ok().build();
+            }
+            default -> {
+                return ResponseEntity.badRequest().body("지원하지 않는 태그 타입입니다: " + dto.type());
             }
         }
-
-        return tag;
     }
 
 
+    public Map<String, List<TagResponse>> get(List<String> type, Sort sort) {
+        Map<String, List<TagResponse>> tagMap = new HashMap<>();
+
+        for (String t : type) {
+            List<TagResponse> tags = switch (t) {
+                case "type" -> typeRepo.findAll(sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "effect" -> effectRepo.findAll(sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "sideEffect" -> sideEffectRepo.findAll(sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "trialDesign" -> trialDesignRepo.findAll(Sort.by(Sort.Direction.ASC, "id"))
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "supplement" -> supplementRepo.findAll(sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
+            };
+
+            tagMap.put(t, tags);
+        }
+
+        return tagMap;
+    }
+
+
+
+    public Map<String, List<TagResponse>> search(String keyword, List<String> type, Sort sort) {
+        Map<String, List<TagResponse>> tagMap = new HashMap<>();
+
+        for (String t : type) {
+            List<TagResponse> tags = switch (t) {
+                case "type" -> typeRepo.findByKorNameContaining(keyword, sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "effect" -> effectRepo.searchWithRelation(keyword, sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "sideEffect" -> sideEffectRepo.searchWithRelation(keyword, sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                case "supplement" -> supplementRepo.searchWithRelations(keyword, sort)
+                        .stream()
+                        .map(TagResponse::fromEntity)
+                        .toList();
+                default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
+            };
+
+            tagMap.put(t, tags);
+        }
+
+        return tagMap;
+    }
+
+
+    public List<EffectTableResponse> getEffectTable(String type, Sort sort){
+        switch (type) {
+            case "effect":
+                return effectRepo.findAllWithRelation(sort)
+                        .stream()
+                        .map(EffectTableResponse::fromEntity)
+                        .toList();
+            case "sideEffect":
+                return sideEffectRepo.findAllWithRelation(sort)
+                        .stream()
+                        .map(EffectTableResponse::fromEntity)
+                        .toList();
+            default:
+                throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        }
+    }
+
+    public List<EffectTableResponse> searchEffectTable(String type, String keyword, Sort sort){
+        switch (type) {
+            case "effect":
+                return effectRepo.searchWithRelation(keyword,sort)
+                        .stream()
+                        .map(EffectTableResponse::fromEntity)
+                        .toList();
+            case "sideEffect":
+                return sideEffectRepo.searchWithRelation(keyword,sort)
+                        .stream()
+                        .map(EffectTableResponse::fromEntity)
+                        .toList();
+            default:
+                throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        }
+    }
+
+    public TagDetailResponse getDetail(String type, Long id){
+        switch (type) {
+            case "type":
+                return typeDetailRepo.findById(id)
+                        .map(TagDetailResponse::fromEntity)
+                        .orElseThrow(() -> new NoSuchElementException("type detail not found"));
+            case "effect":
+                return effectDetailRepo.findById(id)
+                        .map(TagDetailResponse::fromEntity)
+                        .orElseThrow(() -> new NoSuchElementException("effect detail not found"));
+            case "sideEffect":
+                return sideEffectDetailRepo.findById(id)
+                        .map(TagDetailResponse::fromEntity)
+                        .orElseThrow(() -> new NoSuchElementException("sideEffect detail not found"));
+            default:
+                throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        }
+    }
+
+    public List<SupplementResponse> getSupplement(String type, Long id, Sort sort){
+        return switch (type) {
+            case "type" -> supplementRepo.findByTypeId(id, sort)
+                    .stream()
+                    .map(SupplementResponse::fromEntity)
+                    .toList();
+            case "effect" -> supplementEffectRepo.findSupplementsByEffectId(id, sort)
+                    .stream()
+                    .map(SupplementResponse::fromEntity)
+                    .toList();
+            case "sideEffect" -> supplementSideEffectRepo.findSupplementsBySideEffectId(id, sort)
+                    .stream()
+                    .map(SupplementResponse::fromEntity)
+                    .toList();
+            default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        };
+    }
+
+    public List<JournalResponse> getJournal(String type, Long id ,Sort sort){
+        return switch (type) {
+            case "effect" -> journalService.toJournalResponses(jseRepo.findJournalsByEffectId(id, sort));
+            case "sideEffect" -> journalService.toJournalResponses(jsseRepo.findJournalsByEffectId(id, sort));
+            default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        };
+    }
 
     public ResponseEntity<String> delete(String type, Long id ){
         boolean[] removed = {false}; // 람다 안에서 값 수정 위해 배열 사용
@@ -157,14 +280,14 @@ public class TagService {
                     removed[0] = true;
                 });
                 break;
-            case "positive":
+            case "effect":
                 effectRepo.findById(id).ifPresent(tag -> {
                     tag.getSE().clear();// 매핑부터 삭제
                     effectRepo.delete(tag);
                     removed[0] = true;
                 });
                 break;
-            case "negative":
+            case "sideEffect":
                 sideEffectRepo.findById(id).ifPresent(tag -> {
                     tag.getSE().clear();
                     sideEffectRepo.delete(tag);

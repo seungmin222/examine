@@ -62,3 +62,45 @@ lazy 로딩되는 필드들 트랜잭션이랑 join fetch 중 고민
 
 최대한 모듈화 해서 책임 분할 -> ex) 모듈 로딩할때 html 코드 랜더링, js 이벤트 랜더링 나눠서 관리(html은 그대로 상태유지)
 z인덱스 뿐만 아니라 랜더링 순서에도 요소 높이 결정
+
+lazy loadinf 하는 many to one 매핑은 내부적으로 select 문을 사용하기에
+호출 자체에 쿼리 리소스가 들어가므로 두번 이상 경유할 경우
+레포지토리에서 쿼리문으로 직접 select 하는게 이상적
+
+
+-- 1. EffectTag 조회
+SELECT * FROM effect_tag WHERE id = ?
+
+-- 2. 해당 Effect에 연결된 SupplementEffect 조회 (1:N)
+SELECT * FROM supplement_effect WHERE effect_tag_id = ?
+
+-- 3. 각 SupplementEffect에서 Supplement ID 가져와서 N개 만큼 조회
+-- (LAZY일 경우 아래 쿼리가 Supplement마다 날아감: N+1 문제)
+SELECT * FROM supplement WHERE id = ?
+SELECT * FROM supplement WHERE id = ?
+
+@Query("""
+    SELECT DISTINCT se.supplement
+    FROM SupplementEffect se
+    WHERE se.effectTag.id = :effectId
+""")
+List<Supplement> findSupplementsByEffectTagId(@Param("effectId") Long effectId);
+
+SELECT DISTINCT s.*
+FROM supplement_effect se
+JOIN supplement s ON se.supplement_id = s.id
+WHERE se.effect_tag_id = ?
+
+
+ 보너스 팁: 성능 인덱스
+해당 조건에서 성능 이슈가 생긴다면 다음 인덱스가 도움돼:
+
+sql
+복사
+편집
+-- 복합키 FK 기준
+CREATE INDEX idx_se_effect ON supplement_effect(effect_tag_id);
+CREATE INDEX idx_se_supplement ON supplement_effect(supplement_id);
+
+-- 조인용 보조 인덱스
+CREATE INDEX idx_jse_se_fk ON journal_supplement_effect(supplement_id, effect_tag_id);

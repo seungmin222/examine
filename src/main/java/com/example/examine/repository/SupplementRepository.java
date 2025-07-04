@@ -1,6 +1,6 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.Supplement;
+import com.example.examine.entity.Tag.Supplement;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,12 +9,33 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface SupplementRepository extends JpaRepository<Supplement, Long> { // 애매함
+public interface SupplementRepository extends JpaRepository<Supplement, Long>, TagRepository<Supplement> { // 애매함
     Optional<Supplement> findByKorNameAndEngName(String korName, String engName);
-    List<Supplement> findByKorNameContainingIgnoreCaseOrEngNameContainingIgnoreCase(
-            String kor, String eng, Sort sort
-    );
+    @Query("""
+    SELECT DISTINCT s FROM Supplement s
+    LEFT JOIN FETCH s.effects
+    LEFT JOIN FETCH s.sideEffects
+    LEFT JOIN FETCH s.types
+    WHERE LOWER(s.korName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+       OR LOWER(s.engName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+""")
+    List<Supplement> searchWithRelations(@Param("keyword") String keyword, Sort sort);
 
+
+    @Query("""
+SELECT DISTINCT s FROM Supplement s
+LEFT JOIN FETCH s.effects
+LEFT JOIN FETCH s.sideEffects
+LEFT JOIN FETCH s.types
+""")
+    List<Supplement> findAllWithRelations(Sort sort);
+
+    @Query("""
+    SELECT s FROM Supplement s
+    JOIN s.types t
+    WHERE t.id = :typeId
+""")
+    List<Supplement> findByTypeId(@Param("typeId") Long typeId, Sort sort);
 
     @Query("""
         SELECT DISTINCT s FROM Supplement s

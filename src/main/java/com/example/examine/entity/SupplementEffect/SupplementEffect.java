@@ -1,21 +1,19 @@
 package com.example.examine.entity.SupplementEffect;
 
-import com.example.examine.entity.Effect.Effect;
-import com.example.examine.entity.Effect.EffectTag;
-import com.example.examine.entity.Supplement;
-import com.example.examine.entity.EntityTime;
+import com.example.examine.entity.Tag.Effect.Effect;
+import com.example.examine.entity.Tag.Effect.EffectTag;
+import com.example.examine.entity.Tag.Supplement;
+import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 
 import com.example.examine.service.util.CalculateScore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -41,14 +39,42 @@ public class SupplementEffect extends EntityTime implements SE {
     @JoinColumn(name = "effect_tag_id")
     private EffectTag effectTag;
 
-    private String tier;
+    @Column(name = "supplement_kor_name")
+    private String supplementKorName;
 
+    @Column(name = "supplement_eng_name")
+    private String supplementEngName;
+
+    @Column(name = "effect_kor_name")
+    private String effectKorName;
+
+    @Column(name = "effect_eng_name")
+    private String effectEngName;
+
+    // 이름 동기화
+    @PrePersist
+    @PreUpdate
+    public void syncNames() {
+        this.supplementKorName = supplement.getKorName();
+        this.supplementEngName = supplement.getEngName();
+        this.effectKorName = effectTag.getKorName();
+        this.effectEngName = effectTag.getEngName();
+    }
+
+
+    @Builder.Default
+    @Column(nullable = false)
+    private String tier = "D";
+
+    @Builder.Default
     @Column(name = "total_score", nullable = false)
     private BigDecimal totalScore = BigDecimal.ZERO;
 
+    @Builder.Default
     @Column(name = "total_participants", nullable = false)
     private Integer totalParticipants = 0;
 
+    @Builder.Default
     @Column(name = "final_score", nullable = false)
     private BigDecimal finalScore = BigDecimal.ZERO;       // totalScoreSum / totalParticipants
 
@@ -140,6 +166,46 @@ public class SupplementEffect extends EntityTime implements SE {
             );
         }
         this.tier = CalculateScore.calculateTier(finalScore);
+    }
+
+    @Override
+    public String getSupplementKorName() {
+        return supplementKorName;
+    }
+
+    @Override
+    public void setSupplementKorName(String name) {
+        this.supplementKorName = name;
+    }
+
+    @Override
+    public String getSupplementEngName() {
+        return supplementEngName;
+    }
+
+    @Override
+    public void setSupplementEngName(String name) {
+        this.supplementEngName = name;
+    }
+
+    @Override
+    public String getEffectKorName() {
+        return effectKorName;
+    }
+
+    @Override
+    public void setEffectKorName(String name) {
+        this.effectKorName = name;
+    }
+
+    @Override
+    public String getEffectEngName() {
+        return effectEngName;
+    }
+
+    @Override
+    public void setEffectEngName(String name) {
+        this.effectEngName = name;
     }
 }
 
