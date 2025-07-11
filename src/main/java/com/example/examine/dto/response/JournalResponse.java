@@ -19,11 +19,7 @@ public record JournalResponse(
         Integer participants,
         LocalDate date
 ) {
-    public static JournalResponse fromEntity(
-            Journal j,
-            List<JSEResponse> effects,
-            List<JSEResponse> sideEffects
-    ) {
+    public static JournalResponse fromEntity(Journal j) {
         int blind = (j.getBlind() != null ? j.getBlind() : -1);
         String blindStr = switch (blind) {
             case 0 -> "open-label";
@@ -33,8 +29,17 @@ public record JournalResponse(
         };
 
         return new JournalResponse(
-                j.getId(), j.getTitle(), j.getLink(),
-                effects, sideEffects,
+                j.getId(),
+                j.getTitle(),
+                j.getLink(),
+                j.getJournalSupplementEffects()
+                        .stream()
+                        .map(JSEResponse::fromEntity)
+                        .toList(),
+                j.getJournalSupplementSideEffects()
+                        .stream()
+                        .map(JSEResponse::fromEntity)
+                        .toList(),
                 j.getSummary(),
                 TagResponse.fromEntity(j.getTrialDesign()),
                 blindStr, j.getParallel(),

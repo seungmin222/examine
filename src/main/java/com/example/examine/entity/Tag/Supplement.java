@@ -39,7 +39,9 @@ public class Supplement extends EntityTime implements Tag{
 
     private BigDecimal dosageValue;
 
-    private String dosageUnit;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dosage_unit")
+    private DosageUnit dosageUnit;
 
     private BigDecimal cost;
 
@@ -56,20 +58,10 @@ public class Supplement extends EntityTime implements Tag{
     private List<TypeTag> types = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SupplementEffect> effects = new HashSet<>();
+    private List<SupplementEffect> effects = new ArrayList<>();
 
     @OneToMany(mappedBy = "supplement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SupplementSideEffect> sideEffects = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(
-            name = "supplement_journal",
-            joinColumns = @JoinColumn(name = "supplement_id"),
-            inverseJoinColumns = @JoinColumn(name = "journal_id")
-    )
-    @JsonIgnore
-    @Builder.Default
-    private List<Journal> journals = new ArrayList<>();
+    private List<SupplementSideEffect> sideEffects = new ArrayList<>();
 
     @Builder.Default
     @Column(nullable = false)
@@ -108,5 +100,30 @@ public class Supplement extends EntityTime implements Tag{
     @Override
     public void setTier(String tier) {
         this.tier = this.tier;
+    }
+
+    public String getDosageUnit() {
+        return dosageUnit != null ? dosageUnit.name().toLowerCase() : null;
+    }
+
+    public void setDosageUnit(String str) {
+        this.dosageUnit = Supplement.DosageUnit.fromString(str);
+    }
+
+    public enum DosageUnit {
+        G, MG, UG, IU;
+
+        public static Supplement.DosageUnit fromString(String raw) {
+            if (raw == null) return null;
+            String norm = raw.trim().toLowerCase();
+
+            return switch (norm) {
+                case "mg" -> MG;
+                case "g", "gram", "grams" -> G;
+                case "ug", "mcg", "μg", "microgram", "micrograms" -> UG;
+                case "iu", "i.u." -> IU;
+                default -> null;
+            };
+        }
     }
 }

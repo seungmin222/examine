@@ -17,13 +17,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JournalController {
 
-    private final JournalRepository journalRepo;
     private final JournalService journalService;
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<String> create(@RequestBody JournalRequest dto) {
-        return journalService.create(dto);
+        return journalService.createOne(dto);
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PostMapping("/batch")
+    public ResponseEntity<String> createBatch(@RequestBody List<JournalRequest> dto) {
+        return journalService.createBatch(dto);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

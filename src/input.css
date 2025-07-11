@@ -7,6 +7,8 @@
   :root {
     --navbar-height: 60px;
     --sidebar-width: 10%;
+    --svg-height: 24px;
+    --svg-width: 24px;
 
     --z-index-base: 0;
     --z-index-navbar: 1000;
@@ -29,7 +31,7 @@
     --color-button: hotpink;
     --color-button-text: white;
     --color-scroll-button: rgba(186, 104, 200, 0.3);
-    --color-scroll-circle: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle: rgba(126, 44, 140, 0.9);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
     --color-border: #ff6a9c;
@@ -69,7 +71,7 @@
     --color-button: #ba68c8;
     --color-button-text: white;
     --color-scroll-button: rgba(186, 104, 200, 0.3);
-    --color-scroll-circle: rgba(186, 104, 200, 0.9);
+    --color-scroll-circle: rgba(126, 44, 140, 0.9);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
     --color-border: #ab47bc;
@@ -113,7 +115,7 @@
     --color-button-text: white;
 
     --color-scroll-button: rgba(77, 182, 172, 0.3); /* 청록 계열 */
-    --color-scroll-circle: rgba(77, 182, 172, 0.9);
+    --color-scroll-circle: rgba(17, 122, 92, 0.9);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
 
@@ -154,7 +156,7 @@
     --color-button-text: white;
 
     --color-scroll-button: rgba(129, 212, 212, 0.5); /* 파랑 느낌 살짝 넣음 */
-    --color-scroll-circle: rgba(129, 212, 212, 1.0);
+    --color-scroll-circle: rgba(69, 152, 152, 1.0);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
 
@@ -195,7 +197,7 @@
     --color-button: #888;
     --color-button-text: white;
     --color-scroll-button: rgba(100, 181, 246, 0.3);
-    --color-scroll-circle: rgba(100, 181, 246, 0.9);
+    --color-scroll-circle: rgba(40, 121, 186, 0.9);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
     --color-border: #999;
@@ -232,9 +234,9 @@
     color: var(--color-text);
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
-    padding: 0;
-    padding-top: 70px; /* ✅ 상단바 공간 확보 */
+    padding: var(--navbar-height) +10px 0 0;
   }
+
 
   h1 {
       font-size: 2em;       /* 약 32px (보통 브라우저 기본) */
@@ -243,6 +245,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+      white-space: nowrap;
     }
 
   h2 {
@@ -252,6 +255,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+      white-space: nowrap;
     }
 
   h3 {
@@ -261,6 +265,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+    white-space: nowrap;
     }
 
   h4 {
@@ -270,6 +275,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+      white-space: nowrap;
     }
 
   h5 {
@@ -279,6 +285,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+    white-space: nowrap;
     }
 
   h6 {
@@ -288,6 +295,7 @@
       color: var(--color-header);
       scroll-margin-top:70px;
       border-bottom: 2px solid #ccc;
+    white-space: nowrap;
     }
 
   li,
@@ -556,11 +564,10 @@
 
   p {
     display: block;
-    background-color: var(--color-background);
+    background-color: inherit;
     padding: 8px 12px;
     border-radius: 12px;
     line-height: 1.6;
-    width: 100%;
     word-break: break-word;
     text-align:left;
     margin: 0 auto;
@@ -585,13 +592,11 @@
   a.index {
      display: flex;             /* ✅ 핵심 */
      align-items: center;       /* 세로 가운데 */
-     justify-content: center;   /* (옵션) 가로 가운데 */
      height: 40px;
      font: inherit;
-     background-color: transparent;
      cursor: pointer;
      box-shadow: none;
-     text-align: center;
+     gap: 4px;
   }
 
   a.logo {
@@ -849,32 +854,44 @@
   }
 
   nav.navbar {
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: var(--navbar-height);
-      background-color: var(--color-background);
-      border-bottom: 2px solid #eee;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 1.5rem;
-      z-index: var(--z-index-navbar);
-    }
-
-  nav.sidebar {
-    top: 60px;
-    bottom: 0;
+    top: 0;
     left: 0;
-    height: 100vh;         /* 전체 높이 */
-    width: var(--sidebar-width);          /* 너비 */
-    background-color: var(--color-sidebar);
-    border-right: 1px solid var(--color-sidebar-border);
-    gap: 1rem;              /* 항목 간 간격 */
-    overflow-y: auto;
-    flex-direction: column;
-    z-index: var(--z-index-sidebar);
+    width: 100%;
+    height: var(--navbar-height);
+    background-color: var(--color-background);
+    border-bottom: 2px solid #eee;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    z-index: var(--z-index-navbar);
   }
 
+
+  aside {
+    position: sticky;
+    top: var(--navbar-height);
+    align-self: flex-start;
+    height: calc(100vh - var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: var(--sidebar-width);
+    max-width: 240px;
+    background-color: var(--color-sidebar);
+    border-right: 1px solid var(--color-sidebar-border);
+    overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 8px;
+  }
+
+  aside.closed {
+    width: var(--svg-width) + 16px;
+    overflow: hidden;
+  }
+
+  aside.closed *:not(#sidebar-toggle) {
+    display: none;
+  }
    .logo-icon {
      width: 24px;
      height: 24px;
@@ -932,8 +949,8 @@
    }
 
   .scroll button svg {
-    width: 24px;
-    height: 24px;
+    width: var(--svg-width);
+    height: var(--svg-height);
     vertical-align: middle;
     stroke: var(--color-1);
   }
@@ -960,6 +977,17 @@
 
   path {
     stroke: var(--color-arrow);
+  }
+
+  svg.arrow {
+    stroke: var(--color-arrow);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    vertical-align: middle;
+    width: var(--svg-width);
+    height: var(--svg-height);
   }
 
 

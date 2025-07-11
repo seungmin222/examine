@@ -1,6 +1,6 @@
 package com.example.examine.controller;
 
-import com.example.examine.service.redis.RedisService;
+import com.example.examine.service.Redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

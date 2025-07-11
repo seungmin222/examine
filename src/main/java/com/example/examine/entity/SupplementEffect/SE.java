@@ -22,7 +22,7 @@ public interface SE {
     void setTotalParticipants(Integer totalParticipants);
 
     BigDecimal getFinalScore();
-    void setFinalScore();
+    void setFinalScore(BigDecimal finalScore);
 
     String getTier();
     void setTier(String tier);
@@ -39,4 +39,21 @@ public interface SE {
     String getEffectEngName();
     void setEffectEngName(String name);
 
+    Integer getPlusCount();
+    void setPlusCount(Integer plusCount);
+
+    Integer getMinusCount();
+    void setMinusCount(Integer minusCount);
+
+    Integer getZeroCount();
+    void setZeroCount(Integer zeroCount);
+
+    Integer getPlusParticipants();
+    void setPlusParticipants(Integer plusParticipants);
+
+    Integer getMinusParticipants();
+    void setMinusParticipants(Integer minusParticipants);
+
+    Integer getZeroParticipants();
+    void setZeroParticipants(Integer zeroParticipants);
 }

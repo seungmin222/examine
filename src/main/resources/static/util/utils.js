@@ -141,35 +141,16 @@ function createTooltip(anchorId, text, position = 'top', cls = '') {
   tooltip.addEventListener('mouseleave', hide);
 }
 
-
-function checkCheckboxesById(type, tags = [], idField = 'id') {
-  if(tags == null){
-    return;
-  }
-  const tagArray = Array.isArray(tags) ? tags : [tags];  // 단일 객체도 배열로 포장
-  const idSet = new Set(tagArray.map(e => e[idField]));
-
+function checkCheckboxes(type, tagList) {
+  const tagSet = new Set(tagList.map(tag => String(tag.id))); // ✅ 문자열 기준 Set 생성
   document.querySelectorAll(`#${type}-checkboxes input`).forEach(cb => {
-    cb.checked = idSet.has(+cb.value);
+    cb.checked = tagSet.has(cb.value); // ✅ cb.value도 string이니까 잘 작동
   });
 }
-
-
-function checkCheckboxes(type, tag) {
-  document.querySelectorAll(`#${type}-checkboxes input`).forEach(cb => {
-    cb.checked = (tag === cb.value);
-  });
-}
-
 
 function ArrayCheckboxesById(type) {
     return Array.from(document.querySelectorAll(`#${type}-checkboxes input:checked`))
               .map(cb => (parseInt(cb.value) ));
-}
-
-function ObjectCheckboxesById(type) {
-    const checked = document.querySelector(`#${type}-checkboxes input:checked`);
-    return checked ? checked.value : null;
 }
 
 function ArrayCheckboxesByName(type) {
@@ -276,7 +257,7 @@ async function checkLogin() {
       console.log("사용자 정보 불러옴.");
       const data = await res.json();
       userDiv.textContent = `${data.username}`;
-      userDiv.dataset.level = `${data.level}`;
+      document.body.dataset.level = `${data.level}`;
       bookmark.innerHTML = "";
       data.pages.forEach(page => {
         const link = document.createElement("a");
@@ -316,6 +297,39 @@ async function checkLogin() {
   return await fetchUser();
 }
 
+function createNumberSVG(num) {
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+
+  svg.setAttribute("width", "20");
+  svg.setAttribute("height", "20");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("class", "number-icon");
+
+  // 배경 원 (또는 사각형으로 바꿔도 됨)
+  const rect = document.createElementNS(svgNS, "rect");
+  rect.setAttribute("x", "2");           // 시작 x좌표
+  rect.setAttribute("y", "2");           // 시작 y좌표
+  rect.setAttribute("width", "20");      // 너비
+  rect.setAttribute("height", "20");     // 높이
+  rect.setAttribute("rx", "5");          // 둥근 모서리 반지름 (선택)
+  rect.setAttribute("fill", "var(--color-button)");
+
+  svg.appendChild(rect);
+
+  // 숫자 텍스트
+  const text = document.createElementNS(svgNS, "text");
+  text.setAttribute("x", "12");
+  text.setAttribute("y", "16");
+  text.setAttribute("text-anchor", "middle");
+  text.setAttribute("font-size", "12");
+  text.setAttribute("fill", "white");
+  text.setAttribute("font-weight", "bold");
+  text.textContent = num;
+  svg.appendChild(text);
+
+  return svg;
+}
 
 
 
@@ -327,13 +341,12 @@ export {
   createTagList,
     switchTagList,
   checkCheckboxes,
-  checkCheckboxesById,
   ArrayCheckboxesById,
-  ObjectCheckboxesById,
   ArrayCheckboxesByName,
   resetModal,
   createTooltip,
   resetEventListener,
   renderEffectCache,
-  checkLogin
+  checkLogin,
+  createNumberSVG
 };

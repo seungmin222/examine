@@ -9,7 +9,7 @@ public record TagResponse(
         String tier
 ) {
     public static TagResponse fromEntity(Tag tag) {
-        if(tag == null) {
+        if (tag == null) {
             return null;
         }
         return new TagResponse(

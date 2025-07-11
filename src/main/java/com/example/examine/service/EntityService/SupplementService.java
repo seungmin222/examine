@@ -8,9 +8,15 @@ import com.example.examine.entity.*;
 import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.entity.Tag.TypeTag;
 import com.example.examine.entity.detail.SupplementDetail;
-import com.example.examine.repository.*;
-import com.example.examine.service.llm.LLMResponse;
-import com.example.examine.service.llm.LLMService;
+import com.example.examine.repository.Detailrepository.SupplementDetailRepository;
+import com.example.examine.repository.JSERepository.JournalSupplementEffectRepository;
+import com.example.examine.repository.JSERepository.JournalSupplementSideEffectRepository;
+import com.example.examine.repository.SERepository.SupplementEffectRepository;
+import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
+import com.example.examine.repository.TagRepository.SupplementRepository;
+import com.example.examine.repository.TagRepository.TypeTagRepository;
+import com.example.examine.service.LLM.LLMResponse;
+import com.example.examine.service.LLM.LLMService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
@@ -54,7 +61,7 @@ public class SupplementService {
                 .korName(dto.korName())
                 .engName(dto.engName())
                 .dosageValue(dto.dosageValue())
-                .dosageUnit(dto.dosageUnit())
+                .dosageUnit(Supplement.DosageUnit.fromString(dto.dosageUnit()))
                 .cost(dto.cost())
                 .build();
 
@@ -195,30 +202,60 @@ public class SupplementService {
 
         supplementRepo.save(supplement);
         return ResponseEntity.ok("성분 업데이트 완료");
+
     }
 
-    public List<SupplementResponse> findAll(Sort sort){
-        return supplementRepo.findAllWithRelations(sort)
-                .stream()
+    public List<SupplementResponse> toSupplementResponse(List<Long> ids, Sort sort) {
+        if (ids.isEmpty()) return List.of();
+
+        List<Supplement> supplements = supplementRepo.fetchTypesByIds(ids, sort);
+        supplementRepo.fetchEffectsByIds(ids);
+        supplementRepo.fetchSideEffectsByIds(ids);
+
+        return supplements.stream()
                 .map(SupplementResponse::fromEntity)
                 .toList();
     }
 
-    public List<SupplementResponse> findOne(Long id) {
-        return supplementRepo.findById(id)
-                .stream()
-                .map(SupplementResponse::fromEntity)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<SupplementResponse> findAll(Sort sort) {
+        List<Long> ids = supplementRepo.findAllIds();
+        return toSupplementResponse(ids, sort);
     }
 
-
-    public List<SupplementResponse> search(String keyword, Sort sort){
-        return supplementRepo.searchWithRelations(keyword, sort)
-                .stream()
-                .map(SupplementResponse::fromEntity)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<SupplementResponse> search(String keyword, Sort sort) {
+        List<Long> ids = supplementRepo.findIdsByKeyword(keyword);
+        return toSupplementResponse(ids, sort);
     }
 
+    @Transactional(readOnly = true)
+    public SupplementDetailResponse findDetail(Long id, Sort sort) {
+        Supplement supplement = supplementRepo.findById(id).orElseThrow(() -> new NoSuchElementException("성분이 없습니다"));
+
+        SupplementResponse supplementResponse = SupplementResponse.fromEntity(supplement);
+        List <SupplementResponse> supplementResponses = new ArrayList<>();
+        supplementResponses.add(supplementResponse);
+        DetailResponse detail = DetailResponse.fromEntity(supplementDetailRepo.findById(id).orElseThrow(() -> new NoSuchElementException("상세 정보가 없습니다")));
+        List<TagResponse> effects = supplement.getEffects().stream()
+                .map(e->new TagResponse(e.getId().getEffectId(), e.getEffectKorName(), e.getEffectEngName(), e.getTier()))
+                .toList();
+        List<TagResponse> sideEffects = supplement.getSideEffects().stream()
+                .map(e->new TagResponse(e.getId().getEffectId(), e.getEffectKorName(), e.getEffectEngName(), e.getTier()))
+                .toList();
+        return new SupplementDetailResponse(supplementResponses, detail, effects, sideEffects);
+    }
+
+    @Transactional(readOnly = true)
+    public List<JournalResponse> findJournals(Long id, Sort sort) {
+        Set<Long> journalIds = new HashSet<>();
+        journalIds.addAll(jseRepo.findJournalsBySupplementId(id));
+        journalIds.addAll(jsseRepo.findJournalsBySupplementId(id));
+
+        return journalService.toJournalResponses(journalIds.stream().toList(), sort);
+    }
+
+    @Transactional(readOnly = true)
     public List<SupplementResponse> findFiltered(
             List<Long> typeIds,
             List<Long> effectIds,
@@ -226,20 +263,33 @@ public class SupplementService {
             List<String> tiers,
             Sort sort
     ){
-        return supplementRepo.findFiltered(typeIds, effectIds, sideEffectIds, tiers, sort)
-                .stream()
-                .map(SupplementResponse::fromEntity)
-                .toList();
+        List<Long> result = null;
+
+        if (typeIds != null) {
+            result = new ArrayList<>(supplementRepo.findIdsByTypes(typeIds));
+        }
+        if (effectIds != null) {
+            List<Long> temp = supplementRepo.findIdsByEffects(effectIds);
+            result = (result == null) ? temp : retainIntersection(result, temp);
+        }
+        if (sideEffectIds != null) {
+            List<Long> temp = supplementRepo.findIdsBySideEffects(sideEffectIds);
+            result = (result == null) ? temp : retainIntersection(result, temp);
+        }
+        if (tiers != null) {
+            List<Long> temp = supplementRepo.findIdsByTiers(tiers);
+            result = (result == null) ? temp : retainIntersection(result, temp);
+        }
+
+        result = (result == null) ? new ArrayList<>() : result;
+
+        return toSupplementResponse(result, sort);
     }
 
-    public List<JournalResponse> journals(Long id, Sort sort) {
-
-        Set<Journal> journalSet = new HashSet<>();
-        journalSet.addAll(jseRepo.findJournalsBySupplementId(id, sort));
-        journalSet.addAll(jsseRepo.findJournalsBySupplementId(id, sort));
-
-        return journalService.toJournalResponses(journalSet.stream().toList());
-
+    private List<Long> retainIntersection(List<Long> list1, List<Long> list2) {
+        return list1.stream()
+                .filter(new HashSet<>(list2)::contains)
+                .toList();
     }
 
     public ResponseEntity<String> delete(Long id) {

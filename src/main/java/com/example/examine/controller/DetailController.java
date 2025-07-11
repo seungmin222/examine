@@ -28,17 +28,4 @@ public class DetailController {
         return supplementService.detailUpdate(dto);
     }
 
-    @GetMapping("/{id}")
-    public DetailResponse detail(@PathVariable Long id) {
-        return supplementService.detail(id);
-    }
-
-    @GetMapping("/{id}/journals")
-    public List<JournalResponse> journals(@PathVariable Long id,
-                                          @RequestParam(defaultValue = "title") String sort,
-                                          @RequestParam(defaultValue = "asc") String direction) {
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return supplementService.journals(id, sorting);
-    }
-
 }

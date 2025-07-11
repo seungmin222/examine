@@ -19,20 +19,6 @@ public record SupplementResponse(
         List<SEResponse> sideEffects
 ) {
     public static SupplementResponse fromEntity(Supplement supplement) {
-        List<SEResponse> effects = new ArrayList<>(
-                supplement.getEffects().stream()
-                        .map(SEResponse::fromEntity)
-                        .toList()
-        );
-        effects.sort(Comparator.comparing(SEResponse::finalScore).reversed());
-
-        List<SEResponse> sideEffects = new ArrayList<>(
-                supplement.getSideEffects().stream()
-                        .map(SEResponse::fromEntity)
-                        .toList()
-        );
-        sideEffects.sort(Comparator.comparing(SEResponse::finalScore).reversed());
-
         return new SupplementResponse(
 
                 supplement.getId(),
@@ -44,8 +30,16 @@ public record SupplementResponse(
                 supplement.getTypes().stream()
                         .map(TagResponse::fromEntity)
                         .toList(),
-                effects,
-                sideEffects
+                supplement.getEffects().stream()
+                        .map(SEResponse::fromEntity)
+                        .sorted(Comparator.comparing(SEResponse::finalScore).reversed())
+                        .limit(5)
+                        .toList(),
+                supplement.getSideEffects().stream()
+                        .map(SEResponse::fromEntity)
+                        .sorted(Comparator.comparing(SEResponse::finalScore).reversed())
+                        .limit(5)
+                        .toList()
         );
     }
 }

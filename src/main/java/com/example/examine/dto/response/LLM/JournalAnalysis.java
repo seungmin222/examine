@@ -1,8 +1,10 @@
 package com.example.examine.dto.response.LLM;
 
 import com.example.examine.dto.response.JSEResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 public record JournalAnalysis (
         Integer participants,
@@ -11,6 +13,8 @@ public record JournalAnalysis (
         Integer blind,
         Boolean parallel,
         String design,
-        List<LLMJSE> effects
+        @JsonProperty("effects")
+        List<Map<String, Object>> effectsRaw
+
 ){
 }

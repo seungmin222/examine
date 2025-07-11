@@ -12,7 +12,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,8 +46,9 @@ public class Journal extends EntityTime {
     @Column(nullable = true)
     private Integer durationValue;
 
-    @Column(nullable = true)
-    private String durationUnit;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "duration_unit", nullable = true)
+    private DurationUnit durationUnit;
 
     @Column(nullable = true)
     private Integer durationDays;
@@ -71,11 +74,11 @@ public class Journal extends EntityTime {
 
     @Builder.Default
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<JournalSupplementEffect> journalSupplementEffects = new HashSet<>();;
+    private List<JournalSupplementEffect> journalSupplementEffects = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "journal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<JournalSupplementSideEffect> journalSupplementSideEffects = new HashSet<>();
+    private List<JournalSupplementSideEffect> journalSupplementSideEffects = new ArrayList<>();
 
     public void setDurationDays() {
         this.durationDays = JournalService.toDays(this.durationValue, this.durationUnit);
@@ -83,5 +86,30 @@ public class Journal extends EntityTime {
 
     public void setScore() {
         this.score = CalculateScore.calculateJournalScore(participants,durationDays,trialDesign,blind);
+    }
+
+    public String getDurationUnit() {
+        return durationUnit != null ? durationUnit.name().toLowerCase() : null;
+    }
+
+    public void setDurationUnit(String str) {
+        this.durationUnit = DurationUnit.fromString(str);
+    }
+
+    public enum DurationUnit {
+        DAY, WEEK, MONTH, YEAR, UNKNOWN;
+
+        public static DurationUnit fromString(String raw) {
+            if (raw == null) return null;
+            String norm = raw.trim().toLowerCase();
+
+            return switch (norm) {
+                case "day", "days" -> DAY;
+                case "week", "weeks" -> WEEK;
+                case "month", "months" -> MONTH;
+                case "year", "years" -> YEAR;
+                default -> UNKNOWN;
+            };
+        }
     }
 }

@@ -1,14 +1,26 @@
 package com.example.examine.repository;
 
-import com.example.examine.entity.Page;
-import com.example.examine.entity.User;
-import com.example.examine.entity.UserPage;
-import com.example.examine.entity.UserPageId;
+import com.example.examine.entity.*;
+import com.example.examine.entity.JournalSupplementEffect.JSE;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface UserPageRepository extends JpaRepository<UserPage, UserPageId> {
     boolean existsByUserAndPage(User user, Page page);
+
+    @Query("""
+    SELECT DISTINCT up
+    FROM UserPage up
+    JOIN up.page p
+    WHERE up.user.id = :userId
+""")
+    List<Page> findByUserId(@Param("userId") Long userId);
+
 }
 

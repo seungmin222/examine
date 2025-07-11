@@ -1,5 +1,7 @@
 package com.example.examine.entity.detail;
 
+import com.example.examine.entity.Tag.Effect.EffectTag;
+import com.example.examine.entity.Tag.Tag;
 import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.entity.Tag.TypeTag;
 import jakarta.persistence.*;
@@ -12,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class TypeDetail extends EntityTime implements TagDetail {
+public class TypeDetail extends EntityTime implements Detail {
 
     @Id
     private Long typeId;
@@ -51,5 +53,15 @@ public class TypeDetail extends EntityTime implements TagDetail {
     @Override
     public void setIntro(String intro) {
         this.intro= intro;
+    }
+
+    @Override
+    public Tag getTag() {
+        return typeTag;
+    }
+
+    @Override
+    public void setTag(Tag tag) {
+        this.typeTag= (TypeTag) tag;
     }
 }

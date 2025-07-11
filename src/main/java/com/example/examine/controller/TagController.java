@@ -47,7 +47,7 @@ public class TagController {
             @RequestParam(defaultValue = "asc") String direction) {
 
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.get(type, sorting);
+        return tagService.sort(type, sorting);
     }
 
     @GetMapping("/search")
@@ -66,7 +66,7 @@ public class TagController {
                                     @RequestParam(defaultValue = "id") String sort,
                                     @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.getSupplement(type, id, sorting);
+        return tagService.getSupplements(type, id, sorting);
     }
 
     @GetMapping("/detail/journals/{type}/{id}")
@@ -75,7 +75,7 @@ public class TagController {
                                     @RequestParam(defaultValue = "id") String sort,
                                     @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.getJournal(type, id, sorting);
+        return tagService.getJournals(type, id, sorting);
     }
 
 
@@ -86,18 +86,18 @@ public class TagController {
     }
 
     @GetMapping("/table")
-    public List<EffectTableResponse> table(@RequestParam(defaultValue = "positive") String type,
-                                   @RequestParam(defaultValue = "id") String sort,
-                                   @RequestParam(defaultValue = "asc") String direction) {
+    public List<?> table(@RequestParam(defaultValue = "positive") String type,
+                                           @RequestParam(defaultValue = "id") String sort,
+                                           @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.getEffectTable(type, sorting);
+        return tagService.getTagTable(type, sorting);
     }
 
     @GetMapping("/table/{keyword}")
-    public List<EffectTableResponse> tableSearch(@PathVariable String keyword,
+    public List<?> tableSearch(@PathVariable String keyword,
                                                  @RequestParam String type,
-                                           @RequestParam(defaultValue = "id") String sort,
-                                           @RequestParam(defaultValue = "asc") String direction) {
+                                                 @RequestParam(defaultValue = "id") String sort,
+                                                 @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
         return tagService.searchEffectTable(type, keyword, sorting);
     }

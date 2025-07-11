@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public record EffectTableResponse (
+public record EffectTableResponse(
       Long id,
       String korName,
       String engName,

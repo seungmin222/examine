@@ -14,26 +14,16 @@ import{
 } from '/util/event.js';
 
 import{
+    createNumberSVG,
     checkLogin
 } from '/util/utils.js';
 import{
     renderButton
 } from '/util/render.js';
 
-
-async function loadNav(){
-  await fetch(`/module/nav.html`)
-  .then(res => res.text())
-  .then(async html => {
-  document.getElementById('nav').innerHTML = '';
-  document.getElementById('nav').insertAdjacentHTML('beforeend', html);
-  });
-    loadNavEvent();
-}
-
 async function loadNavEvent(){
     const userLink = document.getElementById("user");
-    userLink.href=`/user/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+    userLink.href=`/user/login?redirect=${encodeURIComponent(window.location.href)}`;
     if (await checkLogin()){
         userLink.removeAttribute("href"); // 링크 제거
         userLink.addEventListener("click", e => e.preventDefault());
@@ -66,18 +56,6 @@ async function loadPage() {
     }
 }
 
-
-
-async function loadIndexNav(){
-  await fetch(`/module/index-nav.html`)
-  .then(res => res.text())
-  .then(html => {
-  document.getElementById('index-nav').innerHTML='';
-  document.getElementById('index-nav').insertAdjacentHTML('beforeend', html);
-  });
-  renderIndex();
-}
-
 function renderIndex(){
   const index = document.getElementById('index');
   index.innerHTML = ``;
@@ -88,7 +66,9 @@ function renderIndex(){
       link.id = `r-index-${i}`;
       link.href = `#index-${i}`;
       link.classList.add('index');
-      link.textContent = num.textContent;
+      const icon = createNumberSVG(i);
+      link.appendChild(icon);
+      link.append(num.textContent);
       index.appendChild(link);
     }
 }
@@ -104,9 +84,14 @@ async function loadScroll(){
   pageScroll('bottom-scroll', 'bottom');
   updateScrollProgress();
 }
+function loadScrollEvent(){
+    pageScroll('top-scroll', 'top');
+    pageScroll('bottom-scroll', 'bottom');
+    updateScrollProgress();
+}
 
 async function loadModalController(){
-    await fetch('/module/modal-controller.html')
+    await fetch('/module/controller/modal-controller.html')
       .then(res => res.text())
       .then(html => {
         const remote = document.getElementById('modal-controller');
@@ -116,7 +101,7 @@ async function loadModalController(){
 }
 
 async function loadTagController(){
-    await fetch('/module/tag-controller.html')
+    await fetch('/module/controller/tag-controller.html')
       .then(res => res.text())
       .then(html => {
         const remote = document.getElementById('tag-controller');
@@ -169,7 +154,7 @@ async function loadLoginInfo() {
 }
 
 async function loadButton(loadFn){
-    const level = Number(document.getElementById('user-info').dataset.level);
+    const level = Number(document.body.dataset.level);
     if (level>=10){
         renderButton('button-box','toggle-change','수정','');
         renderButton('button-box','toggle-delete','삭제','');
@@ -181,31 +166,26 @@ async function loadButton(loadFn){
     }
 }
 
-async function loadModule(){
-    await fetch('/module/module-box.html')
-        .then(res => res.text())
-        .then(html => {
-            document.getElementById('load-basic').innerHTML='';
-            document.getElementById('load-basic').insertAdjacentHTML('beforeend', html);
-        });
-}
 
 
-//돔 로딩할때 한번만
-async function loadBasic(loadFn = () => {}){
-  await loadModule();
-  await loadNav(); // 네비게이션바
-  loadTheme('selectedTheme','icon','theme-select'); // 테마
-  await loadIndexNav(); // 사이드바
-  await loadScroll(); // 위아래 스크롤 버튼
+//메인 모듈 로딩 후에 실행
+async function loadBasicModule(){
   await loadModalController(); //모달 리모컨
   await loadTagController(); //태그 리모컨
   await loadFold(); // 콘텐트 숨기기
   renderNote(); //주석 연결
-  await loadButton(loadFn)
+    renderIndex();
+}
+
+async function loadBasicEvent(){//index 독립 이벤트만
+    loadTheme('selectedTheme','icon','theme-select'); // 테마
+    await loadNavEvent();
+    loadScrollEvent();
     await loadPage();
 }
 export{
-   loadBasic,
-   renderIndex
+   loadBasicModule,loadBasicEvent,
+   renderIndex, loadNavEvent,
+    loadScrollEvent,
+    loadButton
 };

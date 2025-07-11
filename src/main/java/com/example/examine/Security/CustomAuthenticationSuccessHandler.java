@@ -2,10 +2,9 @@ package com.example.examine.Security;
 
 import com.example.examine.entity.User;
 import com.example.examine.repository.UserRepository;
-import com.example.examine.service.EntityService.UserService;
-import com.example.examine.service.redis.JwtProperties;
-import com.example.examine.service.redis.JwtToken;
-import com.example.examine.service.redis.RedisService;
+import com.example.examine.service.Redis.JwtProperties;
+import com.example.examine.service.Redis.JwtToken;
+import com.example.examine.service.Redis.RedisService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.Duration;
 
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {

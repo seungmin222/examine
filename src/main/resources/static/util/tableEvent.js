@@ -1,5 +1,7 @@
 import {
-    renderEffectCache
+    renderEffectCache,
+    checkCheckboxes,
+    ArrayCheckboxesById,
 } from '/util/utils.js';
 
 function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
@@ -8,7 +10,7 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
         const itemId = Number(row?.dataset.id);
         const item = journalMap.get(itemId);
         const modal = document.getElementById('modal');
-        const modalId = modal?.dataset.id;
+        const modalId = parseInt(modal?.dataset.id);
         if (!row||!itemId) return;
 
         // 삭제 모드
@@ -25,7 +27,15 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
         }
         // 태그 모달
         if (e.target.classList.contains('modal-btn')) {
-            if (itemId != modalId) {
+            if (itemId !== modalId) {
+                const button = document.querySelector(`.modal-btn[data-id="${modalId}"]`);
+                const newButton = document.querySelector(`.modal-btn[data-id="${itemId}"]`);
+                if (button) {
+                    button.classList.remove('execute');
+                }
+                if (newButton) {
+                    newButton.classList.add('execute');
+                }
                 modal.dataset.id = itemId;
                 renderEffectCache(item);
             }
@@ -36,24 +46,37 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
         if (e.target.classList.contains('save-btn')) {
             let effects, sideEffects;
 
-            if (itemId != modalId) {
-                effects = item.effects;
-                sideEffects = item.sideEffects;
-            } else {
-                effects = [...document.querySelectorAll('.effect-cash')].map(e => ({
-                    supplementId: parseInt(e.dataset.supplementId),
-                    effectId: parseInt(e.dataset.effectId),
-                    cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
-                    pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
-                    pValue: parseFloat(e.querySelector('input[name="p"]').value)
+            if (itemId !== modalId) {
+                effects = item.effects.map(i => ({
+                    supplementId: i.supplementId,
+                    effectId: i.effectId,
+                    cohenD: i.cohenD,
+                    pearsonR: i.pearsonR,
+                    pValue: i.pValue
                 }));
 
-                sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(e => ({
-                    supplementId: parseInt(e.dataset.supplementId),
-                    sideEffectId: parseInt(e.dataset.effectId),
-                    cohenD: parseFloat(e.querySelector('input[name="sizeD"]').value),
-                    pearsonR: parseFloat(e.querySelector('input[name="sizeR"]').value),
-                    pValue: parseFloat(e.querySelector('input[name="p"]').value)
+                sideEffects = item.sideEffects.map(i => ({
+                    supplementId: i.supplementId,
+                    effectId: i.effectId,
+                    cohenD: i.cohenD,
+                    pearsonR: i.pearsonR,
+                    pValue: i.pValue
+                }));
+            } else {
+                effects = [...document.querySelectorAll('.effect-cash')].map(c => ({
+                    supplementId: parseInt(c.dataset.supplementId),
+                    effectId: parseInt(c.dataset.effectId),
+                    cohenD: parseFloat(c.querySelector('input[name="cohenD"]')?.value),
+                    pearsonR: parseFloat(c.querySelector('input[name="peasonR"]')?.value),
+                    pValue: parseFloat(c.querySelector('input[name="pValue"]')?.value)
+                }));
+
+                sideEffects = [...document.querySelectorAll('.sideEffect-cash')].map(c => ({
+                    supplementId: parseInt(c.dataset.supplementId),
+                    effectId: parseInt(c.dataset.effectId),
+                    cohenD: parseFloat(c.querySelector('input[name="cohenD"]')?.value),
+                    pearsonR: parseFloat(c.querySelector('input[name="pearsonR"]')?.value),
+                    pValue: parseFloat(c.querySelector('input[name="pValue"]')?.value)
                 }));
             }
 
@@ -82,7 +105,7 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
                 //모달 초기화 및 테이블 재랜더링
                 loadTags();
                 loadJournals();
-                modal.dataset.id = "0";
+                modal.dataset.id = '';
             } else {
                 alert("수정 실패");
             }
@@ -90,13 +113,13 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
     });
 }
 
-function supplementEvent(supplementMap, loadSupplements) {
+function supplementEvent(supplementMap, loadSupplements, loadTags=()=>{}) {
     document.getElementById('supplement-body').addEventListener('click', async e => {
         const row = e.target.closest('tr');
         const itemId = Number(row?.dataset.id);
         const item = supplementMap.get(itemId);
         const modal = document.getElementById('modal');
-        const modalId = modal?.dataset.id;
+        const modalId = parseInt(modal?.dataset.id);
         if (!row||!itemId) {
             return;
         }
@@ -111,17 +134,34 @@ function supplementEvent(supplementMap, loadSupplements) {
             }
             return;
         }
+        // 태그 모달
+        if (e.target.classList.contains('modal-btn')) {
+            if (itemId !== modalId) {
+                const button = document.querySelector(`.modal-btn[data-id="${modalId}"]`);
+                const newButton = document.querySelector(`.modal-btn[data-id="${itemId}"]`);
+                if (button) {
+                    button.classList.remove('execute');
+                }
+                if (newButton) {
+                    newButton.classList.add('execute');
+                }
+                modal.dataset.id = itemId;
+
+                checkCheckboxes('type', item.types);
+            }
+            modal.classList.remove('hidden');
+        }
 
         // 저장 버튼
         if (e.target.classList.contains('save-btn')) {
-            const types = ArrayCheckboxesById('type');
+            const typeIds = ArrayCheckboxesById('type');
             const updated = {
                 korName: row.querySelector('[name="korName"]').value,
                 engName: row.querySelector('[name="engName"]').value,
                 dosageValue: row.querySelector('[name="dosageValue"]').value,
                 dosageUnit: row.querySelector('[name="dosageUnit"]').value,
                 cost: parseFloat(row.querySelector('[name="cost"]').value),
-                types
+                typeIds
             };
 
             const res = await fetch(`/api/supplements/${item.id}`, {
@@ -136,15 +176,13 @@ function supplementEvent(supplementMap, loadSupplements) {
                 alert('저장되었습니다');
                 await loadSupplements();
                 document.getElementById('list-sort')?.dispatchEvent(new Event('change'));
+                loadTags();
+                modal.dataset.id = '';
             } else {
                 alert('저장 실패');
             }
         }
-        // 태그 모달
-        if (e.target.classList.contains('modal-btn')) {
-            //checkCheckboxesById('type', e.taget.types);
-            document.getElementById('modal').classList.remove('hidden');
-        }
+
     });
 }
 

@@ -1,9 +1,13 @@
 package com.example.examine.entity.Tag;
 
+import com.example.examine.entity.SupplementType.SupplementType;
 import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "type_tag")
@@ -28,6 +32,9 @@ public class TypeTag extends EntityTime implements Tag{
     @Column(nullable = false)
     private String tier = "D";
 
+    @Builder.Default
+    @OneToMany(mappedBy = "typeTag", cascade = CascadeType.ALL)
+    private List<SupplementType> st = new ArrayList<>();
 
     @Override
     public Long getId() {

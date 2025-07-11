@@ -1,24 +1,19 @@
 package com.example.examine.entity.SupplementEffect;
 
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class SupplementEffectId implements Serializable, SEId {
 
     private Long supplementId;
     private Long effectTagId;
-
-    // 기본 생성자 (필수)
-    public SupplementEffectId() {}
-
-    // 필드 초기화 생성자 (선택)
-    public SupplementEffectId(Long supplementId, Long effectTagId) {
-        this.supplementId = supplementId;
-        this.effectTagId = effectTagId;
-    }
 
     // Getter & Setter
     @Override

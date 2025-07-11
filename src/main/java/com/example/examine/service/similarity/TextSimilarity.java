@@ -1,6 +1,9 @@
 package com.example.examine.service.similarity;
 
+import com.example.examine.service.EntityService.JournalService;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.stream.Collectors;
 
 public class TextSimilarity {
 
+    private static final Logger log = LoggerFactory.getLogger(TextSimilarity.class);
     private static final LevenshteinDistance ld = new LevenshteinDistance();
 
     /**
@@ -16,8 +20,13 @@ public class TextSimilarity {
      */
     public static String normalize(String s) {
         if (s == null) return "";
-        return s.toLowerCase().replaceAll("[^a-z0-9]", "");
+        return s
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")  // 특수문자 제거, 공백 유지
+                .replaceAll("\\s+", " ")         // 공백 정리
+                .trim();
     }
+
 
     /**
      * 공백 기준 단어 기반 Jaccard 유사도
@@ -89,7 +98,6 @@ public class TextSimilarity {
 
         if (norm1.isEmpty() || norm2.isEmpty()) return 0.0;
 
-        // 완전 포함이면 1.0
         if (norm1.contains(norm2) || norm2.contains(norm1)) return 1.0;
 
         Set<String> tokens1 = new HashSet<>(List.of(norm1.split("\\s+")));
@@ -97,10 +105,25 @@ public class TextSimilarity {
 
         if (tokens1.containsAll(tokens2) || tokens2.containsAll(tokens1)) return 0.9;
 
+        // 공통 토큰 유사도 (Jaccard word-level)
+        Set<String> intersection = new HashSet<>(tokens1);
+        intersection.retainAll(tokens2);
+
+        Set<String> union = new HashSet<>(tokens1);
+        union.addAll(tokens2);
+
+        double tokenOverlapScore = union.isEmpty() ? 0.0 : (double) intersection.size() / union.size(); // 0.0 ~ 1.0
+
+        // 기존 유사도 (문자 단위 Levenshtein, Jaccard)
         double levScore = 1.0 - (double) getLevenshtein(norm1, norm2) / Math.max(norm1.length(), norm2.length());
         double jaccardScore = jaccardChar(norm1, norm2);
 
-        return (levScore + jaccardScore) / 2.0;
+        // 세 가지 평균 (가중치 조절 가능)
+        log.info(String.format("🔍 유사도 계산: [%s] vs [%s] → lev: %.3f, jac: %.3f, token: %.3f",
+                s1, s2, levScore, jaccardScore, tokenOverlapScore));
+
+        return levScore * 0.3 + jaccardScore * 0.3 + tokenOverlapScore * 0.4;
     }
+
 
 }

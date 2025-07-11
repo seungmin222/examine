@@ -61,7 +61,6 @@ public class SupplementEffect extends EntityTime implements SE {
         this.effectEngName = effectTag.getEngName();
     }
 
-
     @Builder.Default
     @Column(nullable = false)
     private String tier = "D";
@@ -78,6 +77,30 @@ public class SupplementEffect extends EntityTime implements SE {
     @Column(name = "final_score", nullable = false)
     private BigDecimal finalScore = BigDecimal.ZERO;       // totalScoreSum / totalParticipants
 
+    @Builder.Default
+    @Column(name = "plus_count", nullable = false)
+    private Integer plusCount = 0;
+
+    @Builder.Default
+    @Column(name = "minus_count", nullable = false)
+    private Integer minusCount = 0;
+
+    @Builder.Default
+    @Column(name = "zero_count", nullable = false)
+    private Integer zeroCount = 0;
+
+    @Builder.Default
+    @Column(name = "plus_participants", nullable = false)
+    private Integer plusParticipants = 0;
+
+    @Builder.Default
+    @Column(name = "minus_participants", nullable = false)
+    private Integer minusParticipants = 0;
+
+    @Builder.Default
+    @Column(name = "zero_participants", nullable = false)
+    private Integer zeroParticipants = 0;
+
     public SupplementEffect(Supplement supplement, EffectTag effectTag) {
         this.supplement = supplement;
         this.effectTag = effectTag;
@@ -85,6 +108,15 @@ public class SupplementEffect extends EntityTime implements SE {
         this.totalScore = BigDecimal.ZERO;
         this.finalScore = BigDecimal.ZERO;
         this.totalParticipants = 0;
+        this.tier = "D";
+
+        this.plusCount = 0;
+        this.minusCount = 0;
+        this.zeroCount = 0;
+
+        this.plusParticipants = 0;
+        this.minusParticipants = 0;
+        this.zeroParticipants = 0;
     }
 
     // getter/setter
@@ -154,20 +186,9 @@ public class SupplementEffect extends EntityTime implements SE {
     }
 
     @Override
-    public void setFinalScore() {
-        if(this.totalParticipants==0){
-            this.finalScore = BigDecimal.ZERO;
-        }
-        else {
-            this.finalScore = this.totalScore.divide(
-                    BigDecimal.valueOf(this.totalParticipants),
-                    4,  // 소수점 4자리
-                    RoundingMode.HALF_UP
-            );
-        }
-        this.tier = CalculateScore.calculateTier(finalScore);
+    public void setFinalScore(BigDecimal finalScore) {
+        this.finalScore =  finalScore;
     }
-
     @Override
     public String getSupplementKorName() {
         return supplementKorName;
@@ -207,5 +228,68 @@ public class SupplementEffect extends EntityTime implements SE {
     public void setEffectEngName(String name) {
         this.effectEngName = name;
     }
+
+    @Override
+    public Integer getPlusCount() {
+        return plusCount;
+    }
+
+    @Override
+    public void setPlusCount(Integer plusCount) {
+        this.plusCount = plusCount;
+    }
+
+    @Override
+    public Integer getMinusCount() {
+        return minusCount;
+    }
+
+    @Override
+    public void setMinusCount(Integer minusCount) {
+        this.minusCount = minusCount;
+    }
+
+    @Override
+    public Integer getZeroCount() {
+        return zeroCount;
+    }
+
+    @Override
+    public void setZeroCount(Integer zeroCount) {
+        this.zeroCount = zeroCount;
+    }
+
+// ✅ participants 관련 추가
+
+    @Override
+    public Integer getPlusParticipants() {
+        return plusParticipants;
+    }
+
+    @Override
+    public void setPlusParticipants(Integer plusParticipants) {
+        this.plusParticipants = plusParticipants;
+    }
+
+    @Override
+    public Integer getMinusParticipants() {
+        return minusParticipants;
+    }
+
+    @Override
+    public void setMinusParticipants(Integer minusParticipants) {
+        this.minusParticipants = minusParticipants;
+    }
+
+    @Override
+    public Integer getZeroParticipants() {
+        return zeroParticipants;
+    }
+
+    @Override
+    public void setZeroParticipants(Integer zeroParticipants) {
+        this.zeroParticipants = zeroParticipants;
+    }
+
 }
 

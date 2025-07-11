@@ -1,6 +1,7 @@
 package com.example.examine.entity.detail;
 
 import com.example.examine.entity.Tag.Effect.EffectTag;
+import com.example.examine.entity.Tag.Tag;
 import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class EffectDetail extends EntityTime implements TagDetail {
+public class EffectDetail extends EntityTime implements Detail {
 
     @Id
     private Long effectId;
@@ -51,6 +52,16 @@ public class EffectDetail extends EntityTime implements TagDetail {
     @Override
     public void setIntro(String intro) {
         this.intro= intro;
+    }
+
+    @Override
+    public Tag getTag() {
+        return effectTag;
+    }
+
+    @Override
+    public void setTag(Tag tag) {
+        this.effectTag= (EffectTag) tag;
     }
 
 }

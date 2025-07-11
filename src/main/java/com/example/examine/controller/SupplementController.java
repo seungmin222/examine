@@ -1,8 +1,10 @@
 package com.example.examine.controller;
 
 import com.example.examine.dto.request.SupplementRequest;
+import com.example.examine.dto.response.JournalResponse;
+import com.example.examine.dto.response.SupplementDetailResponse;
 import com.example.examine.dto.response.SupplementResponse;
-import com.example.examine.repository.*;
+import com.example.examine.repository.TagRepository.SupplementRepository;
 import com.example.examine.service.EntityService.SupplementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -72,9 +74,19 @@ public class SupplementController {
         return supplementService.findFiltered(typeIds, effectIds, sideEffectIds, tiers, sorting);
     }
 
-    @GetMapping("/{id}")
-    public List<SupplementResponse> findOne(@PathVariable Long id) {
-        return supplementService.findOne(id);
+    @GetMapping("/detail/{id}")
+    public SupplementDetailResponse findDetail(@PathVariable Long id,@RequestParam(defaultValue = "engName") String sort,
+                                                     @RequestParam(defaultValue = "asc") String direction) {
+        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
+        return supplementService.findDetail(id, sorting);
+    }
+
+    @GetMapping("/detail/{id}/journals")
+    public List<JournalResponse> findJournals(@PathVariable Long id,
+                                            @RequestParam(defaultValue = "engName") String sort,
+                                            @RequestParam(defaultValue = "asc") String direction) {
+        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
+        return supplementService.findJournals(id, sorting);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

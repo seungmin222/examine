@@ -1,6 +1,5 @@
 package com.example.examine.service.EntityService;
 
-import com.example.examine.dto.request.UserPageRequest;
 import com.example.examine.dto.request.UserRequest;
 import com.example.examine.dto.response.UserResponse;
 import com.example.examine.entity.Page;
@@ -10,8 +9,8 @@ import com.example.examine.entity.UserPageId;
 import com.example.examine.repository.PageRepository;
 import com.example.examine.repository.UserPageRepository;
 import com.example.examine.repository.UserRepository;
-import com.example.examine.service.redis.JwtProperties;
-import com.example.examine.service.redis.RedisService;
+import com.example.examine.service.Redis.JwtProperties;
+import com.example.examine.service.Redis.RedisService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,0 +1,115 @@
+<div>
+<div class="w-full flex justify-between items-center flex-wrap gap-2">
+    <!--section-header-->
+    <h1 id="index-1"></h1>
+    <p id="overview" class="editable" contenteditable="false" data-field="overview">성분 요약을 입력하세요.</p>
+    <div class="flex gap-2">
+        <div id="button-box" class="flex gap-2"></div>
+        <button id="save-button">저장</button>
+    </div>
+</div>
+<table id="content-1">
+    <thead>
+    <tr>
+        <th>한글명</th>
+        <th>영어명</th>
+        <th>분류</th>
+        <th>복용량(일)</th>
+        <th>비용(복용량당)</th>
+        <th>기대효과</th>
+        <th>부작용</th>
+    </tr>
+    </thead>
+    <tbody id="supplement-body"></tbody>
+</table>
+
+
+<h3 id="index-2">상세 소개</h3>
+<div id="content-2" class="content">
+    <p id="intro" class="editable bg-white" contenteditable="false" data-field="intro">성분 소개 내용을 입력하세요.</p>
+</div>
+
+<h3 id="index-3">기대효과</h3>
+<div id="content-3" class="content">
+    <p id="positive" class="editable bg-white" contenteditable="false" data-field="positive">기대효과 내용을 입력하세요.</p>
+</div>
+
+<h3 id="index-4">부작용</h3>
+<div id="content-4" class="content">
+    <p id="negative" class="editable bg-white" contenteditable="false" data-field="negative">부작용 내용을 입력하세요.</p>
+</div>
+
+<h3 id="index-5">작용기전</h3>
+<div id="content-5" class="content">
+    <p id="mechanism" class="editable bg-white" contenteditable="false" data-field="mechanism">작용기전 설명을 입력하세요.</p>
+</div>
+
+<h3 id="index-6">복용량</h3>
+<div id="content-6" class="content">
+    <p id="dosage" class="editable bg-white" contenteditable="false" data-field="dosageUnit">복용량 정보를 입력하세요.</p>
+</div>
+
+<div class="w-full flex justify-between items-center flex-wrap gap-2">
+    <button id="tag-toggle-fold">접기</button>
+    <select name="typeId" id="tag-sort">
+        <option value="korName">한글순</option>
+        <option value="engName">영어순</option>
+    </select>
+</div>
+<h3 id="index-7">연관 효과</h3>
+<table id="content-7">
+    <thead>
+    <tr>
+        <th>한글명</th>
+        <th>영어명</th>
+        <th>연관 성분</th>
+    </tr>
+    </thead>
+    <tbody id="effect-body"></tbody>
+</table>
+
+<h3 id="index-8">연관 부작용</h3>
+<table id="content-8">
+    <thead>
+    <tr>
+        <th>한글명</th>
+        <th>영어명</th>
+        <th>연관 성분</th>
+    </tr>
+    </thead>
+    <tbody id="sideEffect-body"></tbody>
+</table>
+
+<div class="w-full flex justify-between items-center flex-wrap gap-2">
+    <button id="toggle-fold">접기</button>
+    <select name="typeId" id="list-sort">
+        <option value="title">제목순</option>
+        <option value="date">최신순</option>
+        <option value="participants">표본순</option>
+        <option value="durationDays">기간순</option>
+        <option value="score">점수순</option>
+    </select>
+</div>
+<h3 id="index-9">연관 논문</h3>
+<table id="content-9">
+    <thead>
+    <tr>
+        <th>제목</th>
+        <th>연구설계</th>
+        <th>맹검</th>
+        <th>평행</th>
+        <th>기간</th>
+        <th>참가자</th>
+        <th>연관성분</th>
+        <th>연관효과</th>
+        <th>연관부작용</th>
+        <th>게재 날짜</th>
+    </tr>
+    </thead>
+    <tbody id="journal-body"></tbody>
+</table>
+<h3 id="index-10">추천 제품</h3>
+<ul id="product-list" class="w-48">
+    <!--브랜드, 비용, 링크 나열-->
+</ul>
+</div>

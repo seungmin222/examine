@@ -1,18 +1,11 @@
 import{
-  createTierSelectBox,
   createModalInner,
   createTagList,
-  checkCheckboxes,
-  checkCheckboxesById,
-  ArrayCheckboxesById,
-  ObjectCheckboxesById,
-  ArrayCheckboxesByName,
-  resetModal,
   createTooltip
 } from '/util/utils.js';
 
-function renderSupplements(list,supplementMap) {
-    const tbody = document.getElementById('supplement-body');
+function renderSupplements(list,supplementMap ,tableId='supplement-body') {
+    const tbody = document.getElementById(tableId);
     tbody.innerHTML = '';
     supplementMap.clear();
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
@@ -23,10 +16,10 @@ function renderSupplements(list,supplementMap) {
         supplementMap.set(item.id, item);
         const row = document.createElement('tr');
         row.dataset.id = item.id;
-        const types = item.types?.map(e => e.name).join(', ') || '';
-        const effects = item.effects?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const link = `http://localhost:8080/detailPage/detail.html?id=${item.id}`;
+        const types = item.types?.map(e => e.korName).join(', ') || '';
+        const effects = item.effects?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const link = `http://localhost:8080/detail/detail?id=${item.id}`;
 
         row.innerHTML = `
       <td>
@@ -44,15 +37,16 @@ function renderSupplements(list,supplementMap) {
       <td>${types}</td>
       <td>
       ${editMode
-      ? `<input name="dosageValue" value="${item.dosageValue}"/>
-         <select name="dosageUnit" class="w-16">
-            <option value="g" ${item.dosageUnit === 'g' ? 'selected' : ''}>g</option>
-            <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
-            <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
-            <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
-         </select>`
-      : `${item.dosageValue}${item.dosageUnit}`
-      }
+            ? `<input name="dosageValue" value='${item.dosageValue ?? ''}'/>
+     <select name="dosageUnit" class="w-16">
+        <option value="g" ${item.dosageUnit === 'g' ? 'selected' : ''}>g</option>
+        <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
+        <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
+        <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
+     </select>`
+            : `${item.dosageValue ?? ''}${item.dosageUnit}`
+        }
+
       </td>
       <td>
        ${editMode
@@ -64,8 +58,8 @@ function renderSupplements(list,supplementMap) {
       <td>${sideEffects}</td>
       ${editMode ? `<td>
       <div class="flex flex-col gap-2">
-      <button class="modal-btn">태그</button>
-      <button class="save-btn">저장</button>
+      <button class="modal-btn" data-id="${item.id}">태그</button>
+      <button class="save-btn" data-id="${item.id}">저장</button>
       </div>
       </td>` : ''}
     `;
@@ -73,8 +67,8 @@ function renderSupplements(list,supplementMap) {
     });
 }
 
-function renderJournals(list, journalMap) {
-    const tbody = document.getElementById('journal-body');
+function renderJournals(list, journalMap, tableId='journal-body') {
+    const tbody = document.getElementById(tableId);
     tbody.innerHTML = '';
     journalMap.clear();
     const folded = document.getElementById('fold-toggle')?.classList.contains('folded');
@@ -253,8 +247,8 @@ function renderButton(boxId, id, text, cls){
     box.appendChild(button);
 }
 
-function renderPages(list,pageMap) {
-    const tbody = document.getElementById('page-body');
+function renderPages(list,pageMap,tableId='page-body') {
+    const tbody = document.getElementById(tableId);
     tbody.innerHTML = '';
     pageMap.clear();
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
@@ -295,8 +289,8 @@ function renderPages(list,pageMap) {
     });
 }
 
-function renderTagTable(list) {
-    const tbody = document.getElementById('tag-body');
+function renderTagTable(list, tableId = 'tag-body') {
+    const tbody = document.getElementById(tableId);
     tbody.innerHTML = '';
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
     const shown = isFolded ? list.slice(0, 5) : list;
@@ -304,7 +298,7 @@ function renderTagTable(list) {
     shown.forEach(item => {
         const row = document.createElement('tr');
         row.dataset.id = item.id;
-        const supplements = item.supplements?.map(e => `<span class="${e.tier}">${e.name} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const supplements = item.supplements?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
 
         row.innerHTML = `
          <td name="korName">${item.korName}</td>

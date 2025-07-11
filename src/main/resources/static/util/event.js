@@ -1,9 +1,7 @@
 import {
   createTooltip,
   resetEventListener,
-  ArrayCheckboxesById,
-  checkCheckboxesById,
-  renderEffectCache
+
 } from '/util/utils.js';
 
 function setupFoldToggle(buttonId, targetFn) {
@@ -72,7 +70,7 @@ function setupModalOpenClose(openId, closeId, modalId) {
   const modal = document.getElementById(modalId);
 
   if (openBtn) openBtn.addEventListener('click', () => {
-    modal.dataset.id = '0';
+    modal.dataset.id = '';
     modal.classList.remove('hidden');
     document.body.classList.add('overflow-hidden');
     modalScroll('top-scroll', modalId, 'top');
@@ -467,7 +465,20 @@ async function addBookmark(buttonId, loadFn) {
     });
   }
 
+function sidebarToggle(sidebarId, btnId) {
+  const sidebar = document.getElementById(sidebarId);
+  const toggleBtn = document.getElementById(btnId);
 
+  if (!sidebar || !toggleBtn) {
+    console.warn("Sidebar 또는 화살표 요소가 없습니다.");
+    return;
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('closed');
+    toggleBtn.classList.toggle('rotate-180');
+  });
+}
 
 
 export {
@@ -493,4 +504,5 @@ export {
   addBookmark,
   deleteBookmark,
   updateScrollProgress,
+  sidebarToggle
 };
