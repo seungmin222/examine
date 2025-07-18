@@ -49,12 +49,6 @@ export async function init() {
     setupSortTrigger('list-sort', loadEffects);
     setupSortTrigger('tag-sort', loadTags);
 
-    // 삭제 / 수정 토글
-    setupToggleButton('tag-toggle-delete', loadTags, '삭제', '삭제중'); // 수정버튼 없는 경우도 처리 가능 // 단독 토글일 경우 self로 전달
-
-    // 모달 열고 닫기
-    setupModalOpenClose('modal-open', 'modal-close', 'modal');
-
     //검색 폼
     setupSearchForm("tags", "tag-search-form", "tag-sort", ["supplement"], renderTags);
     setupSearchForm(`${effectType}`, "search-form", "list-sort", [`${effectType}`], renderTagTable); //api 주소 수정 필요
@@ -67,7 +61,7 @@ async function loadEffects() {
     const sort = document.getElementById('list-sort').value;
     const res = await fetch(`/api/tags/table?type=${effectType}&sort=${encodeURIComponent(sort)}&direction=asc`);
     const allEffects = await res.json();
-    renderTagTable(allEffects);
+    renderTagTable(allEffects, effectType, 'tag-body');
 }
 
 // 태그 로딩

@@ -1,4 +1,4 @@
-package com.example.examine.service.Crawler;
+package com.example.examine.service.Crawler.JournalCrawler;
 
 import java.io.IOException;
 import java.net.URL;

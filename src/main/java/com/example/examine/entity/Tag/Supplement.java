@@ -5,6 +5,7 @@ import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.SupplementEffect.SupplementEffect;
 import com.example.examine.entity.SupplementEffect.SupplementSideEffect;
+import com.example.examine.service.util.EnumService;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class Supplement extends EntityTime implements Tag{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "dosage_unit")
-    private DosageUnit dosageUnit;
+    private EnumService.DosageUnit dosageUnit;
 
     private BigDecimal cost;
 
@@ -107,23 +108,6 @@ public class Supplement extends EntityTime implements Tag{
     }
 
     public void setDosageUnit(String str) {
-        this.dosageUnit = Supplement.DosageUnit.fromString(str);
-    }
-
-    public enum DosageUnit {
-        G, MG, UG, IU;
-
-        public static Supplement.DosageUnit fromString(String raw) {
-            if (raw == null) return null;
-            String norm = raw.trim().toLowerCase();
-
-            return switch (norm) {
-                case "mg" -> MG;
-                case "g", "gram", "grams" -> G;
-                case "ug", "mcg", "μg", "microgram", "micrograms" -> UG;
-                case "iu", "i.u." -> IU;
-                default -> null;
-            };
-        }
+        this.dosageUnit = EnumService.DosageUnit.fromString(str);
     }
 }

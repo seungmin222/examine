@@ -10,7 +10,7 @@ import {
 } from '/util/render.js';
 
 import {
-    loadBasic
+    loadButton
 } from '/util/load.js';
 
 import {
@@ -22,9 +22,9 @@ import {
 const pageMap = new Map();
 
 // 초기 로딩
-document.addEventListener('DOMContentLoaded', async () => {
+export async function init() {
 
-    await loadBasic(loadPages);
+    await loadButton(loadPages);
     await loadPages();
     // 테이블 클릭 이벤트리스너, 이벤트 위임이므로 한번만 추가
     pageEvent(pageMap, loadPages);
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSearchForm("pages", "search-form", "list-sort", null, renderPages);
 
     selectList(["type"],filterByTag);
-});
+}
 
 async function loadPages() {
     const sort = document.getElementById('list-sort').value;

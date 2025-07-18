@@ -249,14 +249,126 @@ function tagTableEvent(loadEffects,type){
                 });
                 await loadEffects();
             }
-            return;
+
         }
     });
 }
+
+function brandEvent(brandMap, loadBrands) {
+    document.getElementById('brand-body').addEventListener('click', async e => {
+        const row = e.target.closest('tr');
+        const itemId = Number(row?.dataset.id);
+        const item = brandMap.get(itemId);
+        if (!row || !itemId) return;
+
+        // 삭제 모드
+        if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
+            e.preventDefault();
+            if (confirm(`'${item.name}' 브랜드를 삭제할까요?`)) {
+                await fetch(`/api/brand/${itemId}`, {
+                    method: 'DELETE'
+                });
+                await loadBrands();
+            }
+            return;
+        }
+
+        // 저장 버튼
+        if (e.target.classList.contains('save-btn')) {
+            const updated = {
+                name: row.querySelector('[name="name"]').value,
+                country: row.querySelector('[name="country"]').value,
+                fei: row.querySelector('[name="fei"]').value,
+                nai: parseInt(row.querySelector('[name="nai"]').value),
+                vai: parseInt(row.querySelector('[name="vai"]').value),
+                oai: parseInt(row.querySelector('[name="oai"]').value)
+            };
+
+            const res = await fetch(`/api/brand/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updated)
+            });
+
+            if (res.ok) {
+                alert("브랜드가 수정되었습니다.");
+                await loadBrands();
+            } else {
+                alert("수정 실패");
+            }
+        }
+    });
+}
+
+function productEvent(productMap, loadProducts) {
+    document.getElementById('product-body').addEventListener('click', async e => {
+        const row = e.target.closest('tr');
+        const itemId = Number(row?.dataset.id);
+        const item = productMap.get(itemId);
+        if (!row || !itemId || !item) return;
+
+        const deleteMode = document.getElementById('delete-mode-btn')?.classList.contains('execute');
+
+        // ✅ 삭제 처리
+        if (deleteMode) {
+            if (!confirm("정말 삭제할까요?")) return;
+
+            const res = await fetch(`/api/supplement/detail/${itemId}/products`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                alert("삭제 완료");
+                await loadProducts();
+            } else {
+                const msg = await res.text();
+                alert("❌ 삭제 실패: " + msg);
+            }
+
+            return;
+        }
+
+        // ✅ 저장 처리
+        if (e.target.classList.contains('save-btn')) {
+            const updated = {
+                id: item.id,
+                name: row.querySelector('[name="name"]').value,
+                link: item.link,
+                dosageValue: parseFloat(row.querySelector('[name="dosageValue"]').value),
+                dosageUnit: row.querySelector('[name="dosageUnit"]').value,
+                price: parseFloat(row.querySelector('[name="price"]').value),
+                pricePerDose: parseFloat(row.querySelector('[name="pricePerDose"]').value),
+                brandId: item.brandId,
+                supplementId: item.supplementId
+            };
+
+            const res = await fetch(`/api/supplement/detail/products`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated)
+            });
+
+            if (res.ok) {
+                alert("제품이 수정되었습니다.");
+                await loadProducts();
+            } else {
+                const msg = await res.text();
+                alert("수정 실패: " + msg);
+            }
+        }
+    });
+}
+
+
 
 export {
     supplementEvent,
     journalEvent,
     pageEvent,
-    tagTableEvent
+    tagTableEvent,
+    brandEvent,
+    productEvent
 };

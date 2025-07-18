@@ -104,3 +104,10 @@ CREATE INDEX idx_se_supplement ON supplement_effect(supplement_id);
 
 -- 조인용 보조 인덱스
 CREATE INDEX idx_jse_se_fk ON journal_supplement_effect(supplement_id, effect_tag_id);
+
+
+데이터를 천만건 이상 넣어보고, 제이미터 같은 걸로 트래픽 발생시켜,
+
+발생하는 문제나 해결하는 과정을 리포팅해도 도움이 될 거 같습니다.
+
+http server 정도 간략하게 만들어 포폴에 추가하면 오~ 할 거 같습니다.

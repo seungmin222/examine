@@ -6,6 +6,7 @@
   <link href="/dist/output.css" rel="stylesheet">
   <link id="favicon" rel="icon" type="image/png" href="/image/icon-pink.png" />
   <script src="/headScript.js"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 <!-- ✅ 상단 네비게이션 -->
@@ -19,10 +20,11 @@
         </button>
       </a>
     </div>
+
     <div class="relative">
       <button id="table-dropdown-toggle" class="dropdown">목록 관리</button>
       <div id="table-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="bottom">
-        <div class="tooltip-body">
+        <div class="tooltip-body grid [grid-template-columns:repeat(2,auto)] gap-2">
           <a href="/table/supplement" class="logo">성분 목록</a>
           <a href="/table/journal" class="logo">논문 목록</a>
           <a href="/table/effect?type=effect" class="logo">기대 효과</a>
@@ -30,37 +32,36 @@
           <a href="/table/effect?type=type" class="logo">분류</a>
           <a href="/table/brand" class="logo">브랜드 목록</a>
         </div>
-        <div class="tooltip-tail bg"></div>
-        <div class="tooltip-tail-border"></div>
       </div>
     </div>
+
     <div class="relative">
       <div class="flex">
         <button id="guide-dropdown-toggle" class="dropdown">용어 설명</button>
       </div>
       <div id="guide-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="bottom">
-        <div class="tooltip-body">
+        <div class="tooltip-body grid [grid-template-columns:repeat(2,auto)] gap-2">
           <a href="/guide/ebm" class="logo">근거 수준</a>
           <a href="/guide/shop" class="logo">쇼핑몰</a>
           <a href="/guide/diet" class="logo">식단 가이드</a>
           <a href="/guide/api" class="logo">api 사용법</a>
         </div>
-        <div class="tooltip-tail bg"></div>
-        <div class="tooltip-tail-border"></div>
       </div>
     </div>
   </div>
+
   <div class="flex gap-2">
     <form id="all-search-form" class="flex-row">
       <input id="all-search-input" class="w-48" placeholder="통합검색">
       <button>검색</button>
     </form>
+
     <div class="relative">
       <div class="flex">
-        <button id="setting-dropdown-toggle" class="dropdown">설정</button>
+        <button id="setting-dropdown-toggle" class="dropdown">기타</button>
       </div>
       <div id="setting-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="bottom">
-        <div class="tooltip-body">
+        <div class="tooltip-body overflow-visible p-0">
           <label> 테마
             <select id="theme-select">
               <option value="pink">분홍</option>
@@ -70,40 +71,47 @@
               <option value="lavender">보라</option>
             </select>
           </label>
+
+          <div class="relative">
+            <button id="iherb-dropdown-toggle" class="dropdown big">쿠폰</button>
+            <div id="iherb-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
+              <div class="tooltip-body">
+                <ul id="iherb-coupon"></ul>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="tooltip-tail bg"></div>
-        <div class="tooltip-tail-border"></div>
       </div>
     </div>
+
     <div class="relative">
       <a id="user" href="/user/login" class="hover:no-underline">
         <button id="user-dropdown-toggle" class="dropdown">로그인</button>
       </a>
       <div id="user-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="bottom">
-        <div class="tooltip-body flex flex-col gap-2 overflow-visible">
+        <div class="tooltip-body overflow-visible p-0">
           <div class="relative">
-            <button id="user-info-dropdown-toggle">내 정보</button>
-            <div id="user-info-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="left">
+            <button id="user-info-dropdown-toggle" class="dropdown big">내 정보</button>
+            <div id="user-info-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
               <div class="tooltip-body">
                 <span id="user-info"></span>
               </div>
-              <div class="tooltip-tail bg"></div>
-              <div class="tooltip-tail-border"></div>
             </div>
           </div>
+
           <div class="relative">
-            <button id="alarm-dropdown-toggle">알림</button>
-            <div id="alarm-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="left">
+            <button id="alarm-dropdown-toggle" class="dropdown big">알림</button>
+            <div id="alarm-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
               <div class="tooltip-body">
                 <div id="alarm"></div>
               </div>
-              <div class="tooltip-tail bg"></div>
-              <div class="tooltip-tail-border"></div>
             </div>
           </div>
+
           <div class="relative">
-            <button id="bookmark-dropdown-toggle">북마크</button>
-            <div id="bookmark-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="left">
+            <button id="bookmark-dropdown-toggle" class="dropdown big">북마크</button>
+            <div id="bookmark-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
               <div id="bookmark-content" class="tooltip-body">
                 <div class="flex gap-2">
                   <button class="w-16" id="bookmark-delete-toggle">삭제</button>
@@ -111,38 +119,47 @@
                 </div>
                 <div id="bookmark"></div>
               </div>
-              <div class="tooltip-tail bg"></div>
-              <div class="tooltip-tail-border"></div>
             </div>
           </div>
+
           <div class="relative">
-            <button id="memo-dropdown-toggle">메모</button>
-            <div id="memo-dropdown" class="tooltip-box hidden bg stop" data-popper-placement="left">
+            <button id="cart-dropdown-toggle" class="dropdown big">장바구니</button>
+            <div id="cart-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
+              <div id="cart-content" class="tooltip-body">
+                <div class="flex gap-2">
+                  <button class="w-16" id="cart-delete-toggle">삭제</button>
+                </div>
+                <div id="cart"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative">
+            <button id="memo-dropdown-toggle" class="dropdown big">메모</button>
+            <div id="memo-dropdown" class="tooltip-box hidden bg stop notail" data-popper-placement="left">
               <div class="tooltip-body">
                 <div id="memo"></div>
               </div>
-              <div class="tooltip-tail bg"></div>
-              <div class="tooltip-tail-border"></div>
             </div>
           </div>
-          <button id="logout">로그아웃</button>
+
+          <button id="logout" class="dropdown big">로그아웃</button>
         </div>
-        <div class="tooltip-tail bg"></div>
-        <div class="tooltip-tail-border"></div>
       </div>
     </div>
   </div>
 </nav>
 
+
 <!-- ✅ 본문 구조: 사이드바 + 콘텐츠 -->
 <article class="flex items-start">
   <aside id="sidebar">
-      <svg id="sidebar-toggle" class="arrow transition-transform rotate-180" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14" />
-        <path d="m12 5 7 7-7 7" />
-      </svg>
+    <svg id="sidebar-toggle" class="arrow transition-transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+    </svg>
     <div id="index" class="text-left"></div>
+
   </aside>
 
   <div class="flex-1">

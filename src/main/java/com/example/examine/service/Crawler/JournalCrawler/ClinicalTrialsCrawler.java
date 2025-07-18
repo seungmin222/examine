@@ -1,4 +1,4 @@
-package com.example.examine.service.Crawler;
+package com.example.examine.service.Crawler.JournalCrawler;
 
 import com.example.examine.service.Crawler.DateParser.ClinicalTrialsDateParser;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -2,9 +2,9 @@ package com.example.examine.service.Redis;
 
 import com.example.examine.controller.DetailController;
 import com.example.examine.entity.Page;
-import com.example.examine.entity.User;
+import com.example.examine.entity.User.User;
 import com.example.examine.repository.PageRepository;
-import com.example.examine.repository.UserRepository;
+import com.example.examine.repository.UserRepository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;

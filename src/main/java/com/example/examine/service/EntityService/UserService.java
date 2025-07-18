@@ -3,12 +3,13 @@ package com.example.examine.service.EntityService;
 import com.example.examine.dto.request.UserRequest;
 import com.example.examine.dto.response.UserResponse;
 import com.example.examine.entity.Page;
-import com.example.examine.entity.User;
-import com.example.examine.entity.UserPage;
-import com.example.examine.entity.UserPageId;
+import com.example.examine.entity.Product;
+import com.example.examine.entity.User.*;
 import com.example.examine.repository.PageRepository;
-import com.example.examine.repository.UserPageRepository;
-import com.example.examine.repository.UserRepository;
+import com.example.examine.repository.ProductRepository;
+import com.example.examine.repository.UserRepository.UserPageRepository;
+import com.example.examine.repository.UserRepository.UserProductRepository;
+import com.example.examine.repository.UserRepository.UserRepository;
 import com.example.examine.service.Redis.JwtProperties;
 import com.example.examine.service.Redis.RedisService;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
@@ -32,7 +35,9 @@ public class UserService implements UserDetailsService {
     private final RedisService redisService;
     private final JwtProperties jwtProperties;
     private final PageRepository pageRepo;
+    private final ProductRepository productRepo;
     private final UserPageRepository userPageRepo;
+    private final UserProductRepository userProductRepo;
 
     public boolean findByUsername(String username) {
         return userRepo.findByUsername(username).isPresent();
@@ -155,6 +160,35 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    public ResponseEntity<String> addCart(Authentication auth, Long productId, int quantity) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        User user = (User) auth.getPrincipal();
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 제품입니다."));
+
+        UserProductId id = new UserProductId(user.getId(), productId);
+        boolean exists = userProductRepo.existsById(id);
+        if (exists) {
+            return ResponseEntity.badRequest().body("이미 장바구니에 담긴 상품입니다.");
+        }
+
+        UserProduct cartItem = UserProduct.builder()
+                .id(id)
+                .user(user)
+                .product(product)
+                .quantity(quantity)
+                .checked(false)
+                .build();
+
+        userProductRepo.save(cartItem);
+        return ResponseEntity.ok("🛒 장바구니에 추가 완료");
+    }
+
+
+    @Transactional
     public ResponseEntity<String> deleteBookmark(Authentication authentication, Long id) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthenticated");
@@ -169,6 +203,22 @@ public class UserService implements UserDetailsService {
         userPageRepo.delete(userPage);
 
         return ResponseEntity.ok("북마크 삭제 완료");
+    }
+
+    @Transactional
+    public ResponseEntity<String> removeCart(Authentication auth, Long productId) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        User user = (User) auth.getPrincipal();
+        UserProductId id = new UserProductId(user.getId(), productId);
+
+        UserProduct item = userProductRepo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("해당 상품은 장바구니에 없습니다."));
+
+        userProductRepo.delete(item);
+        return ResponseEntity.ok("❌ 장바구니에서 제거 완료");
     }
 
 

@@ -1,19 +1,7 @@
-import {
-  createPopper
-} from 'https://unpkg.com/@popperjs/core@2/dist/esm/popper.js';
-
-function createTagList(type, list) {
-  const liList = list.map(tag => {
-    const li = document.createElement('li');
-    li.textContent = tag.korName;
-    li.dataset.name = tag.engName;
-    li.dataset.id = tag.id;
-    li.dataset.type = type;
-    li.classList.add(tag.tier[0]);
-    return li;
-  });
-  return liList;
-}
+import{
+  createA,
+  createProduct
+} from '/util/create.js';
 
 function switchTagList(type) {
   const list = document.getElementById(`${type}-list`);
@@ -25,120 +13,6 @@ function switchTagList(type) {
     li.textContent = li.dataset.name;
     li.dataset.name = text;
   });
-}
-
-// tag 배열 받아서 한꺼번에 만들기
-function createCheckbox(tag, prefix) {
-  const cb = document.createElement('input');
-  cb.type = 'checkbox';
-  cb.value = tag.id;
-  cb.id = `${prefix}-${tag.id}`;
-  return cb;
-}
-
-function createLabelText(tag) {
-  const span = document.createElement('span');
-  span.textContent = tag.korName;
-  const tier = tag?.tier;
-    if (tier) {
-      span.classList.add(tier[0]);
-    }
-  return span;
-}
-
-function createTierSelectBox(tagId, prefix) {
-  const gr = document.createElement('select');
-  gr.name = `tier-${tagId}`;
-  gr.id = `${prefix}-tier-${tagId}`;
-  gr.className = 'modal';
-
-  ['A', 'B', 'C', 'D', 'null'].forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g;
-    opt.className = g;
-    opt.textContent = g;
-    if (g === 'null') opt.selected = true;
-    gr.appendChild(opt);
-  });
-
-  gr.addEventListener('change', () => {
-    gr.className = gr.value;
-  });
-
-  return gr;
-}
-
-function createModalInner(tag, type) {
-  const wrapper = document.createElement('label');
-  wrapper.classList.add('modal-inner');
-  const cb = createCheckbox(tag, type);
-  const labelText = createLabelText(tag);
-
-  wrapper.append(cb, labelText);
-
-  return wrapper;
-}
-
-//popper 라이브러리 사용
-function createTooltip(anchorId, text, position = 'top', cls = '') {
-  const anchor = document.getElementById(anchorId);
-  if (!anchor) {
-    console.warn(`Tooltip anchor not found: ${anchorId}`);
-    return;
-  }
-
-  const tooltip = document.createElement('div');
-  tooltip.className = 'tooltip-box hidden';
-  if (cls) {
-    tooltip.classList.add(cls);
-  }
-  tooltip.innerHTML = `
-    <div class="tooltip-body">${text}</div>
-    <div class="tooltip-tail-wrapper" data-popper-arrow>
-      <div class="tooltip-tail-border"></div>
-      <div class="tooltip-tail"></div>
-    </div>
-  `;
-  document.body.appendChild(tooltip);
-
-  const popperInstance = createPopper(anchor, tooltip, {
-    placement: position,
-    modifiers: [
-      {
-        name: 'offset',
-        options: { offset: [0, 10] },
-      },
-      {
-        name: 'arrow',
-        options: {
-          element: tooltip.querySelector('[data-popper-arrow]'),
-        },
-      },
-      {
-        name: 'preventOverflow',
-        options: {
-          boundary: 'viewport',
-        },
-      },
-    ],
-  });
-
-  let hideTimer = null;
-  const show = () => {
-    clearTimeout(hideTimer);
-    tooltip.classList.remove('hidden');
-    popperInstance.update();
-  };
-  const hide = () => {
-    hideTimer = setTimeout(() => {
-      tooltip.classList.add('hidden');
-    }, 100);
-  };
-
-  anchor.addEventListener('mouseenter', show);
-  anchor.addEventListener('mouseleave', hide);
-  tooltip.addEventListener('mouseenter', show);
-  tooltip.addEventListener('mouseleave', hide);
 }
 
 function checkCheckboxes(type, tagList) {
@@ -249,6 +123,7 @@ function deleteCookie(name) {
 async function checkLogin() {
   const userDiv = document.getElementById("user-info");
   const bookmark = document.getElementById("bookmark");
+  const cart = document.getElementById("cart");
 
   async function fetchUser() {
     const res = await fetch("/api/user/me", { credentials: "include" });
@@ -259,15 +134,18 @@ async function checkLogin() {
       userDiv.textContent = `${data.username}`;
       document.body.dataset.level = `${data.level}`;
       bookmark.innerHTML = "";
-      data.pages.forEach(page => {
-        const link = document.createElement("a");
-        link.href = page.link;
-        link.textContent = page.title;
-        link.dataset.id = page.id;
-        link.rel = "noopener noreferrer";
-        link.classList.add("logo");
+      cart.innerHTML = "";
+
+      data.pages.forEach(p => {
+        const link = createA(p.link, p.title, "logo");
+        link.dataset.id = p.id;
         bookmark.appendChild(link);
       });
+
+      data.products.forEach(p => {
+        cart.appendChild(createProduct(p));
+      });
+
       return true;
     }
 
@@ -297,56 +175,17 @@ async function checkLogin() {
   return await fetchUser();
 }
 
-function createNumberSVG(num) {
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-
-  svg.setAttribute("width", "20");
-  svg.setAttribute("height", "20");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("class", "number-icon");
-
-  // 배경 원 (또는 사각형으로 바꿔도 됨)
-  const rect = document.createElementNS(svgNS, "rect");
-  rect.setAttribute("x", "2");           // 시작 x좌표
-  rect.setAttribute("y", "2");           // 시작 y좌표
-  rect.setAttribute("width", "20");      // 너비
-  rect.setAttribute("height", "20");     // 높이
-  rect.setAttribute("rx", "5");          // 둥근 모서리 반지름 (선택)
-  rect.setAttribute("fill", "var(--color-button)");
-
-  svg.appendChild(rect);
-
-  // 숫자 텍스트
-  const text = document.createElementNS(svgNS, "text");
-  text.setAttribute("x", "12");
-  text.setAttribute("y", "16");
-  text.setAttribute("text-anchor", "middle");
-  text.setAttribute("font-size", "12");
-  text.setAttribute("fill", "white");
-  text.setAttribute("font-weight", "bold");
-  text.textContent = num;
-  svg.appendChild(text);
-
-  return svg;
-}
-
 
 
 
 
 export {
-  createTierSelectBox,
-  createModalInner,
-  createTagList,
-    switchTagList,
+  switchTagList,
   checkCheckboxes,
   ArrayCheckboxesById,
   ArrayCheckboxesByName,
   resetModal,
-  createTooltip,
   resetEventListener,
   renderEffectCache,
   checkLogin,
-  createNumberSVG
 };

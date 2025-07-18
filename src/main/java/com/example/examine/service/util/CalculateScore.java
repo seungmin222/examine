@@ -1,5 +1,6 @@
 package com.example.examine.service.util;
 
+import com.example.examine.entity.Brand;
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.JournalSupplementEffect.JSE;
 import com.example.examine.entity.SupplementEffect.SE;
@@ -243,6 +244,27 @@ public class CalculateScore {
         if (score.compareTo(BigDecimal.valueOf(50)) >= 0) return "A";
         if (score.compareTo(BigDecimal.valueOf(20)) >= 0) return "B";
         if (score.compareTo(BigDecimal.valueOf(10)) >= 0) return "C";
-        return "D";
+        if (score.compareTo(BigDecimal.valueOf(0)) >= 0) return "D";
+        return "F";
+    }
+
+    public static double calculateBrandScore(Brand brand) {
+        if (brand.getFei() == null || brand.getFei().isEmpty()) {
+            return -2.0;
+        }
+
+        int nai = brand.getNai();
+        int vai = brand.getVai();
+        int oai = brand.getOai();
+
+        return nai * 2.0 + vai * 1.0 - oai * 3.0;
+    }
+
+    public static String calculateBrandTier(double score) {
+        if (score >= 10) return "A";
+        if (score >= 5) return "B";
+        if (score >= 0) return "C";
+        if (score >= -5) return "D";
+        return "F";
     }
 }

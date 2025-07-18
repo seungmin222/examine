@@ -1,7 +1,6 @@
 package com.example.examine.service.EntityService;
 
 import com.example.examine.dto.request.LLMJSERequest;
-import com.example.examine.dto.response.JSEResponse;
 import com.example.examine.dto.response.LLM.JournalAnalysis;
 import com.example.examine.dto.request.JSERequest;
 import com.example.examine.dto.response.JournalResponse;
@@ -24,14 +23,14 @@ import com.example.examine.repository.JSERepository.JournalSupplementSideEffectR
 import com.example.examine.repository.SERepository.SupplementEffectRepository;
 import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
 import com.example.examine.repository.TagRepository.*;
-import com.example.examine.service.Crawler.ClinicalTrialsCrawler;
-import com.example.examine.service.Crawler.JournalCrawlerMeta;
-import com.example.examine.service.Crawler.PubmedCrawler;
-import com.example.examine.service.Crawler.SemanticScholarCrawler;
+import com.example.examine.service.Crawler.JournalCrawler.ClinicalTrialsCrawler;
+import com.example.examine.service.Crawler.JournalCrawler.JournalCrawlerMeta;
+import com.example.examine.service.Crawler.JournalCrawler.PubmedCrawler;
+import com.example.examine.service.Crawler.JournalCrawler.SemanticScholarCrawler;
 import com.example.examine.service.LLM.LLMService;
 import com.example.examine.service.similarity.TextSimilarity;
 import com.example.examine.service.util.CalculateScore;
-import com.example.examine.service.util.ObjectService;
+import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -113,7 +112,7 @@ public class JournalService {
         Journal journal = Journal.builder()
                 .link(dto.link())
                 .durationValue(dto.durationValue())
-                .durationUnit(Journal.DurationUnit.fromString(dto.durationUnit())) // 여기서 String → enum
+                .durationUnit(EnumService.DurationUnit.fromString(dto.durationUnit())) // 여기서 String → enum
                 .participants(dto.participants())
                 .parallel(dto.parallel())
                 .blind(dto.blind())
@@ -475,7 +474,7 @@ public class JournalService {
                 });
     }
 
-    public static Integer toDays(Integer value, Journal.DurationUnit unit) {
+    public static Integer toDays(Integer value, EnumService.DurationUnit unit) {
         if (value == null) return null;
 
         return switch (unit) {

@@ -1,7 +1,10 @@
 package com.example.examine.controller;
 
+import com.example.examine.dto.request.DetailRequest;
+import com.example.examine.dto.request.ProductRequest;
 import com.example.examine.dto.request.SupplementRequest;
 import com.example.examine.dto.response.JournalResponse;
+import com.example.examine.dto.response.ProductResponse;
 import com.example.examine.dto.response.SupplementDetailResponse;
 import com.example.examine.dto.response.SupplementResponse;
 import com.example.examine.repository.TagRepository.SupplementRepository;
@@ -74,6 +77,11 @@ public class SupplementController {
         return supplementService.findFiltered(typeIds, effectIds, sideEffectIds, tiers, sorting);
     }
 
+    @PutMapping("/detail")
+    public ResponseEntity<String> update(@RequestBody DetailRequest dto) {
+        return supplementService.detailUpdate(dto);
+    }
+
     @GetMapping("/detail/{id}")
     public SupplementDetailResponse findDetail(@PathVariable Long id,@RequestParam(defaultValue = "engName") String sort,
                                                      @RequestParam(defaultValue = "asc") String direction) {
@@ -95,4 +103,30 @@ public class SupplementController {
         return supplementService.delete(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/detail/products")
+    public ResponseEntity<String> createProduct(@RequestBody ProductRequest dto) {
+        return supplementService.createProduct(dto);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/detail/products/{productId}")
+    public ResponseEntity<String> updateProduct(@PathVariable Long productId,
+                                                @RequestBody ProductRequest dto) {
+        return supplementService.updateProduct(productId, dto);
+    }
+
+    @GetMapping("/detail/{id}/products")
+    public List<ProductResponse> getProducts(@PathVariable Long id,
+                                             @RequestParam(defaultValue = "name") String sort,
+                                             @RequestParam(defaultValue = "asc") String direction) {
+        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
+        return supplementService.getProducts(id, sorting);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/detail/{id}/products")
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+        return supplementService.deleteProduct(id);
+    }
 }

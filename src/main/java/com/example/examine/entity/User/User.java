@@ -1,4 +1,4 @@
-package com.example.examine.entity;
+package com.example.examine.entity.User;
 
 import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
@@ -41,6 +41,11 @@ public class User extends EntityTime implements UserDetails {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPage> userPages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserProduct> userProducts = new ArrayList<>();
+
+
     // 권한을 단순 문자열로 예시
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

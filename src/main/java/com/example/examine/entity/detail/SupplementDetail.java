@@ -1,10 +1,14 @@
 package com.example.examine.entity.detail;
 
+import com.example.examine.entity.Product;
 import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.entity.Tag.Supplement;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "supplement_detail")
@@ -41,4 +45,6 @@ public class SupplementDetail extends EntityTime {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String dosage;
 
+    @OneToMany(mappedBy = "supplementDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 }

@@ -1,6 +1,6 @@
 package com.example.examine.service.Redis;
 
-import com.example.examine.entity.User;
+import com.example.examine.entity.User.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;

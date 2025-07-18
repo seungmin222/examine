@@ -1,5 +1,6 @@
 package com.example.examine.entity;
 
+import com.example.examine.entity.User.UserPage;
 import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
 import lombok.*;

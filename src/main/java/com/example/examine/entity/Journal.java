@@ -6,6 +6,7 @@ import com.example.examine.entity.Tag.TrialDesign;
 import com.example.examine.entity.extend.EntityTime;
 import com.example.examine.service.EntityService.JournalService;
 import com.example.examine.service.util.CalculateScore;
+import com.example.examine.service.util.EnumService;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -48,7 +49,7 @@ public class Journal extends EntityTime {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "duration_unit", nullable = true)
-    private DurationUnit durationUnit;
+    private EnumService.DurationUnit durationUnit;
 
     @Column(nullable = true)
     private Integer durationDays;
@@ -93,23 +94,7 @@ public class Journal extends EntityTime {
     }
 
     public void setDurationUnit(String str) {
-        this.durationUnit = DurationUnit.fromString(str);
+        this.durationUnit = EnumService.DurationUnit.fromString(str);
     }
 
-    public enum DurationUnit {
-        DAY, WEEK, MONTH, YEAR, UNKNOWN;
-
-        public static DurationUnit fromString(String raw) {
-            if (raw == null) return null;
-            String norm = raw.trim().toLowerCase();
-
-            return switch (norm) {
-                case "day", "days" -> DAY;
-                case "week", "weeks" -> WEEK;
-                case "month", "months" -> MONTH;
-                case "year", "years" -> YEAR;
-                default -> UNKNOWN;
-            };
-        }
-    }
 }

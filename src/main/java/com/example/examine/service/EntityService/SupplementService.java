@@ -2,21 +2,27 @@ package com.example.examine.service.EntityService;
 
 import com.example.examine.controller.DetailController;
 import com.example.examine.dto.request.DetailRequest;
+import com.example.examine.dto.request.ProductRequest;
 import com.example.examine.dto.request.SupplementRequest;
 import com.example.examine.dto.response.*;
+import com.example.examine.dto.response.Crawler.IherbProductResponse;
 import com.example.examine.entity.*;
 import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.entity.Tag.TypeTag;
 import com.example.examine.entity.detail.SupplementDetail;
+import com.example.examine.repository.BrandRepository;
 import com.example.examine.repository.Detailrepository.SupplementDetailRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementEffectRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementSideEffectRepository;
+import com.example.examine.repository.ProductRepository;
 import com.example.examine.repository.SERepository.SupplementEffectRepository;
 import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
 import com.example.examine.repository.TagRepository.SupplementRepository;
 import com.example.examine.repository.TagRepository.TypeTagRepository;
+import com.example.examine.service.Crawler.ShopCrawler.IherbCrawler;
 import com.example.examine.service.LLM.LLMResponse;
 import com.example.examine.service.LLM.LLMService;
+import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -32,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 // 서비스
@@ -43,8 +50,8 @@ public class SupplementService {
     private final SupplementRepository supplementRepo;
     private final TypeTagRepository typeRepo;
     private final SupplementDetailRepository supplementDetailRepo;
-    private final SupplementEffectRepository supplementEffectRepo;
-    private final SupplementSideEffectRepository supplementSideEffectRepo;
+    private final BrandRepository brandRepo;
+    private final ProductRepository productRepo;
     private final JournalSupplementEffectRepository jseRepo;
     private final JournalSupplementSideEffectRepository jsseRepo;
     private final JournalService journalService;
@@ -61,7 +68,7 @@ public class SupplementService {
                 .korName(dto.korName())
                 .engName(dto.engName())
                 .dosageValue(dto.dosageValue())
-                .dosageUnit(Supplement.DosageUnit.fromString(dto.dosageUnit()))
+                .dosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()))
                 .cost(dto.cost())
                 .build();
 
@@ -310,7 +317,7 @@ public class SupplementService {
         return DetailResponse.fromEntity(detail);
     }
 
-
+    @Transactional
     public ResponseEntity<String> detailUpdate(@RequestBody DetailRequest dto) {
         log.info("🔄 수정 요청 들어옴 - ID: {}", dto.id());
         log.info("📥 받은 데이터: {}", dto);
@@ -325,8 +332,76 @@ public class SupplementService {
         s.setMechanism(dto.mechanism());
         s.setDosage(dto.dosage());
 
+        s.getSupplement().setUpdatedAt(s.getUpdatedAt());
+
         supplementDetailRepo.save(s);
         return ResponseEntity.ok("성분 업데이트 완료");
     }
 
+    @Transactional
+    public ResponseEntity<String> createProduct(ProductRequest dto) {
+        // ✅ 1. 크롤링으로 부족한 필드 채우기
+        IherbProductResponse crawled = null;
+        if (dto.link() != null && dto.link().contains("iherb.com")) {
+            crawled = IherbCrawler.productCrawl(dto.link());
+        }
+
+        Brand brand = dto.brandId() != null
+                ? brandRepo.findById(dto.brandId()).orElse(null)
+                : null;
+
+        SupplementDetail detail = supplementDetailRepo.findById(dto.supplementId()).orElse(null);
+
+        // ✅ 3. Product 빌드
+        Product product = Product.builder()
+                .name(dto.name() != null ? dto.name() : crawled != null ? crawled.name() : null)
+                .link(dto.link())
+                .imageUrl(crawled != null ? crawled.imageUrl() : "")
+                .dosageValue(dto.dosageValue())
+                .dosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()))
+                .price(dto.price() != null ? dto.price() : parsePrice(crawled != null ? crawled.price() : null))
+                .pricePerDose(dto.pricePerDose() != null ? dto.pricePerDose() : parsePrice(crawled != null ? crawled.pricePerDose() : null))
+                .brand(brand)
+                .supplementDetail(detail)
+                .build();
+
+        productRepo.save(product);
+        return ResponseEntity.ok("✅ 제품 등록 완료");
+    }
+
+
+    private BigDecimal parsePrice(String text) {
+        if (text == null) return null;
+        try {
+            String number = text.replaceAll("[^\\d.]", ""); // ₩, /, 단위 등 제거
+            return new BigDecimal(number);
+        } catch (NumberFormatException e) {
+            log.warn("가격 파싱 실패: {}", text);
+            return null;
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<String> updateProduct(Long productId, ProductRequest dto) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("해당 제품이 존재하지 않습니다."));
+
+        product.setName(dto.name());
+        product.setDosageValue(dto.dosageValue());
+        product.setDosageUnit(dto.dosageUnit());
+        product.setPrice(dto.price());
+        product.setPricePerDose(dto.pricePerDose());
+        return ResponseEntity.ok("✅ 제품 수정 완료");
+    }
+
+    public List<ProductResponse> getProducts(@PathVariable Long id, Sort sort) {
+       return productRepo.findBySupplementId(id, sort)
+               .stream()
+               .map(ProductResponse::fromEntity)
+               .toList();
+    }
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+        productRepo.deleteById(id);
+        return ResponseEntity.ok("제품 삭제 완료");
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.examine.entity;
+package com.example.examine.entity.User;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -14,20 +14,19 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPageId implements Serializable {
+public class UserProductId implements Serializable {
     private Long userId;
-    private Long pageId;
+    private Long productId;
 
-    // equals, hashCode 꼭 오버라이드
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserPageId that)) return false;
-        return Objects.equals(userId, that.userId) && Objects.equals(pageId, that.pageId);
+        if (!(o instanceof UserProductId that)) return false;
+        return Objects.equals(userId, that.userId) && Objects.equals(productId, that.productId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, pageId);
+        return Objects.hash(userId, productId);
     }
 }

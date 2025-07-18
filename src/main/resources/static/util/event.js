@@ -1,8 +1,9 @@
 import {
-  createTooltip,
   resetEventListener,
-
 } from '/util/utils.js';
+import{
+  createTailTooltip,
+} from '/util/create.js';
 
 function setupFoldToggle(buttonId, targetFn) {
   const btn = document.getElementById(buttonId);
@@ -85,7 +86,7 @@ function setupModalOpenClose(openId, closeId, modalId) {
   });
 }
 
-function setupSearchForm(dto, formId, sortSelectId, targetTypes, renderFn) {
+function setupSearchForm(api, formId, sortSelectId, targetTypes, renderFn) {
   const form = document.getElementById(formId);
   const sortSelect = document.getElementById(sortSelectId);
 
@@ -98,12 +99,12 @@ function setupSearchForm(dto, formId, sortSelectId, targetTypes, renderFn) {
 
     if (targetTypes?.length) {
       for (let type of targetTypes) {
-        const res = await fetch(`/api/${dto}/search?keyword=${encodeURIComponent(keyword)}&type=${type}&sort=${sort}&direction=asc`);
+        const res = await fetch(`/api/${api}/search?keyword=${encodeURIComponent(keyword)}&type=${type}&sort=${sort}&direction=asc`);
         const filtered = await res.json();
         renderFn(type, filtered);
       }
     } else {
-      const res = await fetch(`/api/${dto}/search?keyword=${encodeURIComponent(keyword)}&sort=${sort}&direction=asc`);
+      const res = await fetch(`/api/${api}/search?keyword=${encodeURIComponent(keyword)}&sort=${sort}&direction=asc`);
       const filtered = await res.json();
       renderFn(filtered);
     }
@@ -290,7 +291,7 @@ function noteLink(id, rid){
    if(!link||!rlink){
      return false;
    }
-   createTooltip(id,rlink.innerHTML);
+   createTailTooltip(id,rlink.innerHTML);
    return true;
 }
 
@@ -480,6 +481,78 @@ function sidebarToggle(sidebarId, btnId) {
   });
 }
 
+async function deleteCart(boxId, deleteId, loadFn) {
+  resetEventListener(boxId);
+  const box = document.getElementById(boxId);
+  const deleteButton = document.getElementById(deleteId);
+
+  if (!box || !deleteButton) {
+    console.warn("요소를 찾을 수 없습니다.");
+    return;
+  }
+
+  const deleteMode = deleteButton.classList.contains('execute');
+  if (!deleteMode) return;
+
+  box.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const wrapper = e.target.closest(".product-item");
+    if (!wrapper || !wrapper.dataset.id) {
+      console.warn("상품 ID가 존재하지 않음");
+      return;
+    }
+
+    const productId = wrapper.dataset.id;
+
+    try {
+      const res = await fetch(`/api/user/cart/${productId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        alert("🗑️ 장바구니에서 삭제 완료!");
+        wrapper.remove();
+        loadFn();
+      } else {
+        const msg = await res.text();
+        alert("❌ 삭제 실패: " + msg);
+      }
+    } catch (err) {
+      console.error("요청 중 오류 발생:", err);
+      alert("🚨 네트워크 오류 발생");
+    }
+  });
+}
+
+
+function iherbCouponRefresh(buttonId = "iherb-dropdown-toggle") {
+  const button = document.getElementById(buttonId);
+  if (!button) return;
+
+  button.addEventListener("click", async () => {
+    try {
+      const res = await fetch("/api/sale/iherb/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify([])
+      });
+
+      if (!res.ok) throw new Error("요청 실패");
+
+      const result = await res.text();
+      alert("✅ 쿠폰 새로고침 완료: " + result);
+    } catch (e) {
+      console.error("❌ 쿠폰 새로고침 실패", e);
+      alert("오류가 발생했습니다.");
+    }
+  });
+}
+
 
 export {
   setupFoldToggle,
@@ -504,5 +577,6 @@ export {
   addBookmark,
   deleteBookmark,
   updateScrollProgress,
-  sidebarToggle
+  sidebarToggle,
+  iherbCouponRefresh
 };

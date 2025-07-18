@@ -1,7 +1,7 @@
 package com.example.examine.Security;
 
-import com.example.examine.entity.User;
-import com.example.examine.repository.UserRepository;
+import com.example.examine.entity.User.User;
+import com.example.examine.repository.UserRepository.UserRepository;
 import com.example.examine.service.Redis.JwtProperties;
 import com.example.examine.service.Redis.JwtToken;
 import com.example.examine.service.Redis.RedisService;

@@ -4,7 +4,8 @@ import {
 
 import {
     journalEvent,
-    supplementEvent
+    supplementEvent,
+    productEvent,
 } from '/util/tableEvent.js';
 
 
@@ -13,12 +14,13 @@ import {
     renderJournals,
     renderDetails,
     renderButton,
-    renderTagTable
+    renderTagTable,
+    renderProducts,
 } from '/util/render.js';
 
 const journalMap = new Map();
 const supplementMap = new Map();
-
+const productMap = new Map();
 
 const params = new URLSearchParams(window.location.search);
 const supplementId = params.get('id');
@@ -32,6 +34,7 @@ export async function init() {
         await loadAll();
         supplementEvent(supplementMap,loadDetails);
         journalEvent(journalMap,loadJournals);
+        productEvent(productMap,loadProducts);
 
         document.getElementById('toggle-change').addEventListener('click',e=> {
             const editMode = e.target.classList.contains('execute');
@@ -56,7 +59,6 @@ export async function init() {
     }
 }
 
-
 // 🟢 수정모드 진입: p 태그 contenteditable 활성화 + 스타일 변경
 function enableEditMode() {
     document.querySelectorAll('.editable').forEach(el => {
@@ -77,13 +79,15 @@ async function disableEditMode() {
 
 // 🟣 수정 완료: 내용 수집 후 저장 요청
 async function saveDetail() {
-    const data = {};
+    const data = {
+        id : parseInt(supplementId)
+    };
     document.querySelectorAll('.editable').forEach(el => {
         const key = el.dataset.field;
-        data[key] = el.innerText.trim(); // 줄바꿈이 있다면 innerHTML로 바꿔도 됨
+        data[key] = el.innerText.trim(); // 줄바꿈이 있다면 innerHTML로 바꿔도
     });
 
-    const res = await fetch(`/api/details/${supplementId}`, {
+    const res = await fetch(`/api/supplements/detail`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -91,12 +95,9 @@ async function saveDetail() {
         body: JSON.stringify(data)
     });
 
-    const render = await fetch(`/api/details/${supplementId}`);
-    const details = await render.json();
-
     if (res.ok) {
         alert('✅ 수정 완료!');
-        renderDetails(details); // 서버로부터 다시 불러오기
+        loadDetails(); // 서버로부터 다시 불러오기
     } else {
         alert('❌ 수정 실패');
         enableEditMode();
@@ -114,6 +115,17 @@ async function loadJournals(){
     renderJournals(journals, journalMap);
 }
 
+async function loadProducts(){
+    const sort = document.getElementById('product-list-sort').value;
+    let dir = 'desc';
+    if (sort === 'name'){
+        dir = 'asc';
+    }
+    const res = await fetch(`/api/supplements/detail/${supplementId}/products?sort=${sort}&direction=${dir}`);
+    const products = await res.json();
+    renderProducts(products, productMap);
+}
+
 async function loadDetails(){
     const sort = document.getElementById('tag-sort').value;
     let dir = 'desc';
@@ -129,11 +141,51 @@ async function loadDetails(){
     //subTitle.innerHTML = `${details.supplement[0].korName}`;
     renderSupplements(details.supplement, supplementMap);
     renderDetails(details.detail);
-    renderTagTable(details.effects, 'effect-body');
-    renderTagTable(details.sideEffects, 'sideEffect-body');
+    renderTagTable(details.effects, 'effect' ,'effect-body');
+    renderTagTable(details.sideEffects, 'sideEffect', 'sideEffect-body');
 }
 
 async function loadAll(){
-    loadDetails();
-    loadJournals();
+    await loadDetails();
+    await loadJournals();
+    await loadProducts();
 }
+
+document.getElementById("insert-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+
+    const data = {
+        supplementId: supplementId,
+        link: form.link.value,
+        name: form.name.value,
+        dosageValue: parseFloat(form.dosageValue.value),
+        dosageUnit: form.dosageUnit.value,
+        price: parseFloat(form.price.value),
+        pricePerDose: parseFloat(form.pricePerDose.value),
+    };
+
+    try {
+        const res = await fetch("/api/supplements/detail/products", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+            alert("✅ 제품 등록 완료!");
+            await loadProducts();
+            form.reset();
+        } else {
+            const msg = await res.text();
+            alert("❌ 실패: " + msg);
+        }
+    } catch (err) {
+        console.error("에러 발생:", err);
+        alert("🚨 요청 실패");
+    }
+});
+

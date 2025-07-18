@@ -1,8 +1,9 @@
-package com.example.examine.repository;
+package com.example.examine.repository.UserRepository;
 
 import com.example.examine.entity.*;
-import com.example.examine.entity.JournalSupplementEffect.JSE;
-import org.springframework.data.domain.Sort;
+import com.example.examine.entity.User.User;
+import com.example.examine.entity.User.UserPage;
+import com.example.examine.entity.User.UserPageId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -11,11 +11,19 @@ import{
     addBookmark,
     deleteBookmark,
     updateScrollProgress,
+    iherbCouponRefresh,
+
 } from '/util/event.js';
 
 import{
     createNumberSVG,
-    checkLogin
+    createPath,
+    createCopyIcon,
+    createIherbCoupon,
+} from '/util/create.js';
+
+import{
+    checkLogin,
 } from '/util/utils.js';
 import{
     renderButton
@@ -28,25 +36,29 @@ async function loadNavEvent(){
         userLink.removeAttribute("href"); // 링크 제거
         userLink.addEventListener("click", e => e.preventDefault());
         userLink.querySelector("#user-dropdown-toggle").textContent = "내 정보";
-        hideClickButton('user-dropdown-toggle','user-dropdown');
+        hideHoverButton('user-dropdown-toggle','user-dropdown');
         hideHoverButton('alarm-dropdown-toggle','alarm-dropdown');
         hideHoverButton('user-info-dropdown-toggle','user-info-dropdown');
         hideHoverButton('bookmark-dropdown-toggle','bookmark-dropdown');
         hideHoverButton('memo-dropdown-toggle','memo-dropdown');
+        hideHoverButton('iherb-dropdown-toggle','iherb-dropdown');
         await setupToggleButton('bookmark-delete-toggle', loadNavEvent, '삭제','삭제중');
         await deleteBookmark('bookmark','bookmark-delete-toggle',checkLogin);
         await addBookmark('bookmark-save',checkLogin);
         logout('logout');
+        if(document.body.dataset.level>=10){
+            iherbCouponRefresh('iherb-dropdown-toggle');
+        }
     }
     hideHoverButton('guide-dropdown-toggle','guide-dropdown');
     hideHoverButton('table-dropdown-toggle','table-dropdown');
-    hideClickButton('setting-dropdown-toggle','setting-dropdown');
+    hideHoverButton('setting-dropdown-toggle','setting-dropdown');
     themeSelect('theme-select','icon');
 }
 
 async function loadPage() {
-    const path = window.location.pathname;
-    const res = await fetch(`/api/pages/current?link=${encodeURIComponent(path)}`)
+    const base = createPath();
+    const res = await fetch(`/api/pages/current?link=/${encodeURIComponent(base)}`)
 
     if (res.ok) {
         const id = await res.text();
@@ -61,7 +73,10 @@ function renderIndex(){
   index.innerHTML = ``;
     for (let i = 1; ; i++) {
       const num = document.getElementById(`index-${i}`);
-      if (!num) break; // 요소를 못 찾으면 중단
+      if (!num) {
+          console.log(`${i-1}까지 목차 연결`)
+          break;
+      } // 요소를 못 찾으면 중단
       const link = document.createElement('a');
       link.id = `r-index-${i}`;
       link.href = `#index-${i}`;
@@ -120,7 +135,10 @@ function loadFold(){
 function renderNote(){
     for (let i = 1; ; i++) {
       const success = noteLink(`inote-${i}`, `note-${i}`);
-      if (!success) break; // 요소를 못 찾으면 중단
+      if (!success) {
+          console.log(`${i-1}까지 주석 연결`);
+          break;
+      } // 요소를 못 찾으면 중단
     }
 }
 
@@ -166,6 +184,36 @@ async function loadButton(loadFn){
     }
 }
 
+async function loadIherbCoupon() {
+    const container = document.getElementById("iherb-coupon");
+    if (!container) return;
+
+    try {
+        const res = await fetch("/api/sale/iherb");
+        const data = await res.json();
+
+        if(res.ok){
+            console.log('쿠폰 정보 불러옴');
+        }
+
+        if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = "<li class='w-fit'>현재 진행 중인 할인 정보가 없습니다.</li>";
+            return;
+        }
+
+        container.innerHTML = ""; // 기존 내용 비움
+
+        data.forEach(coupon => {
+            const li = createIherbCoupon(coupon);
+            container.appendChild(li);
+        });
+
+    } catch (e) {
+        console.error("iHerb 쿠폰 로딩 실패", e);
+        container.innerHTML = "<li>오류가 발생했습니다.</li>";
+    }
+}
+
 
 
 //메인 모듈 로딩 후에 실행
@@ -174,14 +222,16 @@ async function loadBasicModule(){
   await loadTagController(); //태그 리모컨
   await loadFold(); // 콘텐트 숨기기
   renderNote(); //주석 연결
-    renderIndex();
+  renderIndex();
+  await loadPage();
+
 }
 
 async function loadBasicEvent(){//index 독립 이벤트만
     loadTheme('selectedTheme','icon','theme-select'); // 테마
     await loadNavEvent();
     loadScrollEvent();
-    await loadPage();
+    await loadIherbCoupon();
 }
 export{
    loadBasicModule,loadBasicEvent,

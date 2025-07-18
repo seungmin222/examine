@@ -1,23 +1,15 @@
 package com.example.examine.controller;
 
-import com.example.examine.dto.request.UserPageRequest;
 import com.example.examine.dto.request.UserRequest;
 import com.example.examine.dto.response.UserResponse;
-import com.example.examine.entity.User;
 import com.example.examine.service.EntityService.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -76,10 +68,27 @@ public class UserController {
         return ResponseEntity.ok("북마크 추가 완료");
     }
 
+    @PostMapping("/cart/{productId}")
+    public ResponseEntity<String> addCart(
+            @PathVariable Long productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            Authentication authentication
+    ) {
+        return userService.addCart(authentication, productId, quantity);
+    }
+
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/bookmark/{id}")
     public ResponseEntity<String> deleteBookmark(Authentication authentication, @PathVariable Long id) {
         userService.deleteBookmark(authentication, id);
         return ResponseEntity.ok("북마크 삭제 완료");
+    }
+
+    @DeleteMapping("/cart/{productId}")
+    public ResponseEntity<String> removeCart(
+            @PathVariable Long productId,
+            Authentication authentication
+    ) {
+        return userService.removeCart(authentication, productId);
     }
 }

@@ -1,8 +1,8 @@
 import{
   createModalInner,
   createTagList,
-  createTooltip
-} from '/util/utils.js';
+  createTailTooltip
+} from '/util/create.js';
 
 function renderSupplements(list,supplementMap ,tableId='supplement-body') {
     const tbody = document.getElementById(tableId);
@@ -19,7 +19,7 @@ function renderSupplements(list,supplementMap ,tableId='supplement-body') {
         const types = item.types?.map(e => e.korName).join(', ') || '';
         const effects = item.effects?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
         const sideEffects = item.sideEffects?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
-        const link = `http://localhost:8080/detail/detail?id=${item.id}`;
+        const link = `/detail/detail?id=${item.id}`;
 
         row.innerHTML = `
       <td>
@@ -177,7 +177,7 @@ function renderJournals(list, journalMap, tableId='journal-body') {
 
         tbody.appendChild(row);
         requestAnimationFrame(() => {
-          createTooltip(`tooltip-${item.id}`, item.summary, 'right' ,'w-1/3');
+          createTailTooltip(`tooltip-${item.id}`, item.summary, 'right' ,'w-1/3');
         });
     });
 }
@@ -269,7 +269,7 @@ function renderPages(list,pageMap,tableId='page-body') {
       <td>
       ${editMode
             ? `<input name="link" value="${item.link}" class="w-32"/>`
-            : `${item.link}`
+            : `<a href="${item.link}">${item.link}</a>`
        }
       </td>
         <td>${item.viewCount}</td>
@@ -289,7 +289,7 @@ function renderPages(list,pageMap,tableId='page-body') {
     });
 }
 
-function renderTagTable(list, tableId = 'tag-body') {
+function renderTagTable(list, type='effect', tableId = 'tag-body') {
     const tbody = document.getElementById(tableId);
     tbody.innerHTML = '';
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
@@ -299,15 +299,118 @@ function renderTagTable(list, tableId = 'tag-body') {
         const row = document.createElement('tr');
         row.dataset.id = item.id;
         const supplements = item.supplements?.map(e => `<span class="${e.tier}">${e.korName} (${e.tier ?? '-'})</span>`).join(', ') || '';
+        const link = `/detail/tagDetail?type=${type}&id=${item.id}`;
 
         row.innerHTML = `
-         <td name="korName">${item.korName}</td>
-         <td name="engName">${item.engName}</td>
+         <td name="korName"><a href="${link}">${item.korName}</a></td>
+         <td name="engName"><a href="${link}">${item.engName}</a></td>
          <td>${supplements}</td>
        `;
         tbody.appendChild(row);
     });
 }
+
+function renderBrands(list, brandMap, tableId = 'brand-body') {
+    const tbody = document.getElementById(tableId);
+    tbody.innerHTML = '';
+    brandMap.clear();
+
+    const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
+    const shown = isFolded ? list.slice(0, 5) : list;
+    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
+
+    shown.forEach(item => {
+        brandMap.set(item.id, item);
+        const row = document.createElement('tr');
+        row.dataset.id = item.id;
+
+        row.innerHTML = `
+      <td>
+        ${editMode ? `<input name="name" value="${item.name}" class="w-32"/>` : item.name}
+      </td>
+      <td>
+        ${editMode ? `<input name="country" value="${item.country}" class="w-32"/>` : item.country}
+      </td>
+      <td>${item.fei || '-'}</td>
+      <td>
+        ${editMode ? `<input type="number" name="nai" value="${item.nai ?? ''}" class="w-16"/>` : item.nai}
+      </td>
+      <td>
+        ${editMode ? `<input type="number" name="vai" value="${item.vai ?? ''}" class="w-16"/>` : item.vai}
+      </td>
+      <td>
+        ${editMode ? `<input type="number" name="oai" value="${item.oai ?? ''}" class="w-16"/>` : item.oai}
+      </td>
+      <td>${item.score.toFixed(2)}</td>
+      <td>${item.tier}</td>
+      <td>${item.memo ?? ''}</td>
+      <td>${item.createdAt?.slice(0, 10)}</td>
+      ${editMode ? `
+        <td>
+          <button class="save-btn" data-id="${item.id}">저장</button>
+        </td>
+      ` : ''}
+    `;
+        tbody.appendChild(row);
+    });
+}
+
+function renderProducts(list, productMap, tableId = 'product-body') {
+    const tbody = document.getElementById(tableId);
+    tbody.innerHTML = '';
+    productMap.clear();
+
+    const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
+    const shown = isFolded ? list.slice(0, 5) : list;
+    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
+
+    shown.forEach(item => {
+        productMap.set(item.id, item);
+        const row = document.createElement('tr');
+        row.dataset.id = item.id;
+
+        row.innerHTML = `
+      <td><img src="${item.imageUrl}" alt="${item.name}" class="w-20 h-20 object-cover rounded"/></td>
+      <td>
+        ${editMode
+            ? `<input name="name" value="${item.name}" class="w-40"/>`
+            : `<a href="${item.link}" target="_blank" class="text-blue-600 underline">${item.name}</a>`
+        }
+      </td>
+      <td>
+        ${editMode
+            ? `<input type="number" step="0.01" name="dosageValue" value="${item.dosageValue ?? ''}" class="w-20"/>
+             <select name="dosageUnit" class="w-20">
+                <option value="g" ${item.dosageUnit === 'g' ? 'selected' : ''}>g</option>
+                <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
+                <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
+                <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
+             </select>`
+            : `${item.dosageValue ?? ''}${item.dosageUnit ?? ''}`
+        }
+      </td>
+      <td>
+        ${editMode
+            ? `<input type="number" step="0.01" name="price" value="${item.price ?? ''}" class="w-24"/>`
+            : `₩${item.price?.toLocaleString() ?? '-'}`
+        }
+      </td>
+      <td>
+        ${editMode
+            ? `<input type="number" step="0.01" name="pricePerDose" value="${item.pricePerDose ?? ''}" class="w-24"/>`
+            : `₩${item.pricePerDose?.toLocaleString() ?? '-'}`
+        }
+      </td>
+      <td>${item.brandName ?? '-'}</td>
+ 
+      <td>${item.updatedAt?.slice(0, 10) ?? '-'}</td>
+      ${editMode ? `<td><button class="save-btn" data-id="${item.id}">저장</button></td>` : ''}
+    `;
+
+        tbody.appendChild(row);
+    });
+}
+
 
 export {
 renderSupplements,
@@ -318,5 +421,7 @@ renderDetails,
 renderTagDetails,
 renderButton,
 renderPages,
-    renderTagTable
+    renderTagTable,
+    renderBrands,
+    renderProducts
 };

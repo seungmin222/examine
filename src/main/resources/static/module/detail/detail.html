@@ -109,7 +109,51 @@
     <tbody id="journal-body"></tbody>
 </table>
 <h3 id="index-10">추천 제품</h3>
-<ul id="product-list" class="w-48">
-    <!--브랜드, 비용, 링크 나열-->
-</ul>
+    <div class="w-full flex justify-between items-center flex-wrap gap-2">
+        <div class="flex gap-2 items-start">
+            <form id="search-form" class="flex-row">
+                <!--wide-form-->
+                <input name="input" type="text" class="w-48" placeholder="한글명 또는 영어명으로 검색" />
+                <button type="submit">검색</button>
+            </form>
+            <button id="product-toggle-fold">접기</button>
+            <select name="typeId" id="product-list-sort">
+                <option value="name">이름순</option>
+            </select>
+        </div>
+    </div>
+    <table id="content-10">
+        <thead>
+        <tr>
+            <th>이미지</th>
+            <th>제품명</th>
+            <th>복용량</th>
+            <th>가격</th>
+            <th>복용량당 가격</th>
+            <th>브랜드</th>
+            <th>수정일</th>
+        </tr>
+        </thead>
+        <tbody id="product-body"></tbody>
+    </table>
+    <h3 id="index-11" class="text-center">제품 추가</h3>
+    <div id="content-11">
+    <form id="insert-form" class="items-start gap-2">
+        <input name="link" placeholder="링크"/>
+        <input name="name" placeholder="제품명"/>
+        <div class="flex">
+            <input name="dosageValue" type="number" step="0.01" placeholder="복용량" class="w-32" />
+            <select name="dosageUnit" class="w-16">
+                <option value="">Unknown</option>
+                <option value="g">g</option>
+                <option value="mg">mg</option>
+                <option value="ug">ug</option>
+                <option value="iu">iu</option>
+            </select>
+        </div>
+        <input name="price" type="number" placeholder="가격"/>
+        <input name="pricePerDose" type="number" placeholder="복용량당 가격"/>
+        <button type="submit">제품 추가</button>
+    </form>
+    </div>
 </div>

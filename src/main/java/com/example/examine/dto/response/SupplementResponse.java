@@ -20,7 +20,6 @@ public record SupplementResponse(
 ) {
     public static SupplementResponse fromEntity(Supplement supplement) {
         return new SupplementResponse(
-
                 supplement.getId(),
                 supplement.getKorName(),
                 supplement.getEngName(),
