@@ -1,5 +1,6 @@
 package com.example.examine.entity;
 
+import com.example.examine.entity.Tag.Brand;
 import com.example.examine.entity.User.UserProduct;
 import com.example.examine.entity.detail.SupplementDetail;
 import com.example.examine.entity.extend.EntityTime;
@@ -13,7 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "product")
+@Table(
+        name = "product",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"site_type", "site_product_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,10 +31,17 @@ public class Product extends EntityTime {
     private Long id;
 
     private String name;
-    private String link;
-    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "site_type", nullable = false, columnDefinition = "VARCHAR(50)")
+    private EnumService.ProductSiteType siteType;
+
+    @Column(name = "site_product_id", nullable = false)
+    private String siteProductId;
 
     private BigDecimal dosageValue;
+
+    @Enumerated(EnumType.STRING)
     private EnumService.DosageUnit dosageUnit;
 
     private BigDecimal price;         // 총 가격
@@ -47,11 +58,4 @@ public class Product extends EntityTime {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<UserProduct> users = new ArrayList<>();
 
-    public String getDosageUnit() {
-        return dosageUnit != null ? dosageUnit.name().toLowerCase() : null;
-    }
-
-    public void setDosageUnit(String str) {
-        this.dosageUnit = EnumService.DosageUnit.fromString(str);
-    }
 }

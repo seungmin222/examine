@@ -37,12 +37,13 @@ function renderSupplements(list,supplementMap ,tableId='supplement-body') {
       <td>${types}</td>
       <td>
       ${editMode
-            ? `<input name="dosageValue" value='${item.dosageValue ?? ''}'/>
+            ? `<input name="dosageValue" type="number" value='${item.dosageValue ?? ''}'/>
      <select name="dosageUnit" class="w-16">
         <option value="g" ${item.dosageUnit === 'g' ? 'selected' : ''}>g</option>
         <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
         <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
         <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
+        <option value="CFU" ${item.dosageUnit === 'CFU' ? 'selected' : ''}>CFU</option>
      </select>`
             : `${item.dosageValue ?? ''}${item.dosageUnit}`
         }
@@ -56,6 +57,7 @@ function renderSupplements(list,supplementMap ,tableId='supplement-body') {
        </td>
       <td>${effects}</td>
       <td>${sideEffects}</td>
+      <td>${item.time}</td>
       ${editMode ? `<td>
       <div class="flex flex-col gap-2">
       <button class="modal-btn" data-id="${item.id}">태그</button>
@@ -67,10 +69,12 @@ function renderSupplements(list,supplementMap ,tableId='supplement-body') {
     });
 }
 
-function renderJournals(list, journalMap, tableId='journal-body') {
+function renderJournals(list, journalMap, reset = false ,tableId='journal-body') {
     const tbody = document.getElementById(tableId);
-    tbody.innerHTML = '';
-    journalMap.clear();
+    if (reset) {
+        tbody.innerHTML = '';
+        journalMap.clear();
+    }
     const folded = document.getElementById('fold-toggle')?.classList.contains('folded');
     const shown = folded ? list.slice(0, 5) : list;
     const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
@@ -294,6 +298,7 @@ function renderTagTable(list, type='effect', tableId = 'tag-body') {
     tbody.innerHTML = '';
     const isFolded = document.getElementById('toggle-fold')?.classList.contains('folded');
     const shown = isFolded ? list.slice(0, 5) : list;
+    const editMode = document.getElementById('toggle-change')?.classList.contains('execute');
 
     shown.forEach(item => {
         const row = document.createElement('tr');
@@ -302,9 +307,24 @@ function renderTagTable(list, type='effect', tableId = 'tag-body') {
         const link = `/detail/tagDetail?type=${type}&id=${item.id}`;
 
         row.innerHTML = `
-         <td name="korName"><a href="${link}">${item.korName}</a></td>
-         <td name="engName"><a href="${link}">${item.engName}</a></td>
+         <td>
+      ${editMode
+            ? `<input name="korName" value="${item.korName}" class="w-32"/>`
+            : `<a href="${link}">${item.korName}</a>`
+        }
+      </td>
+      <td>
+      ${editMode
+            ? `<input name="engName" value="${item.engName}" class="w-32"/>`
+            : `<a href="${link}">${item.engName}</a>`
+        }
+      </td>
          <td>${supplements}</td>
+         ${editMode ? `<td>
+             <div class="flex flex-col gap-2">       
+                <button class="save-btn" data-id="${item.id}">저장</button>
+             </div>
+          </td>` : ''}
        `;
         tbody.appendChild(row);
     });
@@ -326,12 +346,17 @@ function renderBrands(list, brandMap, tableId = 'brand-body') {
 
         row.innerHTML = `
       <td>
-        ${editMode ? `<input name="name" value="${item.name}" class="w-32"/>` : item.name}
+        ${editMode ? `<input name="korName" value="${item.korName}" class="w-32"/>` : item.korName}
+      </td>
+      <td>
+        ${editMode ? `<input name="engName" value="${item.engName}" class="w-32"/>` : item.engName}
       </td>
       <td>
         ${editMode ? `<input name="country" value="${item.country}" class="w-32"/>` : item.country}
       </td>
-      <td>${item.fei || '-'}</td>
+       <td>
+        ${editMode ? `<input type="number" name="fei" value="${item.fei ?? ''}" class="w-16"/>` : item.fei}
+      </td>
       <td>
         ${editMode ? `<input type="number" name="nai" value="${item.nai ?? ''}" class="w-16"/>` : item.nai}
       </td>
@@ -370,11 +395,10 @@ function renderProducts(list, productMap, tableId = 'product-body') {
         row.dataset.id = item.id;
 
         row.innerHTML = `
-      <td><img src="${item.imageUrl}" alt="${item.name}" class="w-20 h-20 object-cover rounded"/></td>
       <td>
         ${editMode
             ? `<input name="name" value="${item.name}" class="w-40"/>`
-            : `<a href="${item.link}" target="_blank" class="text-blue-600 underline">${item.name}</a>`
+            : `<a href="${item.link}" target="_blank" >${item.name}</a>`
         }
       </td>
       <td>
@@ -385,6 +409,7 @@ function renderProducts(list, productMap, tableId = 'product-body') {
                 <option value="mg" ${item.dosageUnit === 'mg' ? 'selected' : ''}>mg</option>
                 <option value="ug" ${item.dosageUnit === 'ug' ? 'selected' : ''}>ug</option>
                 <option value="iu" ${item.dosageUnit === 'iu' ? 'selected' : ''}>iu</option>
+                <option value="CFU" ${item.dosageUnit === 'CFU' ? 'selected' : ''}>CFU</option>
              </select>`
             : `${item.dosageValue ?? ''}${item.dosageUnit ?? ''}`
         }
@@ -401,10 +426,19 @@ function renderProducts(list, productMap, tableId = 'product-body') {
             : `₩${item.pricePerDose?.toLocaleString() ?? '-'}`
         }
       </td>
-      <td>${item.brandName ?? '-'}</td>
+      <td>${item.brand?.korName ?? '-'}</td>
  
       <td>${item.updatedAt?.slice(0, 10) ?? '-'}</td>
-      ${editMode ? `<td><button class="save-btn" data-id="${item.id}">저장</button></td>` : ''}
+      <td>
+         ${editMode
+             ? `<button class="modal-btn" data-id="${item.id}">태그</button>
+                <button class="save-btn" data-id="${item.id}">저장</button>`
+             : `<div class="flex">
+                <input type="number" name="quantity" min="1" value="1" class="w-12"/>
+                <button class="cart-btn" data-id="${item.id}">장바구니</button>
+                </div>`
+         }
+      </td>
     `;
 
         tbody.appendChild(row);

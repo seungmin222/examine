@@ -23,5 +23,7 @@ public interface UserPageRepository extends JpaRepository<UserPage, UserPageId> 
 """)
     List<Page> findByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT up.id.userId FROM UserPage up WHERE up.id.pageId = :pageId")
+    List<Long> findUserIdsByPageId(@Param("pageId") Long pageId);
 }
 

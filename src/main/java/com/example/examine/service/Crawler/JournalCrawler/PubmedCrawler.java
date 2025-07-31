@@ -1,12 +1,15 @@
 package com.example.examine.service.Crawler.JournalCrawler;
 
-import com.example.examine.service.Crawler.DateParser.PubmedDateParser;
+import com.example.examine.service.Crawler.Parser.PubmedDateParser;
+import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -16,6 +19,8 @@ import java.util.regex.Pattern;
 
 @Component
 public class PubmedCrawler implements JournalCrawler {
+    private static final Logger log = LoggerFactory.getLogger(PubmedCrawler.class);
+
     @Override
     public JournalCrawlerMeta extract(String webUrl) throws IOException {
         Pattern p = Pattern.compile("pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d+)");
@@ -44,6 +49,10 @@ public class PubmedCrawler implements JournalCrawler {
             sb.append(abs.text()).append("\n");
         }
         String summary = sb.toString().trim();
-        return new JournalCrawlerMeta(title, null ,summary, PubmedDateParser.parse(date));
+        return new JournalCrawlerMeta(EnumService.JournalSiteType.PUBMED,
+                pId, title, null ,summary,
+                PubmedDateParser.parse(date)
+        );
     }
+
 }

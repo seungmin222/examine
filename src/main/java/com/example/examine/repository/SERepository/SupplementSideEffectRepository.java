@@ -14,10 +14,6 @@ import java.util.Optional;
 
 public interface SupplementSideEffectRepository extends JpaRepository<SupplementSideEffect, SupplementSideEffectId> {
 
-    @Modifying
-    @Query("DELETE FROM SupplementSideEffect se WHERE se.supplement.id = :supplementId")
-    void deleteBySupplementId(@Param("supplementId") Long supplementId);
-
     @Query("""
         SELECT se.supplement
         FROM SupplementSideEffect se
@@ -25,5 +21,4 @@ public interface SupplementSideEffectRepository extends JpaRepository<Supplement
     """)
     List<Supplement> findSupplementsBySideEffectId(@Param("sideEffectId") Long sideEffectId, Sort sort);
 
-    Optional<SupplementSideEffect> findBySupplementIdAndSideEffectTagId(Long supplementId, Long sideEffectTagId);
 }

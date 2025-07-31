@@ -1,12 +1,17 @@
 package com.example.examine.controller;
 
+import com.example.examine.entity.User.User;
+import com.example.examine.service.EntityService.AlarmService;
 import com.example.examine.service.Redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Duration;
 import java.util.Map;
@@ -17,7 +22,7 @@ import java.util.Map;
 public class RedisController {
 
     private final RedisService redisService;
-
+    private final AlarmService alarmService;
 
     @PostMapping("/save")
     public ResponseEntity<Map<String, String>> saveValue(
@@ -48,5 +53,11 @@ public class RedisController {
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(HttpServletRequest request, HttpServletResponse response) {
         return redisService.refresh(request, response);
+    }
+
+    @GetMapping(value = "/alarm/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribe(Authentication auth) {
+        Long userId = ((User) auth.getPrincipal()).getId();
+        return alarmService.subscribe(userId);
     }
 }

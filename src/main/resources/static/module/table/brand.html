@@ -9,10 +9,9 @@
         <input name="input" type="text" class="w-48" placeholder="한글명 또는 영어명으로 검색" />
         <button type="submit">검색</button>
       </form>
-      <div id="button-box" class="flex gap-2"></div>
       <button id="toggle-fold">접기</button>
       <select name="typeId" id="list-sort">
-        <option value="name">한글순</option>
+        <option value="korName">한글순</option>
         <option value="country">나라순</option>
       </select>
     </div>
@@ -20,7 +19,8 @@
   <table id="content-1">
     <thead>
     <tr>
-      <th>이름</th>
+      <th>한글명</th>
+      <th>영어명</th>
       <th>나라</th>
       <th>fei</th>
       <th>nai</th>
@@ -40,7 +40,8 @@
   <div>
     <h2 id="index-brand" class="text-center">브랜드 추가</h2>
     <form id="brand-insert-form" class="gap-2">
-      <input name="name" class="w-48" placeholder="브랜드명 (예: Now Foods)" required />
+      <input name="korName" class="w-48" placeholder="한글명" required />
+      <input name="engName" class="w-48" placeholder="영어명" required />
       <input name="country" class="w-48" placeholder="국가 (예: 미국)" required />
       <input name="fei" class="w-48"placeholder="FEI 코드 (선택)" />
       <input name="nai" class="w-48" placeholder="NAI 검사 수 (선택)" type="number" />

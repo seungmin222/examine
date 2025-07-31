@@ -21,7 +21,8 @@
     --z-index-tooltip-tail-border: 700;
     --z-index-modal: 400;
     --z-index-modal-content: 300;
-    --z-index-scroll: 10000;
+    --z-index-scroll: 9000;
+    --z-index-alarm: 10000;
 
     /*  */
     --color-background: white;
@@ -54,8 +55,8 @@
     --color-tooltip-border: var(--color-border);
     --color-tooltip-tail: var(--color-sidebar);
     --color-tooltip-tail-border: var(--color-border);
-    --color-header: #ff00ff;
-    --color-link: #e600e6;
+    --color-header: #c2185b;
+    --color-link: #c2185b;
     --color-link-hover: #ff1493;
     --color-menu-border: rgba(206, 212, 218, 1);
     --color-scroll-line: #777;
@@ -115,10 +116,12 @@
     --color-button: #4fc3f7; /* 스카이블루 */
     --color-button-text: white;
 
-    --color-scroll-button: rgba(77, 182, 172, 0.3); /* 청록 계열 */
-    --color-scroll-circle: rgba(17, 122, 92, 0.9);
+
+    --color-scroll-button: rgba(129, 212, 212, 0.5); /* 파랑 느낌 살짝 넣음 */
+    --color-scroll-circle: rgba(69, 152, 152, 1.0);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
+
 
     --color-border: #4fc3f7;
     --color-focus: #e1f5fe;
@@ -153,15 +156,15 @@
 
     --color-text: #2e7d32;
     --color-bold-text: #1b5e20;
-    --color-button: #81c784; /* 기존보다 밝고 부드럽게 */
+    --color-button: #03c75a; /* 기존보다 밝고 부드럽게 */
     --color-button-text: white;
 
-    --color-scroll-button: rgba(129, 212, 212, 0.5); /* 파랑 느낌 살짝 넣음 */
-    --color-scroll-circle: rgba(69, 152, 152, 1.0);
+    --color-scroll-button: rgba(77, 182, 172, 0.3); /* 청록 계열 */
+    --color-scroll-circle: rgba(17, 122, 92, 0.9);
     --color-scroll-circle-bg: var(--color-scroll-button);
     --color-arrow: var(--color-scroll-circle);
 
-    --color-border: #66bb6a;
+    --color-border: #03c75a;
     --color-focus: #e8f5e9;
     --color-focus-button: #66bb6a;
     --color-toggle-button: #388e3c;
@@ -231,7 +234,7 @@
 
 
   body {
-    background-color: var(--color-1);
+    background-color: var(--color-background);
     color: var(--color-text);
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
@@ -314,6 +317,12 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     font-family: inherit;
     box-sizing: border-box;
+
+  }
+
+  li,
+  button {
+    min-width: fit-content;
   }
 
   select {
@@ -579,6 +588,11 @@
     text-align:left;
     margin: 0 auto;
   }
+
+  p.editing {
+    border: 2px solid var(--color-border);
+  }
+
   a {
 
     text-decoration: none;      /* 밑줄 제거 */
@@ -586,7 +600,7 @@
     font-weight: bold;          /* 선택 사항: 강조 */
   }
 
-  a.note{
+  .note{
       font-size: 0.7em;           /* 작게 */
       vertical-align: super;      /* 위첨자 위치로 */
   }
@@ -610,7 +624,7 @@
      display: block;
      font-size: 1.3rem;
      font-weight: bold;
-     color: var(--color-button);
+     color: var(--color-text);
      text-decoration: none;
      white-space: nowrap;
      padding: 8px;
@@ -872,7 +886,7 @@
     width: 100%;
     height: var(--navbar-height);
     background-color: var(--color-background);
-    border-bottom: 2px solid #eee;
+    border-bottom: 1px solid var(--color-border);
     justify-content: space-between;
     align-items: center;
     padding: 0 1.5rem;
@@ -889,8 +903,7 @@
     flex-direction: column;
     gap: 1rem;
     width: fit-content;
-    min-width: var(--sidebar-min-width);
-    max-width: var(--sidebar-max-width);
+    min-width: fit-content;
     background-color: var(--color-sidebar);
     border-right: 1px solid var(--color-sidebar-border);
     overflow-y: auto;
@@ -899,6 +912,7 @@
   }
 
   aside.closed {
+    min-width: var(--sidebar-min-width);
     width: var(--sidebar-min-width);
     overflow: hidden;
   }
@@ -1035,6 +1049,30 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .alarm-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: var(--z-index-alarm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+  }
+
+  .alarm-toast {
+    background-color: var(--color-tooltip);
+    color: var(--color-text);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.3s ease;
+    pointer-events: auto;
+  }
+  .alarm-toast.hide {
+    opacity: 0;
   }
 
 }

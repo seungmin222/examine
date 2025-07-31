@@ -124,6 +124,7 @@ public class SupplementController {
         return supplementService.getProducts(id, sorting);
     }
 
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/detail/{id}/products")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {

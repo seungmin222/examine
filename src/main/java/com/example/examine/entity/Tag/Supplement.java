@@ -80,7 +80,7 @@ public class Supplement extends EntityTime implements Tag{
 
     @Override
     public void setKorName(String korName) {
-        this.korName = this.korName;
+        this.korName = korName;
     }
 
     @Override
@@ -89,8 +89,8 @@ public class Supplement extends EntityTime implements Tag{
     }
 
     @Override
-    public void setEngName(String korName) {
-        this.engName = this.engName;
+    public void setEngName(String engName) {
+        this.engName = engName;
     }
 
     @Override
@@ -100,14 +100,6 @@ public class Supplement extends EntityTime implements Tag{
 
     @Override
     public void setTier(String tier) {
-        this.tier = this.tier;
-    }
-
-    public String getDosageUnit() {
-        return dosageUnit != null ? dosageUnit.name().toLowerCase() : null;
-    }
-
-    public void setDosageUnit(String str) {
-        this.dosageUnit = EnumService.DosageUnit.fromString(str);
+        this.tier = tier;
     }
 }

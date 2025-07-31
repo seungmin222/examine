@@ -1,13 +1,13 @@
 package com.example.examine.service.similarity;
 
-import com.example.examine.service.EntityService.JournalService;
+import com.example.examine.dto.request.TextSimilarityRequest;
+import com.example.examine.entity.Tag.Tag;
+import com.example.examine.repository.TagRepository.TagRepository;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TextSimilarity {
@@ -125,5 +125,43 @@ public class TextSimilarity {
         return levScore * 0.3 + jaccardScore * 0.3 + tokenOverlapScore * 0.4;
     }
 
+    public static List<TextSimilarityRequest> findTopKSuggestions(
+            String targetText,
+            TagRepository<? extends Tag> repository,
+            String type,
+            int k,
+            double threshold
+    ) {
+
+        PriorityQueue<AbstractMap.SimpleEntry<TextSimilarityRequest, Double>> pq = new PriorityQueue<>(
+                Comparator.comparingDouble(AbstractMap.SimpleEntry::getValue)
+        );
+
+        repository.findAll().forEach(tag -> {
+            double score = TextSimilarity.combinedScore(tag.getEngName(), targetText);
+            TextSimilarityRequest req = new TextSimilarityRequest(tag.getId(), tag.getEngName(), type);
+            pqAddTopK(pq, req, score, k);
+        });
+
+        return pq.stream()
+                .filter(entry -> entry.getValue() >= threshold)
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue())) // 높은 순으로
+                .map(AbstractMap.SimpleEntry::getKey)
+                .toList();
+    }
+
+    public static void pqAddTopK(
+            PriorityQueue<AbstractMap.SimpleEntry<TextSimilarityRequest, Double>> pq,
+            TextSimilarityRequest item,
+            double score,
+            int k
+    ) {
+        if (pq.size() < k) {
+            pq.add(new AbstractMap.SimpleEntry<>(item, score));
+        } else if (pq.peek().getValue() < score) {
+            pq.poll();
+            pq.add(new AbstractMap.SimpleEntry<>(item, score));
+        }
+    }
 
 }

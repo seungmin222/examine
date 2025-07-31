@@ -1,11 +1,9 @@
 package com.example.examine.service.util;
 
-import com.example.examine.entity.Brand;
-import com.example.examine.entity.Journal;
+import com.example.examine.entity.Tag.Brand;
 import com.example.examine.entity.JournalSupplementEffect.JSE;
 import com.example.examine.entity.SupplementEffect.SE;
 import com.example.examine.entity.Tag.TrialDesign;
-import com.example.examine.service.EntityService.JournalService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

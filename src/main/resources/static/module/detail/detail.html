@@ -1,12 +1,8 @@
 <div>
 <div class="w-full flex justify-between items-center flex-wrap gap-2">
     <!--section-header-->
-    <h1 id="index-1"></h1>
+    <h1 id="index-1">성분 개요</h1>
     <p id="overview" class="editable" contenteditable="false" data-field="overview">성분 요약을 입력하세요.</p>
-    <div class="flex gap-2">
-        <div id="button-box" class="flex gap-2"></div>
-        <button id="save-button">저장</button>
-    </div>
 </div>
 <table id="content-1">
     <thead>
@@ -18,6 +14,7 @@
         <th>비용(복용량당)</th>
         <th>기대효과</th>
         <th>부작용</th>
+        <th>업데이트</th>
     </tr>
     </thead>
     <tbody id="supplement-body"></tbody>
@@ -50,13 +47,14 @@
 </div>
 
 <div class="w-full flex justify-between items-center flex-wrap gap-2">
+    <h3 id="index-7">연관 효과</h3>
     <button id="tag-toggle-fold">접기</button>
     <select name="typeId" id="tag-sort">
         <option value="korName">한글순</option>
         <option value="engName">영어순</option>
     </select>
 </div>
-<h3 id="index-7">연관 효과</h3>
+
 <table id="content-7">
     <thead>
     <tr>
@@ -81,6 +79,7 @@
 </table>
 
 <div class="w-full flex justify-between items-center flex-wrap gap-2">
+    <h3 id="index-9">연관 논문</h3>
     <button id="toggle-fold">접기</button>
     <select name="typeId" id="list-sort">
         <option value="title">제목순</option>
@@ -90,7 +89,7 @@
         <option value="score">점수순</option>
     </select>
 </div>
-<h3 id="index-9">연관 논문</h3>
+
 <table id="content-9">
     <thead>
     <tr>
@@ -108,8 +107,8 @@
     </thead>
     <tbody id="journal-body"></tbody>
 </table>
-<h3 id="index-10">추천 제품</h3>
     <div class="w-full flex justify-between items-center flex-wrap gap-2">
+        <h3 id="index-10">추천 제품</h3>
         <div class="flex gap-2 items-start">
             <form id="search-form" class="flex-row">
                 <!--wide-form-->
@@ -125,7 +124,6 @@
     <table id="content-10">
         <thead>
         <tr>
-            <th>이미지</th>
             <th>제품명</th>
             <th>복용량</th>
             <th>가격</th>
@@ -136,24 +134,46 @@
         </thead>
         <tbody id="product-body"></tbody>
     </table>
+    <div class="flex justify-between items-start mb-4 flex-wrap gap-5">
+        <div>
     <h3 id="index-11" class="text-center">제품 추가</h3>
-    <div id="content-11">
     <form id="insert-form" class="items-start gap-2">
-        <input name="link" placeholder="링크"/>
-        <input name="name" placeholder="제품명"/>
+        <input name="link" class="w-96" placeholder="링크"/>
+        <input name="name" class="w-96" placeholder="제품명"/>
         <div class="flex">
-            <input name="dosageValue" type="number" step="0.01" placeholder="복용량" class="w-32" />
-            <select name="dosageUnit" class="w-16">
+            <input name="dosageValue" type="number" step="0.01" placeholder="복용량" class="w-64" />
+            <select name="dosageUnit" class="w-32">
                 <option value="">Unknown</option>
                 <option value="g">g</option>
                 <option value="mg">mg</option>
                 <option value="ug">ug</option>
                 <option value="iu">iu</option>
+                <option value="CFU">CFU</option>
             </select>
         </div>
-        <input name="price" type="number" placeholder="가격"/>
-        <input name="pricePerDose" type="number" placeholder="복용량당 가격"/>
+        <input name="price" class="w-96" type="number" placeholder="가격"/>
+        <input name="pricePerDose" class="w-96" type="number" placeholder="복용량당 가격"/>
+        <button type="button" id="modal-open">태그 선택</button>
         <button type="submit">제품 추가</button>
     </form>
+        </div>
+        <div>
+            <h2 class="text-center">브랜드</h2>
+            <ul id="brand-list"></ul>
+        </div>
+        <div id="tag-controller"></div>
     </div>
 </div>
+
+<!-- 모달 -->
+<section id="modal" class="modal hidden">
+    <div class="modal-content">
+        <div id="modal-controller" class="flex-end"></div>
+        <div class="flex justify-between gap-5">
+            <div>
+                <h2 class="text-center">브랜드 선택</h2>
+                <div id="brand-checkboxes" class="checkbox grid grid-cols-4"></div>
+            </div>
+        </div>
+    </div>
+</section>

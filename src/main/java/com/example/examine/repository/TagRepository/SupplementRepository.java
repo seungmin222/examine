@@ -25,14 +25,14 @@ public interface SupplementRepository extends JpaRepository<Supplement, Long>, T
 
     @Query("""
     SELECT DISTINCT s FROM Supplement s
-    LEFT JOIN FETCH s.effects
+    JOIN FETCH s.effects
     WHERE s.id IN :ids
 """)
     List<Supplement> fetchEffectsByIds(@Param("ids") List<Long> ids);
 
     @Query("""
     SELECT DISTINCT s FROM Supplement s
-    LEFT JOIN FETCH s.sideEffects
+    JOIN FETCH s.sideEffects
     WHERE s.id IN :ids
 """)
     List<Supplement> fetchSideEffectsByIds(@Param("ids") List<Long> ids);

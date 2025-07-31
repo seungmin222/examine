@@ -45,6 +45,9 @@ public class User extends EntityTime implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProduct> userProducts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAlarm> userAlarms = new ArrayList<>();
+
 
     // 권한을 단순 문자열로 예시
     @Override

@@ -1,5 +1,6 @@
 package com.example.examine.entity;
 
+import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.entity.User.UserPage;
 import com.example.examine.entity.extend.EntityTime;
 import jakarta.persistence.*;
@@ -43,4 +44,11 @@ public class Page extends EntityTime {
 
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPage> userPages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplement_id", unique = true) // nullable이 기본임
+    private Supplement supplement;
 }

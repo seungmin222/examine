@@ -2,7 +2,7 @@ package com.example.examine.controller;
 
 import com.example.examine.dto.request.BrandRequest;
 import com.example.examine.dto.response.BrandResponse;
-import com.example.examine.entity.Brand;
+import com.example.examine.entity.Tag.Brand;
 import com.example.examine.service.EntityService.BrandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;

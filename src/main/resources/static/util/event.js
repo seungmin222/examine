@@ -3,7 +3,12 @@ import {
 } from '/util/utils.js';
 import{
   createTailTooltip,
+    createNewAlarm
 } from '/util/create.js';
+import {
+  createPopper
+} from 'https://unpkg.com/@popperjs/core@2/dist/esm/popper.js';
+
 
 function setupFoldToggle(buttonId, targetFn) {
   const btn = document.getElementById(buttonId);
@@ -29,40 +34,47 @@ function setupToggleButton(buttonId, loadFn = () => {}, onText='수정', offText
 
   if (!Btn) return;
 
-  Btn.addEventListener('click', e => {
+  Btn.addEventListener('click', async e => {
     Btn.classList.toggle('execute');
     Btn.textContent = Btn.classList.contains('execute') ? `${offText}` : `${onText}`;
-    loadFn();
+    await loadFn();
   });
 }
 
-function setupPairToggleButton(deleteId, changeId, loadFn = () => {}) {
-  const deleteBtn = document.getElementById(deleteId);
-  const changeBtn = document.getElementById(changeId);
+function setupPairToggleButton( loadFn = () => {},
+                                 btnId1 = 'toggle-change',
+                                 btnId2 = 'toggle-delete',
+                                 onText1 = '수정중',
+                                 offText1 = '수정',
+                                 onText2 = '삭제중',
+                                 offText2 = '삭제'
+                               ) {
+  const btn1 = document.getElementById(btnId1);
+  const btn2 = document.getElementById(btnId2);
 
-  if (!deleteBtn || !changeBtn) return;
+  if (!btn1 || !btn2) return;
 
-  deleteBtn.addEventListener('click', () => {
-    deleteBtn.classList.toggle('execute');
-    deleteBtn.textContent = deleteBtn.classList.contains('execute') ? '삭제중' : '삭제';
+  btn1.addEventListener('click', async () => {
+    const active = btn1.classList.toggle('execute');
+    btn1.textContent = active ? onText1 : offText1;
 
-    // 반대쪽은 항상 해제
-    changeBtn.classList.remove('execute');
-    changeBtn.textContent = '수정';
+    btn2.classList.remove('execute');
+    btn2.textContent = offText2;
 
-    loadFn();
+    await loadFn();
   });
 
-  changeBtn.addEventListener('click', () => {
-    changeBtn.classList.toggle('execute');
-    changeBtn.textContent = changeBtn.classList.contains('execute') ? '수정중' : '수정';
+  btn2.addEventListener('click', async () => {
+    const active = btn2.classList.toggle('execute');
+    btn2.textContent = active ? onText2 : offText2;
 
-    deleteBtn.classList.remove('execute');
-    deleteBtn.textContent = '삭제';
+    btn1.classList.remove('execute');
+    btn1.textContent = offText1;
 
-    loadFn();
+    await loadFn();
   });
 }
+
 
 
 function setupModalOpenClose(openId, closeId, modalId) {
@@ -86,7 +98,7 @@ function setupModalOpenClose(openId, closeId, modalId) {
   });
 }
 
-function setupSearchForm(api, formId, sortSelectId, targetTypes, renderFn) {
+function setupSearchForm(baseUrl, formId, sortSelectId, targetTypes, renderFn, renderField = []) {
   const form = document.getElementById(formId);
   const sortSelect = document.getElementById(sortSelectId);
 
@@ -94,22 +106,44 @@ function setupSearchForm(api, formId, sortSelectId, targetTypes, renderFn) {
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
+
     const keyword = e.target.input.value;
     const sort = sortSelect.value;
 
+    const params = new URLSearchParams({
+      keyword: keyword,
+      sort: sort,
+      direction: 'asc'
+    });
+
     if (targetTypes?.length) {
-      for (let type of targetTypes) {
-        const res = await fetch(`/api/${api}/search?keyword=${encodeURIComponent(keyword)}&type=${type}&sort=${sort}&direction=asc`);
-        const filtered = await res.json();
-        renderFn(type, filtered);
+      params.append("type", targetTypes.join(","));
+    }
+
+    const url = `${baseUrl}?${params.toString()}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error("❌ 검색 실패:", await res.text());
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      // 👉 Map 형식 (객체)
+      for (const [type, list] of Object.entries(data)) {
+        renderFn(type, list, ...renderField);
       }
     } else {
-      const res = await fetch(`/api/${api}/search?keyword=${encodeURIComponent(keyword)}&sort=${sort}&direction=asc`);
-      const filtered = await res.json();
-      renderFn(filtered);
+      // 👉 단일 리스트 (배열)
+      renderFn(data, ...renderField);
     }
+
   });
 }
+
+
 
 function resetButton(dto, resetId, sortSelectId, targetTypes, renderFn) {
   const reset = document.getElementById(resetId);
@@ -337,27 +371,35 @@ function selectChange(boxId){
     });
 }
 
-
-
-function themeSelect(selectId, iconId) {
-  const select = document.getElementById(selectId);
-  const icon = document.getElementById(iconId);
-  function applyTheme(theme) {
-      for (const c of [...document.documentElement.classList]) {
-        if (c.startsWith('theme-')) {
-          document.documentElement.classList.remove(c);
-        }
-      }
-      document.documentElement.classList.add(`theme-${theme}`);
-      icon.src = `/image/icon-${theme}.png`;
-      select.value = theme;
+function applyTheme(theme, icon) {
+  for (const c of [...document.documentElement.classList]) {
+    if (c.startsWith('theme-')) {
+      document.documentElement.classList.remove(c);
+    }
   }
-  select.addEventListener('change', e => {
-    const selected = e.target.value;
-    applyTheme(selected);
-    localStorage.setItem('selectedTheme', selected);
+  document.documentElement.classList.add(`theme-${theme}`);
+  icon.src = `/image/icon-${theme}.png`;
+}
+
+function themeSelect(ulId, iconId) {
+  const ul = document.getElementById(ulId);
+  const icon = document.getElementById(iconId);
+  if (!ul||!icon) {
+    console.warn(`❗ 테마 선택 ul 요소가 없습니다: #${ulId}`);
+    return;
+  }
+
+  ul.addEventListener('click', (e) => {
+    const li = e.target.closest('li[data-theme]');
+    if (!li || !ul.contains(li)) return;
+
+    const theme = li.dataset.theme;
+    if (theme) {
+      applyTheme(theme, icon);
+    }
   });
 }
+
 
 async function logout(buttonId){
     document.getElementById(buttonId).addEventListener('click', async () => {
@@ -398,8 +440,8 @@ async function addBookmark(buttonId, loadFn) {
       });
 
       if (res.ok) {
-        alert("북마크 추가 완료!");
-        loadFn();
+        createNewAlarm("북마크 추가 완료!");
+        await loadFn();
       } else {
         const msg = await res.text();
         alert("실패: " + msg);
@@ -412,8 +454,7 @@ async function addBookmark(buttonId, loadFn) {
 }
 
 
-  async function deleteBookmark(boxId, deleteId, loadFn) {
-    resetEventListener(boxId);
+async function deleteBookmark(boxId, deleteId, loadFn) {
     const box = document.getElementById(boxId);
     const deleteButton = document.getElementById(deleteId);
 
@@ -424,12 +465,11 @@ async function addBookmark(buttonId, loadFn) {
 
     const deleteMode = deleteButton.classList.contains('execute');
 
-    if (!deleteMode) {
-      return;
-    }
-
     box.addEventListener('click', async (e) => {
 
+      if (!deleteMode) {
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
 
@@ -451,10 +491,10 @@ async function addBookmark(buttonId, loadFn) {
         });
 
         if (res.ok) {
-          alert("북마크 삭제 완료!");
+          createNewAlarm("북마크 삭제 완료");
           // 선택적으로 DOM에서 항목 제거
           anchor.remove();
-          loadFn();
+          await loadFn();
         } else {
           const msg = await res.text();
           alert("실패: " + msg);
@@ -464,7 +504,96 @@ async function addBookmark(buttonId, loadFn) {
         alert("요청 중 오류 발생");
       }
     });
+}
+
+function updateCart(cartId = 'cart', loadFn = () => {}) {
+  const cart = document.getElementById(cartId);
+  if (!cart) return;
+
+  cart.addEventListener("input", async (e) => {
+    const target = e.target;
+    const li = target.closest("li");
+    if (!li || !li.dataset.id) return;
+
+    const productId = li.dataset.id;
+    const quantityInput = li.querySelector('[name="quantity"]');
+    const checkBox = li.querySelector('[name="isChecked"]');
+    if (!quantityInput || !checkBox) return;
+
+    // 수량 변경일 경우에만 처리
+    if (target.name === "quantity") {
+      await sendCartUpdate(productId, quantityInput.value, checkBox.checked, loadFn);
+    }
+  });
+
+  cart.addEventListener("change", async (e) => {
+    const target = e.target;
+    const li = target.closest("li");
+    if (!li || !li.dataset.id) return;
+
+    const productId = li.dataset.id;
+    const quantityInput = li.querySelector('[name="quantity"]');
+    const checkBox = li.querySelector('[name="isChecked"]');
+    if (!quantityInput || !checkBox) return;
+
+    // 체크박스 변경일 경우에만 처리
+    if (target.name === "isChecked") {
+      await sendCartUpdate(productId, quantityInput.value, checkBox.checked, loadFn);
+    }
+  });
+}
+
+
+// 실제 API 호출 함수
+async function sendCartUpdate(productId, quantity, isChecked, loadFn=()=>{}) {
+  const data = {
+    id: productId,
+    quantity,
+    isChecked
+  };
+
+  const res = await fetch("/api/user/cart", {
+    method: "PUT",
+    credentials: "include",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([data])  // 백엔드가 배열 받는 구조라면 그대로 유지
+  });
+
+  if (res.ok) {
+    console.log("✅ 장바구니 업데이트 완료", data);
+    await loadFn();
+  } else {
+    console.warn("❌ 장바구니 업데이트 실패", await res.text());
   }
+}
+
+function cartEvent(containerId='cart', loadFn = () => {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.addEventListener('click', async (e) => {
+    const target = e.target;
+    const li = target.closest('li');
+    if (!li || !target.name) return;
+
+    const cartId = li.dataset.id;
+    if (!cartId) return;
+
+    if (target.name === 'delete') {
+      const res = await fetch(`/api/user/cart/${cartId}`, {
+        method: 'DELETE' ,
+        credentials: "include"
+      });
+      if (res.ok) {
+        console.log(`🗑️ 장바구니 삭제: ${cartId}`);
+        await loadFn();
+      } else {
+        console.error(await res.text());
+      }
+    }
+  });
+}
+
 
 function sidebarToggle(sidebarId, btnId) {
   const sidebar = document.getElementById(sidebarId);
@@ -480,53 +609,6 @@ function sidebarToggle(sidebarId, btnId) {
     toggleBtn.classList.toggle('rotate-180');
   });
 }
-
-async function deleteCart(boxId, deleteId, loadFn) {
-  resetEventListener(boxId);
-  const box = document.getElementById(boxId);
-  const deleteButton = document.getElementById(deleteId);
-
-  if (!box || !deleteButton) {
-    console.warn("요소를 찾을 수 없습니다.");
-    return;
-  }
-
-  const deleteMode = deleteButton.classList.contains('execute');
-  if (!deleteMode) return;
-
-  box.addEventListener("click", async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const wrapper = e.target.closest(".product-item");
-    if (!wrapper || !wrapper.dataset.id) {
-      console.warn("상품 ID가 존재하지 않음");
-      return;
-    }
-
-    const productId = wrapper.dataset.id;
-
-    try {
-      const res = await fetch(`/api/user/cart/${productId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        alert("🗑️ 장바구니에서 삭제 완료!");
-        wrapper.remove();
-        loadFn();
-      } else {
-        const msg = await res.text();
-        alert("❌ 삭제 실패: " + msg);
-      }
-    } catch (err) {
-      console.error("요청 중 오류 발생:", err);
-      alert("🚨 네트워크 오류 발생");
-    }
-  });
-}
-
 
 function iherbCouponRefresh(buttonId = "iherb-dropdown-toggle") {
   const button = document.getElementById(buttonId);
@@ -553,6 +635,171 @@ function iherbCouponRefresh(buttonId = "iherb-dropdown-toggle") {
   });
 }
 
+function tooltipEvent(anchorId, tooltipId, position = 'top') {
+  const anchor = document.getElementById(anchorId);
+  const tooltip = document.getElementById(tooltipId);
+  if (!anchor || !tooltip) {
+    console.warn(`Anchor or tooltip not found: ${anchorId}`);
+    return;
+  }
+
+  const popperInstance = createPopper(anchor, tooltip, {
+    placement: position,
+    modifiers: [
+      {
+        name: 'preventOverflow',
+        options: {
+          boundary: 'viewport',
+        },
+      },
+    ],
+  });
+
+  let hideTimer = null;
+
+  const show = () => {
+    clearTimeout(hideTimer);
+    tooltip.classList.remove('hidden');
+    popperInstance.update();
+  };
+
+  const hide = () => {
+    hideTimer = setTimeout(() => {
+      tooltip.classList.add('hidden');
+    }, 100);
+  };
+
+  anchor.addEventListener('mouseenter', show);
+  anchor.addEventListener('mouseleave', hide);
+  tooltip.addEventListener('mouseenter', show);
+  tooltip.addEventListener('mouseleave', hide);
+}
+
+function deleteAlarm(containerId='alarm', loadFn = () => {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.addEventListener('click', async (e) => {
+    const target = e.target;
+    const li = target.closest('li');
+    if (!li || !target.name) return;
+
+    const alarmId = li.dataset.id;
+    if (!alarmId) return;
+
+    if (target.name === 'read') {
+      const res = await fetch(`/api/user/alarm/${alarmId}`, { method: 'PUT' });
+      if (res.ok) {
+        console.log(`✅ 알림 읽음 처리: ${alarmId}`);
+        await loadFn();
+      } else {
+        console.error(await res.text());
+      }
+    }
+
+    if (target.name === 'delete') {
+      const res = await fetch(`/api/user/alarm/${alarmId}`, { method: 'DELETE' });
+      if (res.ok) {
+        console.log(`🗑️ 알림 삭제: ${alarmId}`);
+        await loadFn();
+      } else {
+        console.error(await res.text());
+      }
+    }
+  });
+}
+
+function alarmEvent(containerId='alarm', loadFn = () => {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.addEventListener('click', async (e) => {
+    const target = e.target;
+    const li = target.closest('li');
+    if (!li || !target.name) return;
+
+    const alarmId = li.dataset.id;
+    if (!alarmId) return;
+
+    // if (target.name === 'read') {
+    //   const res = await fetch(`/api/user/alarm/${alarmId}`, { method: 'PUT' });
+    //   if (res.ok) {
+    //     console.log(`✅ 알림 읽음 처리: ${alarmId}`);
+    //     loadFn();
+    //   } else {
+    //     console.error(await res.text());
+    //   }
+    // }
+
+    if (target.name === 'delete') {
+      const res = await fetch(`/api/user/alarm/${alarmId}`, { method: 'DELETE' });
+      if (res.ok) {
+        console.log(`🗑️ 알림 삭제: ${alarmId}`);
+        await loadFn();
+      } else {
+        console.error(await res.text());
+      }
+    }
+  });
+}
+
+function readAllAlarm(btnId='alarm-read', loadFn = () => {}) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const res = await fetch(`/api/user/alarm/readAll`, { method: 'PUT' });
+    if (res.ok) {
+      console.log(`🗑️ 알림 전부 읽음`);
+      await loadFn();
+    } else {
+      console.error(await res.text());
+    }
+  })
+}
+
+function deleteAllAlarm(btnId='alarm-delete', loadFn = () => {}) {
+   const deleteBtn = document.getElementById(btnId);
+   if (!deleteBtn) return;
+
+   deleteBtn.addEventListener('click', async (e) => {
+     const res = await fetch(`/api/user/alarm/deleteAll`, { method: 'DELETE' });
+     if (res.ok) {
+       console.log(`🗑️ 알림 전부 삭제`);
+       await loadFn();
+     } else {
+       console.error(await res.text());
+     }
+   })
+}
+
+function receiveAlarm(checkLoginFn=()=>{}) {
+  const eventSource = new EventSource('/api/redis/alarm/subscribe');
+
+  eventSource.addEventListener("alarm", async () => {
+    await checkLoginFn();
+    createNewAlarm("새 알림이 도착했습니다.");
+  });
+
+  eventSource.onerror = (err) => {
+    console.error("🔌 SSE 연결 오류", err);
+    eventSource.close();
+  };
+}
+
+function alarmBoxEvent(boxId="alarm-container"){
+  const box = document.getElementById(boxId);
+  if (!box) {
+    console.error('알림 박스를 찾을 수 없습니다');
+    return;
+  }
+  box.addEventListener("click", (e) => {
+    const toast = e.target.closest(".alarm-toast");
+    if (toast) toast.remove();
+  });
+}
+
+
 
 export {
   setupFoldToggle,
@@ -576,7 +823,17 @@ export {
   logout,
   addBookmark,
   deleteBookmark,
+   // deleteCart,
+
   updateScrollProgress,
   sidebarToggle,
-  iherbCouponRefresh
+  iherbCouponRefresh,
+  updateCart,
+    tooltipEvent,
+    alarmEvent,
+  readAllAlarm,
+  deleteAllAlarm,
+  receiveAlarm,
+    cartEvent,
+  alarmBoxEvent,
 };

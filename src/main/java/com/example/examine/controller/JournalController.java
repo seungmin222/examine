@@ -2,6 +2,7 @@ package com.example.examine.controller;
 
 import com.example.examine.dto.request.JournalRequest;
 import com.example.examine.dto.response.JournalResponse;
+import com.example.examine.dto.response.TableResponse;
 import com.example.examine.repository.*;
 import com.example.examine.service.EntityService.JournalService;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,11 @@ public class JournalController {
         return journalService.createOne(dto);
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    @PostMapping("/batch")
-    public ResponseEntity<String> createBatch(@RequestBody List<JournalRequest> dto) {
-        return journalService.createBatch(dto);
-    }
+//    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+//    @PostMapping("/batch")
+//    public ResponseEntity<String> createBatch(@RequestBody List<JournalRequest> dto) {
+//        return journalService.createBatch(dto);
+//    }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/{id}")
@@ -38,35 +39,36 @@ public class JournalController {
     }
 
     @GetMapping
-    public List<JournalResponse> sort(@RequestParam(defaultValue = "title") String sort,
-                                @RequestParam(defaultValue = "asc") String direction) {
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return journalService.sort(sorting);
+    public TableResponse<JournalResponse> sort(@RequestParam(defaultValue = "title") String sort,
+                                @RequestParam(defaultValue = "true") Boolean asc,
+                                @RequestParam(defaultValue = "30") int limit,
+                                @RequestParam(defaultValue = "0") int offset) {
+        return journalService.sort(sort,asc,limit,offset);
     }
 
     @GetMapping("/search")
-    public List<JournalResponse> search(
-            @RequestParam String keyword,
-            @RequestParam(defaultValue = "title") String sort,
-            @RequestParam(defaultValue = "asc") String direction
-    ) {
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return journalService.search(keyword, sorting);
+    public TableResponse<JournalResponse> search(@RequestParam String keyword,
+                                      @RequestParam(defaultValue = "title") String sort,
+                                      @RequestParam(defaultValue = "true") Boolean asc,
+                                      @RequestParam(defaultValue = "30") int limit,
+                                      @RequestParam(defaultValue = "0") int offset) {
+        return journalService.search(keyword, sort, asc, limit, offset);
     }
 
     @GetMapping("/filter")
-    public List<JournalResponse> filterByTagIds(
+    public TableResponse<JournalResponse> filterByTagIds(
             @RequestParam(required = false) List<Long> trialDesign,
-            @RequestParam(required = false) Integer blind,
-            @RequestParam(required = false) Boolean parallel,
+            @RequestParam(required = false) List<Integer> blind,
+            @RequestParam(required = false) List<Boolean> parallel,
             @RequestParam(required = false) List<Long> supplementIds,
             @RequestParam(required = false) List<Long> effectIds,
             @RequestParam(required = false) List<Long> sideEffectIds,
             @RequestParam(defaultValue = "title") String sort,
-            @RequestParam(defaultValue = "asc") String direction
+            @RequestParam(defaultValue = "true") Boolean asc,
+            @RequestParam(defaultValue = "30") int limit,
+            @RequestParam(defaultValue = "0") int offset
     ) {
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return journalService.findFiltered(trialDesign, blind, parallel , supplementIds, effectIds, sideEffectIds, sorting);
+        return journalService.findFiltered(trialDesign, blind, parallel, supplementIds, effectIds, sideEffectIds, sort, asc, limit, offset);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

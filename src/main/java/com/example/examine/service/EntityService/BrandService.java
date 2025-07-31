@@ -3,8 +3,8 @@ package com.example.examine.service.EntityService;
 import com.example.examine.dto.request.BrandRequest;
 import com.example.examine.dto.response.BrandResponse;
 import com.example.examine.dto.response.Crawler.FdaResponse;
-import com.example.examine.entity.Brand;
-import com.example.examine.repository.BrandRepository;
+import com.example.examine.entity.Tag.Brand;
+import com.example.examine.repository.TagRepository.BrandRepository;
 import com.example.examine.service.Crawler.BrandCrawler.FdaCrawler;
 import com.example.examine.service.util.CalculateScore;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.List;
 public class BrandService {
 
     private static final Logger log = LoggerFactory.getLogger(BrandService.class);
-    private final BrandRepository brandRepository;
+    private final BrandRepository brandRepo;
 
     public Brand create(BrandRequest request) {
         String fei = request.fei();
@@ -30,7 +30,7 @@ public class BrandService {
         Integer oai = request.oai();
 
         if (fei == null) {
-           fei = FdaCrawler.fetchFeiByBrandName(request.name());
+           fei = FdaCrawler.fetchFeiByBrandName(request.engName());
         }
         if (nai==null || vai==null || oai==null){
            FdaResponse fdaResponse = FdaCrawler.fetchStatsByFei(fei);
@@ -42,7 +42,8 @@ public class BrandService {
         }
 
         Brand brand = Brand.builder()
-                .name(request.name())
+                .korName(request.korName())
+                .engName(request.engName())
                 .country(request.country())
                 .fei(fei)
                 .nai(nai != null ? nai : 0)
@@ -56,13 +57,14 @@ public class BrandService {
         brand.setScore(score);
         brand.setTier(tier);
 
-        return brandRepository.save(brand);
+        return brandRepo.save(brand);
     }
 
     public Brand update(Long id, BrandRequest request) {
-        Brand brand = brandRepository.findById(id).orElseThrow();
+        Brand brand = brandRepo.findById(id).orElseThrow();
 
-        brand.setName(request.name());
+        brand.setKorName(request.korName());
+        brand.setEngName(request.engName());
         brand.setCountry(request.country());
         brand.setFei(request.fei());
         brand.setNai(request.nai() != null ? request.nai() : 0);
@@ -73,12 +75,13 @@ public class BrandService {
         brand.setScore(score);
         brand.setTier(CalculateScore.calculateBrandTier(score));
 
+        brandRepo.save(brand);
         return brand;
     }
 
     @Transactional(readOnly = true)
     public List<BrandResponse> findAllSorted(Sort sort) {
-        return brandRepository.findAll(sort)
+        return brandRepo.findAll(sort)
                 .stream()
                 .map(BrandResponse::fromEntity)
                 .toList();
@@ -86,13 +89,13 @@ public class BrandService {
 
     @Transactional(readOnly = true)
     public List<BrandResponse> searchByKeyword(String keyword, Sort sort) {
-        return brandRepository.findByNameContainingIgnoreCase(keyword, sort)
+        return brandRepo.findByKeyword(keyword, sort)
                 .stream()
                 .map(BrandResponse::fromEntity)
                 .toList();
     }
 
     public void delete(Long id) {
-        brandRepository.deleteById(id);
+        brandRepo.deleteById(id);
     }
 }

@@ -4,6 +4,7 @@ import com.example.examine.controller.DetailController;
 import com.example.examine.dto.request.TagDetailRequest;
 import com.example.examine.dto.request.TagRequest;
 import com.example.examine.dto.response.*;
+import com.example.examine.entity.Page;
 import com.example.examine.entity.Tag.Effect.EffectTag;
 import com.example.examine.entity.Tag.Effect.SideEffectTag;
 import com.example.examine.entity.Tag.Tag;
@@ -18,6 +19,7 @@ import com.example.examine.repository.Detailrepository.SideEffectDetailRepositor
 import com.example.examine.repository.Detailrepository.TypeDetailRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementEffectRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementSideEffectRepository;
+import com.example.examine.repository.PageRepository;
 import com.example.examine.repository.SERepository.SupplementEffectRepository;
 import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
 import com.example.examine.repository.TagRepository.*;
@@ -45,6 +47,8 @@ public class TagService {
     private final EffectDetailRepository effectDetailRepo;
     private final SideEffectDetailRepository sideEffectDetailRepo;
     private final TypeDetailRepository typeDetailRepo;
+    private final BrandRepository brandRepo;
+    private final PageRepository pageRepo;
     private final SupplementEffectRepository supplementEffectRepo;
     private final SupplementSideEffectRepository supplementSideEffectRepo;
     private final JournalSupplementEffectRepository jseRepo;
@@ -61,6 +65,7 @@ public class TagService {
         tagRepoMap.put("sideEffect", sideEffectRepo);
         tagRepoMap.put("trialDesign", trialDesignRepo);
         tagRepoMap.put("supplement", supplementRepo);
+        tagRepoMap.put("brand", brandRepo);
     }
 
 
@@ -99,7 +104,29 @@ public class TagService {
 
             detailRepo.save(tagDetail);
 
+        String link = "/detail/tagDetail?id="  + tag.getId().toString();
+        Page page = Page.builder()
+                .link(link)
+                .title(tag.getKorName())
+                .level(0)
+                .viewCount(0L)
+                .bookmarkCount(0L)
+                .build();
+        pageRepo.save(page);
+
         return ResponseEntity.ok().build();
+    }
+
+    public <T extends Tag> ResponseEntity<String> update(Long id, TagRequest dto) {
+        @SuppressWarnings("unchecked")
+        TagRepository<T> repo = (TagRepository<T>) tagRepoMap.get(dto.type());
+
+        T tag = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 태그를 찾을 수 없습니다."));
+        tag.setKorName(dto.korName());
+        tag.setEngName(dto.engName());
+
+        repo.save(tag); // 이제 제네릭 타입 일치
+        return ResponseEntity.ok("태그 수정 완료");
     }
 
 
@@ -242,10 +269,10 @@ public class TagService {
         };
     }
 
-    public List<JournalResponse> getJournals(String type, Long id , Sort sort){
+    public List<JournalResponse> getJournals(String type, Long id){
         return switch (type) {
-            case "effect" -> journalService.toJournalResponses(jseRepo.findJournalsByEffectId(id),sort);
-            case "sideEffect" -> journalService.toJournalResponses(jsseRepo.findJournalsByEffectId(id),sort);
+            case "effect" -> journalService.toJournalResponses(jseRepo.findJournalsByEffectId(id));
+            case "sideEffect" -> journalService.toJournalResponses(jsseRepo.findJournalsByEffectId(id));
             default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
         };
     }

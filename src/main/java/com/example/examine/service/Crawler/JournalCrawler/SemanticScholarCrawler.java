@@ -5,7 +5,8 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.example.examine.service.Crawler.DateParser.ClinicalTrialsDateParser;
+import com.example.examine.service.Crawler.Parser.ClinicalTrialsDateParser;
+import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -42,6 +43,9 @@ public class SemanticScholarCrawler implements JournalCrawler {
         System.out.println("Abstract: " + summary);
         System.out.println("Citations: " + citationCount);
 
-        return new JournalCrawlerMeta(title, citationCount ,summary, ClinicalTrialsDateParser.parse(date));
+        return new JournalCrawlerMeta(EnumService.JournalSiteType.SEMANTIC_SCHOLAR,
+                paperId, title, citationCount ,summary,
+                ClinicalTrialsDateParser.parse(date)
+        );
     }                                                         //"yyyy-mm-dd" 형식
 }

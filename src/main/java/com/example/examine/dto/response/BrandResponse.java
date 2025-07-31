@@ -1,11 +1,12 @@
 package com.example.examine.dto.response;
 
-import com.example.examine.entity.Brand;
+import com.example.examine.entity.Tag.Brand;
 import java.time.LocalDateTime;
 
 public record BrandResponse(
         Long id,
-        String name,
+        String korName,
+        String engName,
         String country,
         String fei,
         int nai,
@@ -18,7 +19,8 @@ public record BrandResponse(
     public static BrandResponse fromEntity(Brand brand) {
         return new BrandResponse(
                 brand.getId(),
-                brand.getName(),
+                brand.getKorName(),
+                brand.getEngName(),
                 brand.getCountry(),
                 brand.getFei(),
                 brand.getNai(),

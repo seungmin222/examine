@@ -1,4 +1,4 @@
-package com.example.examine.service.Crawler.DateParser;
+package com.example.examine.service.Crawler.Parser;
 
 import java.time.LocalDate;
 import java.time.YearMonth;

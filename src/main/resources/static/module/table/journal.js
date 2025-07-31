@@ -1,9 +1,5 @@
 import {
     ArrayCheckboxesByName,
-    renderEffectCache
-} from '/util/utils.js';
-
-import {
     setupFoldToggle,
     setupSortTrigger,
     setupToggleButton,
@@ -12,24 +8,27 @@ import {
     selectList,
     onlyOneCheckboxes,
     selectChange,
-} from '/util/event.js';
-
-import {
     renderJournals,
     renderTags,
-    renderModal
-} from '/util/render.js';
+    renderModal,
+    loadButton,
+    journalEvent,
+    createEffectCache,
+    createNewAlarm,
+    createParam,
+    receiveData,
+    insertData,
+    showLoadBtn
+} from '/util/index.js';
 
-import {
-    loadButton
-} from '/util/load.js';
-
-import {
-    journalEvent
-} from '/util/tableEvent.js';
 
 // 전역 맵
 const journalMap = new Map();
+const state = { offset: 0, limit: 1, method: "sort", keyword: '' };
+const tagState = { offset: 0, limit: 1, method: "sort", keyword: '' };
+const modalState = { offset: 0, limit: 1, method: "sort", keyword: '' };
+
+let globalParam = new URLSearchParams();
 
 // 초기 로딩
 export async function init() {
@@ -50,16 +49,49 @@ export async function init() {
     document.getElementById('modal-reset').addEventListener('click', e => {
         const itemId = parseInt(document.getElementById('modal-btn').dataset.id);
         const item = journalMap.get(itemId);
-        if (item) renderEffectCache(item);
+        if (item) createEffectCache(item);
     });
 
     document.getElementById('modal-delete').addEventListener('click', e => {
         loadTags();
     });
 
-    setupSearchForm("tags", "tag-search-form", "tag-sort", ["supplement", "effect", "sideEffect"], renderTags);
-    setupSearchForm("tags", "modal-search-form", "modal-sort", ["supplement", "effect", "sideEffect"], renderModal);
-    setupSearchForm("journals", "search-form", "list-sort", null, renderJournals);
+    document.getElementById('search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+
+        state.offset = 0;
+        state.method = 'search';
+        state.keyword = form.input.value;
+
+        globalParam = createParam("list-sort", true, state.offset, state.limit);
+        globalParam.append('keyword', state.keyword);
+
+        const data = await receiveData("/api/journals/search", globalParam);
+        showLoadBtn(data.hasMore);
+        insertData(data.data, renderJournals, [journalMap, true]);
+    });
+
+
+    document.getElementById('tag-search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const param = createParam("tag-sort", true, tagState.offset, tagState.limit);
+        param.append('keyword',form.input.value);
+        const data = await receiveData("/api/tags", param);
+        showLoadBtn(data.hasMore);
+        insertData(data, renderTags, []);
+    });
+
+    document.getElementById('modal-search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const param = createParam("modal-sort", true, modalState.offset, modalState.limit);
+        param.append('keyword',form.input.value);
+        const data = await receiveData("/api/tags", param);
+        insertData(data, renderTags, []);
+    });
+
 
     selectList(["trialDesign", "blind", "parallel", "supplement", "effect", "sideEffect"], filterByTag);
     selectChange('journal-body');
@@ -67,37 +99,27 @@ export async function init() {
 }
 
 async function loadJournals() {
-    const sort = document.getElementById('list-sort')?.value;
-    let dir = 'desc';
-    if (sort === 'title'){
-        dir = 'asc';
-    }
-    const res = await fetch(`/api/journals?sort=${sort}&direction=${dir}`);
-    const allJournals = await res.json();
-    renderJournals(allJournals, journalMap);
+    state.offset = 0;
+    state.method = 'sort';
 
+    globalParam = createParam('list-sort', true, state.offset, state.limit);
+
+    const data = await receiveData("/api/journals", globalParam);
+    showLoadBtn(data.hasMore);
+    insertData(data.data, renderJournals, [journalMap, true]);
 }
+
 
 
 // 태그 로딩
 async function loadTags() {
-    const sort = document.getElementById('tag-sort')?.value;
-    const allTypes = ['effect', 'sideEffect', 'supplement', 'trialDesign'];
-    const query = new URLSearchParams({
-        type: allTypes.join(','), // 👉
-        sort: sort,
-        direction: 'asc'
-    }).toString();
 
-    const res = await fetch(`/api/tags?${query}`);
-    const tagMap = await res.json();
+    const param = createParam('tag-sort', true, tagState.offset, tagState.limit);
+    param.append('type',['effect','sideEffect', 'supplement', 'trialDesign']);
+    const data = await receiveData("/api/tags", param);
+    insertData(data, renderTags);
+    insertData(data, renderModal);
 
-    for (const [type, list] of Object.entries(tagMap)) {
-        renderTags(type, list);
-        if(type !== 'trialDesign'){
-            renderModal(type, list);
-        }
-    }
     onlyOneCheckboxes(['supplement']);
     onlyOneCheckboxes(['effect', 'sideEffect']);
     document.getElementById('mapping-cash').innerHTML = '';
@@ -105,34 +127,49 @@ async function loadTags() {
 
 // 태그 필터링
 async function filterByTag() {
+    const limit = state.offset; //기존 랜더링 된 것들 중 필터링
+    state.offset = 0;
+    state.method = 'filter';
+
+    globalParam = createParam('list-sort', true, state.offset, limit);
+
     const selected = Array.from(document.querySelectorAll('li[data-type].selected'));
-    const sort = document.getElementById('list-sort')?.value;
+    if (selected.length === 0) return await loadJournals();
 
-    if (selected.length === 0) {
-        loadJournals();
-    } else {
-        const trialDesign = selected.filter(e => e.dataset.type === 'trialDesign').map(e => e.dataset.id);
-        const blind = selected.filter(e => e.dataset.type === 'blind').map(e => e.dataset.id);
-        const parallel = selected.filter(e => e.dataset.type === 'parallel').map(e => e.dataset.id);
-        const supplementIds = selected.filter(e => e.dataset.type === 'supplement').map(e => e.dataset.id);
-        const effectIds = selected.filter(e => e.dataset.type === 'effect').map(e => e.dataset.id);
-        const sideEffectIds = selected.filter(e => e.dataset.type === 'sideEffect').map(e => e.dataset.id);
-        const params = new URLSearchParams();
-
-        trialDesign.forEach(id => params.append('trialDesign', id));
-        blind.forEach(id => params.append('blind', id));
-        parallel.forEach(id => params.append('parallel', id));
-        supplementIds.forEach(id => params.append('supplementIds', id));
-        effectIds.forEach(id => params.append('effectIds', id));
-        sideEffectIds.forEach(id => params.append('sideEffectIds', id));
-
-        const res = await fetch(`/api/journals/filter?${params.toString()}&sort=${sort}&direction=asc`);
-        const filtered = await res.json();
-
-        renderJournals(filtered, journalMap);
-
+    // 항목별 param 설정
+    const getIds = type => selected.filter(e => e.dataset.type === type).map(e => e.dataset.id);
+    for (const [key, type] of [
+        ['trialDesign', 'trialDesign'],
+        ['blind', 'blind'],
+        ['parallel', 'parallel'],
+        ['supplementIds', 'supplement'],
+        ['effectIds', 'effect'],
+        ['sideEffectIds', 'sideEffect'],
+    ]) {
+        getIds(type).forEach(id => globalParam.append(key, id));
     }
+
+    const data = await receiveData("/api/journals/filter", globalParam);
+    showLoadBtn(data.hasMore);
+    insertData(data.data, renderJournals, [journalMap, true]);
 }
+
+
+document.getElementById('load-more').addEventListener('click', async (e) => {
+    state.offset += state.limit;
+    globalParam.set('offset', state.offset);
+
+    const endpoint = {
+        sort: "/api/journals",
+        search: "/api/journals/search",
+        filter: "/api/journals/filter"
+    }[state.method];
+
+    const data = await receiveData(endpoint, globalParam);
+    showLoadBtn(data.hasMore);
+    insertData(data.data, renderJournals, [journalMap, false]);
+
+});
 
 document.getElementById('cash-insert')?.addEventListener('click', async e => {
     e.preventDefault();
@@ -274,12 +311,12 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
     });
 
     const text = await res.text();
-    console.error("응답 본문", text);
+    console.log("응답 본문", text);
 
     if (res.ok) {
-        alert("논문이 추가되었습니다.");
+        createNewAlarm("논문이 추가되었습니다.");
         form.reset();
-        loadJournals();
+        await loadJournals();
     } else {
         alert("추가 실패");
     }

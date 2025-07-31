@@ -1,6 +1,7 @@
 package com.example.examine.dto.response;
 
 import com.example.examine.entity.Product;
+import com.example.examine.service.util.EnumService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,29 +10,28 @@ public record ProductResponse(
         Long id,
         String name,
         String link,
-        String imageUrl,
+        String siteType,
         BigDecimal dosageValue,
         String dosageUnit,
         BigDecimal price,
         BigDecimal pricePerDose,
-        Long brandId,
-        String brandName,
+        TagResponse brand,
         Long supplementId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
     public static ProductResponse fromEntity(Product p) {
+        EnumService.ProductSiteType siteType = p.getSiteType();
         return new ProductResponse(
                 p.getId(),
                 p.getName(),
-                p.getLink(),
-                p.getImageUrl(),
+                siteType.buildUrl(p.getSiteProductId()),
+                siteType.toString(),
                 p.getDosageValue(),
-                p.getDosageUnit(),
+                p.getDosageUnit().toString(),
                 p.getPrice(),
                 p.getPricePerDose(),
-                p.getBrand() != null ? p.getBrand().getId() : null,
-                p.getBrand() != null ? p.getBrand().getName() : null,
+                TagResponse.fromEntity(p.getBrand()),
                 p.getSupplementDetail() != null ? p.getSupplementDetail().getSupplementId() : null,
                 p.getCreatedAt(),
                 p.getUpdatedAt()

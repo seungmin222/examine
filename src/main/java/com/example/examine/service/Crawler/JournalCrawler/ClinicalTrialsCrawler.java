@@ -1,6 +1,7 @@
 package com.example.examine.service.Crawler.JournalCrawler;
 
-import com.example.examine.service.Crawler.DateParser.ClinicalTrialsDateParser;
+import com.example.examine.service.Crawler.Parser.ClinicalTrialsDateParser;
+import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,9 @@ public class ClinicalTrialsCrawler implements JournalCrawler {
         Pattern p = Pattern.compile("NCT\\d+");
         Matcher m = p.matcher(webUrl);
         String apiUrl = "https://clinicaltrials.gov/api/v2/studies/";
+        String nctId = "";
         if (m.find()) {
-            String nctId = m.group();
+            nctId = m.group();
             apiUrl += nctId;
         }
         ObjectMapper mapper = new ObjectMapper();
@@ -31,7 +33,10 @@ public class ClinicalTrialsCrawler implements JournalCrawler {
         System.out.println(title);
         System.out.println(summary);
         System.out.println(date);
-        return new JournalCrawlerMeta(title, participants, summary, ClinicalTrialsDateParser.parse(date));
+        return new JournalCrawlerMeta(EnumService.JournalSiteType.CLINICAL_TRIALS,
+                nctId, title, participants, summary,
+                ClinicalTrialsDateParser.parse(date)
+        );
     }
 
 }

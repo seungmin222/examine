@@ -1,20 +1,14 @@
 import {
     loadBasic,
-    renderIndex
-} from '/util/load.js';
-
-import {
+    renderIndex,
     journalEvent,
-    supplementEvent
-} from '/util/tableEvent.js';
-
-
-import {
+    supplementEvent,
     renderSupplements,
     renderJournals,
     renderTagDetails,
     renderButton
-} from '/util/render.js';
+} from '/util/index.js';
+
 
 const journalMap = new Map();
 const supplementMap = new Map();

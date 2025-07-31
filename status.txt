@@ -105,3 +105,21 @@ dto 만들때 jpql로 직접 dto까지 만들지, 중간에 서비스로 조립�
 
 영속성 컨텍스트 , save, add 매핑 고려
 중첩 복합키 구조이므로 안정성 챙기려면 save 필요 add는 ㄴㄴ JPA @MapsId 복잡성 회피
+
+기존엔 논문을 단순링크로 저장했지만 추후 주소, api 바뀌는거 고려해서 사이트 자체 id, 사이트 유형으로 구분
+
+딥링크나 api 등으로 장바구니 직접 추가는 안됨
+
+알람을 보낼때 유저가 많으면 시간에 오차 생길 수 있음.
+
+ @Query("SELECT up.user.id FROM UserPage up WHERE up.page.id = :pageId")
+    List<Long> findUserIdsByPageId(@Param("pageId") Long pageId);
+
+@Query("SELECT up.id.userId FROM UserPage up WHERE up.id.pageId = :pageId")
+    List<Long> findUserIdsByPageId(@Param("pageId") Long pageId);
+
+    조인 깊이 낮춤
+
+    기본적으로 jpql 사용하되 부분적으로 native query 사용
+
+    jpql내의 native query, queryDSL, mybatis 등 주

@@ -19,7 +19,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "journal")
+@Table(
+        name = "journal",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"site_type", "site_journal_id"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,8 +37,12 @@ public class Journal extends EntityTime {
 
     private String title;
 
-    @Column(unique = true)
-    private String link;
+    @Enumerated(EnumType.STRING) // ✅ enum 이름 그대로 저장
+    @Column(name = "site_type", nullable = false, columnDefinition = "VARCHAR(50)")
+    private EnumService.JournalSiteType siteType;
+
+    @Column(name = "site_journal_id", nullable = false)
+    private String siteJournalId;
 
     @Column(nullable = true)
     private String summary;
@@ -88,13 +95,4 @@ public class Journal extends EntityTime {
     public void setScore() {
         this.score = CalculateScore.calculateJournalScore(participants,durationDays,trialDesign,blind);
     }
-
-    public String getDurationUnit() {
-        return durationUnit != null ? durationUnit.name().toLowerCase() : null;
-    }
-
-    public void setDurationUnit(String str) {
-        this.durationUnit = EnumService.DurationUnit.fromString(str);
-    }
-
 }

@@ -67,7 +67,7 @@ public class PageController {
 
     // ❌ 페이지 삭제
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{pageId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         pageService.delete(id);
         return ResponseEntity.ok("페이지 삭제 완료");

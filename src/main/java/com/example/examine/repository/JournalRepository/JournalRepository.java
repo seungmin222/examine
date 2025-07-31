@@ -1,23 +1,15 @@
-package com.example.examine.repository;
+package com.example.examine.repository.JournalRepository;
 
 import com.example.examine.entity.Journal;
+import com.example.examine.service.util.EnumService;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 public interface JournalRepository extends JpaRepository<Journal, Long> {
-
-    Optional<Journal> findByLink(String Link);
-    @Query("""
-    SELECT j.id FROM Journal j
-    WHERE LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-""")
-    List<Long> findIdsByKeyword(@Param("keyword") String keyword);
 
     @Query("""
 SELECT DISTINCT j.id FROM Journal j
@@ -32,7 +24,6 @@ WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)
             @Param("parallel") Boolean parallel
     );
 
-
     @Query("""
     SELECT j.id FROM Journal j
 """)
@@ -40,7 +31,7 @@ WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)
 
     @Query("""
     SELECT j FROM Journal j
-    join fetch j.trialDesign
+    LEFT JOIN FETCH j.trialDesign
     where j.id IN :ids
 """)
     List<Journal> fetchTrialDesignByIds(@Param("ids") List<Long> ids, Sort sort);
@@ -59,7 +50,5 @@ WHERE (:trialDesign IS NULL OR t.id IN :trialDesign)
 """)
     List<Journal> fetchSideEffectsByIds(@Param("ids") List<Long> ids);
 
-
-
-    List<Journal> findAllByLinkIn(Set<String> links);
+    boolean existsBySiteTypeAndSiteJournalId(EnumService.JournalSiteType siteType, String siteJournalId);
 }

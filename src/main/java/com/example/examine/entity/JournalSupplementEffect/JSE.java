@@ -7,7 +7,7 @@ import com.example.examine.entity.Tag.Supplement;
 
 import java.math.BigDecimal;
 
-public interface JSE {
+public interface JSE<I extends JSEId> {
 
     JSEId getId();
     void setId(JSEId id);

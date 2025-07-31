@@ -1,6 +1,7 @@
 package com.example.examine.dto.response;
 
 import com.example.examine.entity.Tag.Supplement;
+import com.example.examine.service.util.TimeService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,7 +17,8 @@ public record SupplementResponse(
         BigDecimal cost,
         List<TagResponse> types,
         List<SEResponse> effects,
-        List<SEResponse> sideEffects
+        List<SEResponse> sideEffects,
+        String time
 ) {
     public static SupplementResponse fromEntity(Supplement supplement) {
         return new SupplementResponse(
@@ -24,7 +26,7 @@ public record SupplementResponse(
                 supplement.getKorName(),
                 supplement.getEngName(),
                 supplement.getDosageValue(),
-                supplement.getDosageUnit(),
+                supplement.getDosageUnit().toString(),
                 supplement.getCost(),
                 supplement.getTypes().stream()
                         .map(TagResponse::fromEntity)
@@ -38,7 +40,8 @@ public record SupplementResponse(
                         .map(SEResponse::fromEntity)
                         .sorted(Comparator.comparing(SEResponse::finalScore).reversed())
                         .limit(5)
-                        .toList()
+                        .toList(),
+                TimeService.relativeTime(supplement.getUpdatedAt())
         );
     }
 }

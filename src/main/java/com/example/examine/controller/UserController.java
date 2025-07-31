@@ -1,7 +1,9 @@
 package com.example.examine.controller;
 
+import com.example.examine.dto.request.UserProductRequest;
 import com.example.examine.dto.request.UserRequest;
-import com.example.examine.dto.response.UserResponse;
+import com.example.examine.dto.response.UserResponse.UserResponse;
+import com.example.examine.service.EntityService.AlarmService;
 import com.example.examine.service.EntityService.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +13,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+    private final AlarmService alarmService;
 
     @PostMapping("/register")
     public ResponseEntity<String> create(@Valid @RequestBody UserRequest request, BindingResult result) {
@@ -78,6 +83,15 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PutMapping("/cart")
+    public ResponseEntity<String> updateCart(
+            @RequestBody List<UserProductRequest> carts,
+            Authentication authentication
+    ) {
+        return userService.updateCart(authentication, carts);
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/bookmark/{id}")
     public ResponseEntity<String> deleteBookmark(Authentication authentication, @PathVariable Long id) {
         userService.deleteBookmark(authentication, id);
@@ -91,4 +105,30 @@ public class UserController {
     ) {
         return userService.removeCart(authentication, productId);
     }
+
+
+    @PutMapping("/alarm/{alarmId}")
+    public ResponseEntity<String> readAlarm(@PathVariable Long alarmId, Authentication authentication) {
+        alarmService.readAlarm(alarmId, authentication);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/alarm/readAll")
+    public ResponseEntity<String> readALLAlarm(Authentication authentication) {
+        alarmService.readAllAlarm(authentication);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/alarm/{alarmId}")
+    public ResponseEntity<String> deleteAlarm(@PathVariable Long alarmId, Authentication authentication) {
+        alarmService.deleteAlarm(alarmId, authentication);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/alarm/deleteAll")
+    public ResponseEntity<String> deleteAllAlarm(Authentication authentication) {
+        alarmService.deleteAllAlarm(authentication);
+        return ResponseEntity.ok().build();
+    }
+
 }

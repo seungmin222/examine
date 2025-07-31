@@ -1,32 +1,28 @@
 import {
-    ArrayCheckboxesById
-} from '/util/utils.js';
-
-import {
+    ArrayCheckboxesById,
     setupFoldToggle,
     setupSortTrigger,
     setupToggleButton,
     setupModalOpenClose,
     setupSearchForm,
     resetButton,
-    selectList
-} from '/util/event.js';
-
-import {
+    selectList,
     renderSupplements,
     renderTags,
-    renderModal
-} from '/util/render.js';
+    renderModal,
+    loadButton,
+    supplementEvent,
+    createNewAlarm,
+    createParam,
+    receiveData,
+    insertData
+} from '/util/index.js';
 
-import {
-    loadButton
-} from '/util/load.js';
-
-import {
-    supplementEvent
-} from '/util/tableEvent.js';
 
 const supplementMap = new Map();
+const state = { offset: 0, limit: 15 };
+const tagState = { offset: 0, limit: 15 };
+const modalState = { offset: 0, limit: 15 };
 
 // 초기 로딩
 export async function init() {
@@ -51,7 +47,7 @@ export async function init() {
 
     // 모달 열고 닫기
     setupModalOpenClose('modal-open', 'modal-close', 'modal');
-    resetButton("tags", "modal-reset", "modal-sort", ["type", "effect", "sideEffect"], renderModal);
+    resetButton("tags", "modal-reset", "modal-sort", ["type"], renderModal);
 
     // 모달 체크 해제
     document.getElementById('modal-delete').addEventListener('click', e => {
@@ -59,65 +55,74 @@ export async function init() {
     });
 
     //검색 폼
-    setupSearchForm("tags", "tag-search-form", "tag-sort", ["type", "effect", "sideEffect"], renderTags);
-    setupSearchForm("tags", "modal-search-form", "modal-sort", ["type", "effect", "sideEffect"], renderModal);
-    setupSearchForm("supplements", "search-form", "list-sort", null, renderSupplements);
+    document.getElementById('search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const param = createParam("list-sort", true, state.offset, state.limit);
+        param.append('keyword',form.input.value);
+        const data = await receiveData("/api/supplements/search", param);
+        insertData(data, renderSupplements, [supplementMap]);
+    });
+
+    document.getElementById('tag-search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const param = createParam("tag-sort", true, tagState.offset, tagState.limit);
+        param.append('keyword',form.input.value);
+        const data = await receiveData("/api/tags", param);
+        insertData(data, renderTags, []);
+    });
+
+    document.getElementById('modal-search-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const param = createParam("modal-sort", true, modalState.offset, modalState.limit);
+        param.append('keyword',form.input.value);
+        const data = await receiveData("/api/tags", param);
+        insertData(data, renderTags, []);
+    });
 
     selectList(["type", "effect", "sideEffect", "tier"],filterByTag);
 }
 
 
 async function loadSupplements() {
-    const sort = document.getElementById('list-sort').value;
-    const res = await fetch(`/api/supplements?sort=${sort}&direction=asc`);
-    const allSupplements = await res.json();
-    renderSupplements(allSupplements,supplementMap);
+    const param = createParam('list-sort', true, state.offset, state.limit);
+    const data = await receiveData("/api/supplements", param);
+    insertData(data, renderSupplements, [supplementMap]);
 }
 
 
 // 태그 로딩
 async function loadTags() {
-    const sort = document.getElementById('tag-sort').value;
-    const allTypes = ['type', 'effect', 'sideEffect'];
-
-    const query = new URLSearchParams({
-        type: allTypes.join(','), //
-        sort: sort,
-        direction: 'asc'
-    }).toString();
-
-    const res = await fetch(`/api/tags?${query}`);
-    const tagMap = await res.json();
-
-    for (const [type, list] of Object.entries(tagMap)) {
-        renderTags(type, list);
-        renderModal(type, list);
-    }
+    const param = createParam('tag-sort', true, tagState.offset, tagState.limit);
+    param.append('type',['type', 'effect', 'sideEffect']);
+    const data = await receiveData("/api/tags", param);
+    insertData(data, renderTags);
+    insertData(data, renderModal);
 }
 
 // 태그 필터링
 async function filterByTag() {
     const selected = Array.from(document.querySelectorAll('li[data-type].selected'));
-    const sort = document.getElementById('list-sort').value;
+    const param = createParam('list-sort', true, tagState.offset, tagState.limit);
 
     if (selected.length === 0) {
-        loadSupplements();
+        await loadSupplements();
     } else {
         const typeIds = selected.filter(e => e.dataset.type === 'type').map(e => e.dataset.id);
         const effectIds = selected.filter(e => e.dataset.type === 'effect').map(e => e.dataset.id);
         const sideEffectIds = selected.filter(e => e.dataset.type === 'sideEffect').map(e => e.dataset.id);
         const tiers = selected.filter(e => e.dataset.type === 'tier').map(e => e.dataset.id);
-        //selected 개수 많아지면 filter 말고 append로 한번에 처리
+
         const params = new URLSearchParams();
         typeIds.forEach(id => params.append('typeIds', id));
         effectIds.forEach(id => params.append('effectIds', id));
         sideEffectIds.forEach(id => params.append('sideEffectIds', id));
         tiers.forEach(id => params.append('tiers', id));
 
-        const res = await fetch(`/api/supplements/filter?${params.toString()}&sort=${sort}&direction=asc`);
-        const filtered = await res.json();
-
-        renderSupplements(filtered,supplementMap);
+        const data = await receiveData("/api/supplements", param);
+        insertData(data, renderSupplements, [supplementMap]);
     }
 }
 
@@ -146,7 +151,7 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
     });
 
     if (res.ok) {
-        alert("성분이 추가되었습니다.");
+        createNewAlarm("성분이 추가되었습니다.");
         form.reset();
         // 효과 체크박스 및 셀렉트 초기화
         document.querySelectorAll('#effect-checkboxes div').forEach(wrapper => {
@@ -187,7 +192,7 @@ document.getElementById('tag-form').addEventListener('submit', async e => {
     });
 
     if (res.ok) {
-        alert("태그가 추가되었습니다.");
+        createNewAlarm("태그가 추가되었습니다.");
         form.reset();
         await loadTags();
     } else {

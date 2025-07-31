@@ -1,22 +1,21 @@
 import {
-    loadButton
-} from '/util/load.js';
-
-import {
+    loadButton,
+    selectList,
+    setupModalOpenClose,
+    resetButton,
+    createNewAlarm,
     journalEvent,
     supplementEvent,
     productEvent,
-} from '/util/tableEvent.js';
-
-
-import {
     renderSupplements,
     renderJournals,
     renderDetails,
-    renderButton,
     renderTagTable,
     renderProducts,
-} from '/util/render.js';
+    renderTags,
+    renderModal,
+    renderButton,
+} from '/util/index.js';
 
 const journalMap = new Map();
 const supplementMap = new Map();
@@ -32,9 +31,13 @@ export async function init() {
     try {
         await loadButton(loadAll);
         await loadAll();
-        supplementEvent(supplementMap,loadDetails);
-        journalEvent(journalMap,loadJournals);
+        renderButton('button-box','save-button','저장','');
+        //supplementEvent(supplementMap,loadDetails);
+        //journalEvent(journalMap,loadJournals);
         productEvent(productMap,loadProducts);
+        setupModalOpenClose('modal-open', 'modal-close', 'modal');
+        resetButton("tags", "modal-reset", "modal-sort", ["brand"], renderModal);
+        selectList(["brand"],filterByTag);
 
         document.getElementById('toggle-change').addEventListener('click',e=> {
             const editMode = e.target.classList.contains('execute');
@@ -96,7 +99,7 @@ async function saveDetail() {
     });
 
     if (res.ok) {
-        alert('✅ 수정 완료!');
+        createNewAlarm('✅ 수정 완료!');
         loadDetails(); // 서버로부터 다시 불러오기
     } else {
         alert('❌ 수정 실패');
@@ -135,10 +138,6 @@ async function loadDetails(){
     const res = await fetch(`/api/supplements/detail/${supplementId}?sort=${sort}&direction=${dir}`);
     const details = await res.json();
     document.title = details.supplement[0].engName;
-    //const title = document.getElementById('title');
-    //const subTitle = document.getElementById('index-1');
-    //title.innerHTML = `${details.supplement[0].korName}`;
-    //subTitle.innerHTML = `${details.supplement[0].korName}`;
     renderSupplements(details.supplement, supplementMap);
     renderDetails(details.detail);
     renderTagTable(details.effects, 'effect' ,'effect-body');
@@ -149,6 +148,7 @@ async function loadAll(){
     await loadDetails();
     await loadJournals();
     await loadProducts();
+    await loadTags();
 }
 
 document.getElementById("insert-form").addEventListener("submit", async (e) => {
@@ -176,7 +176,7 @@ document.getElementById("insert-form").addEventListener("submit", async (e) => {
         });
 
         if (res.ok) {
-            alert("✅ 제품 등록 완료!");
+            createNewAlarm("✅ 제품 등록 완료!");
             await loadProducts();
             form.reset();
         } else {
@@ -189,3 +189,39 @@ document.getElementById("insert-form").addEventListener("submit", async (e) => {
     }
 });
 
+async function loadTags() {
+    const sort = document.getElementById('tag-sort').value;
+    const allTypes = ['brand'];
+
+    const query = new URLSearchParams({
+        type: allTypes.join(','), //
+        sort: sort,
+        direction: 'asc'
+    }).toString();
+
+    const res = await fetch(`/api/tags?${query}`);
+    const tagMap = await res.json();
+
+    for (const [type, list] of Object.entries(tagMap)) {
+        renderTags(type, list);
+        renderModal(type, list);
+    }
+}
+
+async function filterByTag() {
+    const selected = Array.from(document.querySelectorAll('li[data-type].selected'));
+    const sort = document.getElementById('product-list-sort').value;
+
+    if (selected.length === 0) {
+        loadProducts();
+    } else {
+        const brandIds = selected.filter(e => e.dataset.type === 'brand').map(e => e.dataset.id);
+        const params = new URLSearchParams();
+        brandIds.forEach(id => params.append('brandIds', id));
+
+        const res = await fetch(`/api/supplements/filter?${params.toString()}&sort=${sort}&direction=asc`);
+        const filtered = await res.json();
+
+        renderProducts(filtered,productMap);
+    }
+}

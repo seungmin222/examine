@@ -1,8 +1,14 @@
 import {
-    renderEffectCache,
     checkCheckboxes,
     ArrayCheckboxesById,
+    checkLogin
 } from '/util/utils.js';
+
+import {
+    createEffectCache,
+    createNewAlarm
+} from '/util/create.js';
+
 
 function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
     document.getElementById('journal-body').addEventListener('click', async e => {
@@ -37,7 +43,7 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
                     newButton.classList.add('execute');
                 }
                 modal.dataset.id = itemId;
-                renderEffectCache(item);
+                createEffectCache(item);
             }
             modal.classList.remove('hidden');
         }
@@ -101,7 +107,7 @@ function journalEvent(journalMap, loadJournals, loadTags=()=>{}){
             });
 
             if (res.ok) {
-                alert("논문이 수정되었습니다.");
+                createNewAlarm("논문이 수정되었습니다.");
                 //모달 초기화 및 테이블 재랜더링
                 loadTags();
                 loadJournals();
@@ -173,7 +179,7 @@ function supplementEvent(supplementMap, loadSupplements, loadTags=()=>{}) {
             });
 
             if (res.ok) {
-                alert('저장되었습니다');
+                createNewAlarm('저장되었습니다');
                 await loadSupplements();
                 document.getElementById('list-sort')?.dispatchEvent(new Event('change'));
                 loadTags();
@@ -223,7 +229,7 @@ function pageEvent(pageMap, loadPages){
             });
 
             if (res.ok) {
-                alert("페이지가 수정되었습니다.");
+                createNewAlarm("페이지가 수정되었습니다.");
                 //모달 초기화 및 테이블 재랜더링
                 loadPages();
             } else {
@@ -251,6 +257,29 @@ function tagTableEvent(loadEffects,type){
             }
 
         }
+
+        if (e.target.classList.contains('save-btn')) {
+            const updated = {
+                korName: row.querySelector('[name="korName"]').value,
+                engName: row.querySelector('[name="engName"]').value,
+                type: type
+            };
+
+            const res = await fetch(`/api/tags/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updated)
+            });
+
+            if (res.ok) {
+                createNewAlarm(`${type} 태그가 수정되었습니다.`);
+                await loadEffects();
+            } else {
+                alert("수정 실패");
+            }
+        }
     });
 }
 
@@ -276,7 +305,8 @@ function brandEvent(brandMap, loadBrands) {
         // 저장 버튼
         if (e.target.classList.contains('save-btn')) {
             const updated = {
-                name: row.querySelector('[name="name"]').value,
+                korName: row.querySelector('[name="korName"]').value,
+                engName: row.querySelector('[name="engName"]').value,
                 country: row.querySelector('[name="country"]').value,
                 fei: row.querySelector('[name="fei"]').value,
                 nai: parseInt(row.querySelector('[name="nai"]').value),
@@ -293,7 +323,7 @@ function brandEvent(brandMap, loadBrands) {
             });
 
             if (res.ok) {
-                alert("브랜드가 수정되었습니다.");
+                createNewAlarm("브랜드가 수정되었습니다.");
                 await loadBrands();
             } else {
                 alert("수정 실패");
@@ -307,32 +337,50 @@ function productEvent(productMap, loadProducts) {
         const row = e.target.closest('tr');
         const itemId = Number(row?.dataset.id);
         const item = productMap.get(itemId);
+        const modal = document.getElementById('modal');
+        const modalId = parseInt(modal?.dataset.id);
         if (!row || !itemId || !item) return;
 
-        const deleteMode = document.getElementById('delete-mode-btn')?.classList.contains('execute');
+              // ✅ 삭제 처리
+        if (document.getElementById('toggle-delete')?.classList.contains('execute')) {
+            e.preventDefault();
+            if (confirm(`'${item.name}' 제품을 삭제할까요?`)) {
+                const res = await fetch(`/api/supplements/detail/${itemId}/products`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
 
-        // ✅ 삭제 처리
-        if (deleteMode) {
-            if (!confirm("정말 삭제할까요?")) return;
+                if (res.ok) {
+                    await loadProducts();
+                } else {
+                    const msg = await res.text();
+                    alert("❌ 삭제 실패: " + msg);
+                }
 
-            const res = await fetch(`/api/supplement/detail/${itemId}/products`, {
-                method: 'DELETE',
-                credentials: 'include'
-            });
-
-            if (res.ok) {
-                alert("삭제 완료");
-                await loadProducts();
-            } else {
-                const msg = await res.text();
-                alert("❌ 삭제 실패: " + msg);
+                return;
             }
+        }
 
-            return;
+        if (e.target.classList.contains('modal-btn')) {
+            if (itemId !== modalId) {
+                const button = document.querySelector(`.modal-btn[data-id="${modalId}"]`);
+                const newButton = document.querySelector(`.modal-btn[data-id="${itemId}"]`);
+                if (button) {
+                    button.classList.remove('execute');
+                }
+                if (newButton) {
+                    newButton.classList.add('execute');
+                }
+                modal.dataset.id = itemId;
+
+                checkCheckboxes('brand', item.brand);
+            }
+            modal.classList.remove('hidden');
         }
 
         // ✅ 저장 처리
         if (e.target.classList.contains('save-btn')) {
+            const brandIds = ArrayCheckboxesById('brand');
             const updated = {
                 id: item.id,
                 name: row.querySelector('[name="name"]').value,
@@ -341,7 +389,7 @@ function productEvent(productMap, loadProducts) {
                 dosageUnit: row.querySelector('[name="dosageUnit"]').value,
                 price: parseFloat(row.querySelector('[name="price"]').value),
                 pricePerDose: parseFloat(row.querySelector('[name="pricePerDose"]').value),
-                brandId: item.brandId,
+                brandIds,
                 supplementId: item.supplementId
             };
 
@@ -352,11 +400,29 @@ function productEvent(productMap, loadProducts) {
             });
 
             if (res.ok) {
-                alert("제품이 수정되었습니다.");
+                createNewAlarm("제품이 수정되었습니다.");
                 await loadProducts();
             } else {
                 const msg = await res.text();
                 alert("수정 실패: " + msg);
+            }
+        }
+
+        // 장바구니
+        if (e.target.classList.contains('cart-btn')) {
+            const quantity = row.querySelector('[name="quantity"]').value;
+
+            if (isNaN(quantity) || quantity < 1) {
+                alert("수량을 1 이상으로 입력하세요.");
+                return;
+            }
+
+            const res = await fetch(`/api/user/cart/${itemId}?quantity=${quantity}`, {
+                method: 'POST'
+            });
+            if(res.ok){
+                createNewAlarm("장바구니에 상품을 담았습니다.");
+                await checkLogin();
             }
         }
     });

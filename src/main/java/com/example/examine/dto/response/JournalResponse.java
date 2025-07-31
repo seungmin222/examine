@@ -1,6 +1,7 @@
 package com.example.examine.dto.response;
 import com.example.examine.entity.Journal;
 import com.example.examine.entity.Tag.TrialDesign;
+import com.example.examine.service.util.EnumService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,6 +10,7 @@ public record JournalResponse(
         Long id,
         String title,
         String link,
+        String siteType,
         List<JSEResponse> effects,
         List<JSEResponse> sideEffects,
         String summary,
@@ -19,7 +21,9 @@ public record JournalResponse(
         Integer participants,
         LocalDate date
 ) {
-    public static JournalResponse fromEntity(Journal j) {
+    public static JournalResponse fromEntity(Journal j, List<JSEResponse> effects, List<JSEResponse> sideEffects) {
+        EnumService.JournalSiteType siteType = j.getSiteType();
+
         int blind = (j.getBlind() != null ? j.getBlind() : -1);
         String blindStr = switch (blind) {
             case 0 -> "open-label";
@@ -31,19 +35,14 @@ public record JournalResponse(
         return new JournalResponse(
                 j.getId(),
                 j.getTitle(),
-                j.getLink(),
-                j.getJournalSupplementEffects()
-                        .stream()
-                        .map(JSEResponse::fromEntity)
-                        .toList(),
-                j.getJournalSupplementSideEffects()
-                        .stream()
-                        .map(JSEResponse::fromEntity)
-                        .toList(),
+                siteType.buildUrl(j.getSiteJournalId()),
+                siteType.toString(),
+                effects,
+                sideEffects,
                 j.getSummary(),
                 TagResponse.fromEntity(j.getTrialDesign()),
                 blindStr, j.getParallel(),
-                new DurationResponse(j.getDurationValue(), j.getDurationUnit(), j.getDurationDays()),
+                new DurationResponse(j.getDurationValue(), j.getDurationUnit().toString(), j.getDurationDays()),
                 j.getParticipants(), j.getDate()
         );
     }

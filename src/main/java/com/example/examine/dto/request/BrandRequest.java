@@ -1,7 +1,8 @@
 package com.example.examine.dto.request;
 
 public record BrandRequest(
-        String name,
+        String korName,
+        String engName,
         String country,
         String fei,
         Integer nai,

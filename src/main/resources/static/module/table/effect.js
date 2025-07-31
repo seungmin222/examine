@@ -4,21 +4,13 @@ import {
     setupToggleButton,
     setupModalOpenClose,
     setupSearchForm,
-    selectList
-} from '/util/event.js';
-
-import {
+    selectList,
     renderTagTable,
     renderTags,
-} from '/util/render.js';
-
-import {
-    loadButton
-} from '/util/load.js';
-
-import {
-    tagTableEvent
-} from '/util/tableEvent.js';
+    loadButton,
+    tagTableEvent,
+    createNewAlarm
+} from '/util/index.js';
 
 const params = new URLSearchParams(window.location.search);
 const effectType = params.get('type');
@@ -50,8 +42,8 @@ export async function init() {
     setupSortTrigger('tag-sort', loadTags);
 
     //검색 폼
-    setupSearchForm("tags", "tag-search-form", "tag-sort", ["supplement"], renderTags);
-    setupSearchForm(`${effectType}`, "search-form", "list-sort", [`${effectType}`], renderTagTable); //api 주소 수정 필요
+    setupSearchForm("/api/tags/search", "tag-search-form", "tag-sort", ["supplement"], renderTags);
+    setupSearchForm("/api/tags/table/search", "search-form", "list-sort", [effectType], renderTagTable, [effectType]);
 
     selectList(["supplement"],filterByTag);
 }
@@ -121,7 +113,7 @@ document.getElementById('insert-form').addEventListener('submit', async e => {
     });
 
     if (res.ok) {
-        alert("태그가 추가되었습니다.");
+        createNewAlarm("태그가 추가되었습니다.");
         form.reset();
         await loadEffects();
     } else {

@@ -27,30 +27,36 @@ public interface JournalSupplementEffectRepository extends JpaRepository<Journal
     boolean existsById(JournalSupplementEffectId id);
 
     @Query("""
-    SELECT DISTINCT jse.id.journalId  
+    SELECT DISTINCT jse.journal  
     FROM JournalSupplementEffect jse
+    left join jse.journal.trialDesign
     WHERE jse.id.supplementEffectId.effectTagId = :effectId
 """)
-    List<Long> findJournalsByEffectId(@Param("effectId") Long effectId);
+    List<Journal> findJournalsByEffectId(@Param("effectId") Long effectId);
 
     @Query("""
-    SELECT DISTINCT jse.id.journalId 
+    SELECT DISTINCT jse.journal
     FROM JournalSupplementEffect jse
+    left join jse.journal.trialDesign
     WHERE jse.id.supplementEffectId.supplementId = :supplementId
 """)
-    List<Long> findJournalsBySupplementId(@Param("supplementId") Long supplementId);
+    List<Journal> findJournalsBySupplementId(@Param("supplementId") Long supplementId);
 
     @Query("""
-SELECT DISTINCT jse.id.journalId FROM JournalSupplementEffect jse
+SELECT DISTINCT jse.journal
+FROM JournalSupplementEffect jse
+left join jse.journal.trialDesign
 WHERE jse.id.supplementEffectId.supplementId IN :supplementIds
 """)
-    List<Long> findJournalIdsBySupplementIds(@Param("supplementIds") List<Long> supplementIds);
+    List<Journal> findJournalsBySupplementIds(@Param("supplementIds") List<Long> supplementIds);
 
     @Query("""
-SELECT DISTINCT jse.id.journalId FROM JournalSupplementEffect jse
+SELECT DISTINCT jse.journal
+FROM JournalSupplementEffect jse
+left join jse.journal.trialDesign
 WHERE jse.id.supplementEffectId.effectTagId IN :effectIds
 """)
-    List<Long> findJournalIdsByEffectIds(@Param("effectIds") List<Long> effectIds);
+    List<Journal> findJournalsByEffectIds(@Param("effectIds") List<Long> effectIds);
 
 
     @Query("""
@@ -69,5 +75,11 @@ WHERE jse.id.supplementEffectId.effectTagId IN :effectIds
 """)
     List<JSE> findAllByJournalIdIn(@Param("journalIds") List<Long> journalIds);
 
+    @Query("""
+    SELECT jse FROM JournalSupplementEffect jse
+    JOIN FETCH jse.SE se
+    WHERE jse.journal.id IN :journalIds
+""")
+    List<JournalSupplementEffect> fetchJSEWithSEByJournalIds(@Param("journalIds") List<Long> journalIds);
 
 }

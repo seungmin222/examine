@@ -1,12 +1,16 @@
 package com.example.examine.service.EntityService;
 
+import com.example.examine.dto.request.UserProductRequest;
 import com.example.examine.dto.request.UserRequest;
-import com.example.examine.dto.response.UserResponse;
+import com.example.examine.dto.response.UserResponse.UserResponse;
+import com.example.examine.entity.Alarm;
 import com.example.examine.entity.Page;
 import com.example.examine.entity.Product;
 import com.example.examine.entity.User.*;
+import com.example.examine.repository.AlarmRepository;
 import com.example.examine.repository.PageRepository;
 import com.example.examine.repository.ProductRepository;
+import com.example.examine.repository.UserRepository.UserAlarmRepository;
 import com.example.examine.repository.UserRepository.UserPageRepository;
 import com.example.examine.repository.UserRepository.UserProductRepository;
 import com.example.examine.repository.UserRepository.UserRepository;
@@ -14,8 +18,12 @@ import com.example.examine.service.Redis.JwtProperties;
 import com.example.examine.service.Redis.RedisService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,11 +33,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final RedisService redisService;
@@ -38,6 +54,7 @@ public class UserService implements UserDetailsService {
     private final ProductRepository productRepo;
     private final UserPageRepository userPageRepo;
     private final UserProductRepository userProductRepo;
+
 
     public boolean findByUsername(String username) {
         return userRepo.findByUsername(username).isPresent();
@@ -170,9 +187,10 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 제품입니다."));
 
         UserProductId id = new UserProductId(user.getId(), productId);
-        boolean exists = userProductRepo.existsById(id);
-        if (exists) {
-            return ResponseEntity.badRequest().body("이미 장바구니에 담긴 상품입니다.");
+        UserProduct userProduct = userProductRepo.findById(id).orElse(null);
+        if (userProduct != null) {
+            userProduct.setQuantity(userProduct.getQuantity() + quantity);
+            return ResponseEntity.ok("장바구니 개수 증가.");
         }
 
         UserProduct cartItem = UserProduct.builder()
@@ -180,12 +198,47 @@ public class UserService implements UserDetailsService {
                 .user(user)
                 .product(product)
                 .quantity(quantity)
-                .checked(false)
+                .checked(true)
                 .build();
 
         userProductRepo.save(cartItem);
         return ResponseEntity.ok("🛒 장바구니에 추가 완료");
     }
+
+    @Transactional
+    public ResponseEntity<String> updateCart(Authentication auth, List<UserProductRequest> cartItems) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        User user = (User) auth.getPrincipal();
+
+        // Step 1: ID 추출
+        Set<UserProductId> ids = cartItems.stream()
+                .map(e -> new UserProductId(user.getId(), e.id()))
+                .collect(Collectors.toSet());
+
+        // Step 2: 일괄 조회
+        List<UserProduct> userProducts = userProductRepo.findAllById(ids);
+        Map<Long, UserProduct> productMap = userProducts.stream()
+                .collect(Collectors.toMap(p -> p.getId().getProductId(), p -> p));
+
+        // Step 3: 수정 or 삭제
+        for (UserProductRequest req : cartItems) {
+            UserProduct product = productMap.get(req.id());
+            if (product == null) continue;
+
+            if (req.quantity() < 1) {
+                userProductRepo.delete(product);
+            } else {
+                product.setQuantity(req.quantity());
+                product.setChecked(req.isChecked());
+            }
+        }
+
+        return ResponseEntity.ok("🛒 장바구니에 추가 완료");
+    }
+
 
 
     @Transactional
@@ -220,6 +273,7 @@ public class UserService implements UserDetailsService {
         userProductRepo.delete(item);
         return ResponseEntity.ok("❌ 장바구니에서 제거 완료");
     }
+
 
 
     @Override

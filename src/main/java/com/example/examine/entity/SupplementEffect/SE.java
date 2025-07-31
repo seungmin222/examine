@@ -5,7 +5,7 @@ import com.example.examine.entity.Tag.Supplement;
 
 import java.math.BigDecimal;
 
-public interface SE {
+public interface SE<I extends SEId> {
     SEId getId();
     void setId(SEId id);
 

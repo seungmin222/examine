@@ -1,5 +1,6 @@
-package com.example.examine.dto.response;
+package com.example.examine.dto.response.UserResponse;
 
+import com.example.examine.dto.response.ProductResponse;
 import com.example.examine.entity.User.UserProduct;
 
 import java.time.LocalDateTime;

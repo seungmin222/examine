@@ -1,6 +1,8 @@
 import{
   createA,
-  createProduct
+  createProduct,
+  createAlarm,
+  createNoticeSvg,
 } from '/util/create.js';
 
 function switchTagList(type) {
@@ -16,11 +18,22 @@ function switchTagList(type) {
 }
 
 function checkCheckboxes(type, tagList) {
-  const tagSet = new Set(tagList.map(tag => String(tag.id))); // ✅ 문자열 기준 Set 생성
-  document.querySelectorAll(`#${type}-checkboxes input`).forEach(cb => {
-    cb.checked = tagSet.has(cb.value); // ✅ cb.value도 string이니까 잘 작동
+  const checkboxes = document.querySelectorAll(`#${type}-checkboxes input`);
+
+  // ✅ 태그가 없거나 빈 값이면 전체 체크 해제
+  if (!tagList || (Array.isArray(tagList) && tagList.length === 0)) {
+    checkboxes.forEach(cb => cb.checked = false);
+    return;
+  }
+
+  const tags = Array.isArray(tagList) ? tagList : [tagList];
+  const tagSet = new Set(tags.map(tag => String(tag.id)));
+
+  checkboxes.forEach(cb => {
+    cb.checked = tagSet.has(cb.value);
   });
 }
+
 
 function ArrayCheckboxesById(type) {
     return Array.from(document.querySelectorAll(`#${type}-checkboxes input:checked`))
@@ -49,66 +62,7 @@ function resetEventListener(Id) {
   oldElem.parentNode.replaceChild(newElem, oldElem);
 }
 
-function renderEffectCache(item) {
-  const container = document.getElementById('mapping-cash');
-  container.innerHTML = ''; // ✅ 초기화
 
-  renderCash(item.effects,'effect-cash');
-  renderCash(item.sideEffects,'sideEffect-cash');
-
-  function renderCash(list, cls){
-    list?.forEach(effect => {
-      const row = document.createElement('tr');
-      row.classList.add(cls);
-      row.dataset.supplementId = effect.supplementId;
-      row.dataset.effectId = effect.effectId;
-
-      const td1 = document.createElement('td');
-      td1.textContent = effect.supplementKorName;
-
-      const td2 = document.createElement('td');
-      td2.textContent = effect.effectKorName;
-
-      const td3 = document.createElement('td');
-      const cohenD = document.createElement('input');
-      cohenD.name = 'cohenD';
-      cohenD.type = 'number';
-      cohenD.classList.add('w-16');
-      cohenD.value = effect.cohenD;
-      cohenD.step = '0.1';
-      cohenD.placeholder = "null";
-      td3.appendChild(cohenD);
-
-      const td4 = document.createElement('td');
-      const pearsonR = document.createElement('input');
-      pearsonR.name = 'pearsonR';
-      pearsonR.type = 'number';
-      pearsonR.classList.add('w-16');
-      pearsonR.value = effect.pearsonR;
-      pearsonR.step = '0.1';
-      pearsonR.placeholder = "null";
-      td4.appendChild(pearsonR);
-
-      const td5 = document.createElement('td');
-      const pValue = document.createElement('input');
-      pValue.name = 'pValue';
-      pValue.type = 'number';
-      pValue.classList.add('w-24');
-      pValue.value = effect.pValue;
-      pValue.step = "0.001";
-      pValue.placeholder = "null";
-      td5.appendChild(pValue);
-
-      row.appendChild(td1);
-      row.appendChild(td2);
-      row.appendChild(td3);
-      row.appendChild(td4);
-      row.appendChild(td5);
-
-      container.appendChild(row);
-    });
-  }
-}
 
 
 function getCookie(name) {
@@ -121,20 +75,28 @@ function deleteCookie(name) {
 }
 
 async function checkLogin() {
+  const loginBtn = document.getElementById('user-dropdown-toggle');
   const userDiv = document.getElementById("user-info");
   const bookmark = document.getElementById("bookmark");
   const cart = document.getElementById("cart");
+  const totalPrice = document.getElementById("total-price");
+  const alarm = document.getElementById("alarm");
+  const alarmSvg = document.getElementById('alarm-svg');
 
   async function fetchUser() {
     const res = await fetch("/api/user/me", { credentials: "include" });
 
     if (res.ok) {
       console.log("사용자 정보 불러옴.");
+      loginBtn.textContent = "마이페이지";
       const data = await res.json();
       userDiv.textContent = `${data.username}`;
       document.body.dataset.level = `${data.level}`;
       bookmark.innerHTML = "";
       cart.innerHTML = "";
+      totalPrice.innerHTML = `${Number(data.totalPrice).toLocaleString()}원`;
+      alarm.innerHTML = "";
+      alarmSvg.innerHTML = "";
 
       data.pages.forEach(p => {
         const link = createA(p.link, p.title, "logo");
@@ -145,6 +107,24 @@ async function checkLogin() {
       data.products.forEach(p => {
         cart.appendChild(createProduct(p));
       });
+
+      let unRead=false;
+      data.alarms.forEach(a => {
+        if(!a.isRead){
+          unRead = true;
+        }
+        alarm.appendChild(createAlarm(a.alarm, a.isRead, checkLogin));
+      })
+
+      if(unRead){
+        alarmSvg.appendChild(createNoticeSvg());
+
+        const myPageSvg = document.createElement('div');
+        myPageSvg.classList.add('relative');
+        myPageSvg.appendChild(createNoticeSvg());
+
+        loginBtn.appendChild(myPageSvg);
+      }
 
       return true;
     }
@@ -175,9 +155,38 @@ async function checkLogin() {
   return await fetchUser();
 }
 
+async function receiveData(baseUrl, params) {
+  const url = `${baseUrl}?${params.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.error("❌ 데이터 로딩 실패:", await res.text());
+    return null;
+  }
+  return await res.json();
+}
 
+function insertData(response, renderFn, fnField = []) {
+  if (!response) return;
 
+  if (typeof response === 'object' && !Array.isArray(response)) {
+    for (const [type, list] of Object.entries(response)) {
+      renderFn(type, list, ...fnField);
+    }
+  } else {
+    renderFn(response, ...fnField);
+  }
+}
 
+function showLoadBtn(hasMore='true', loadId = 'load-more') {
+  const btn = document.getElementById(loadId);
+  if (!btn) return;
+
+  if (hasMore) {
+    btn.classList.remove('hidden');
+  } else {
+    btn.classList.add('hidden');
+  }
+}
 
 export {
   switchTagList,
@@ -186,6 +195,8 @@ export {
   ArrayCheckboxesByName,
   resetModal,
   resetEventListener,
-  renderEffectCache,
   checkLogin,
+  receiveData,
+  insertData,
+  showLoadBtn
 };

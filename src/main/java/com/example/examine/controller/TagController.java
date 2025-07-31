@@ -34,6 +34,13 @@ public class TagController {
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateTag(@PathVariable Long id, @RequestBody TagRequest dto) {
+        log.info("📥 받은 데이터: {}", dto);
+        return tagService.update(id, dto);
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/detail")
     @Transactional
     public ResponseEntity<String> update(@RequestBody TagDetailRequest dto) {
@@ -75,7 +82,7 @@ public class TagController {
                                     @RequestParam(defaultValue = "id") String sort,
                                     @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.getJournals(type, id, sorting);
+        return tagService.getJournals(type, id);
     }
 
 
@@ -93,8 +100,8 @@ public class TagController {
         return tagService.getTagTable(type, sorting);
     }
 
-    @GetMapping("/table/{keyword}")
-    public List<?> tableSearch(@PathVariable String keyword,
+    @GetMapping("/table/search")
+    public List<?> tableSearch(@RequestParam String keyword,
                                                  @RequestParam String type,
                                                  @RequestParam(defaultValue = "id") String sort,
                                                  @RequestParam(defaultValue = "asc") String direction) {

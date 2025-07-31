@@ -1,14 +1,5 @@
-import {
-    loadBasicModule,
-    loadBasicEvent
-} from '/util/load.js';
-import {
-    sidebarToggle
-} from '/util/event.js';
+import {createPath, loadBasicEvent, loadBasicModule, sidebarToggle} from '/util/index.js';
 
-import {
-    createPath,
-} from '/util/create.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadBasicEvent();
@@ -23,12 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const content = document.getElementById('content');
 
     try {
-        const html = await fetch(htmlPath).then(res => res.text());
-
-        content.innerHTML = html;
+        content.innerHTML = await fetch(htmlPath).then(res => res.text());
         await MathJax.typesetPromise([content]);
         await loadBasicModule();
-
 
         try {
             const module = await import(jsPath);

@@ -12,18 +12,26 @@ import{
     deleteBookmark,
     updateScrollProgress,
     iherbCouponRefresh,
-
+    updateCart,
+    tooltipEvent,
+    alarmEvent,
+    readAllAlarm,
+    deleteAllAlarm,
+    receiveAlarm,
+    cartEvent,
+    alarmBoxEvent
 } from '/util/event.js';
 
 import{
     createNumberSVG,
-    createPath,
+    createPathWithParam,
     createCopyIcon,
     createIherbCoupon,
 } from '/util/create.js';
 
 import{
     checkLogin,
+    resetEventListener,
 } from '/util/utils.js';
 import{
     renderButton
@@ -35,29 +43,43 @@ async function loadNavEvent(){
     if (await checkLogin()){
         userLink.removeAttribute("href"); // 링크 제거
         userLink.addEventListener("click", e => e.preventDefault());
-        userLink.querySelector("#user-dropdown-toggle").textContent = "내 정보";
-        hideHoverButton('user-dropdown-toggle','user-dropdown');
-        hideHoverButton('alarm-dropdown-toggle','alarm-dropdown');
-        hideHoverButton('user-info-dropdown-toggle','user-info-dropdown');
-        hideHoverButton('bookmark-dropdown-toggle','bookmark-dropdown');
-        hideHoverButton('memo-dropdown-toggle','memo-dropdown');
-        hideHoverButton('iherb-dropdown-toggle','iherb-dropdown');
-        await setupToggleButton('bookmark-delete-toggle', loadNavEvent, '삭제','삭제중');
-        await deleteBookmark('bookmark','bookmark-delete-toggle',checkLogin);
+
+        tooltipEvent('user-dropdown-toggle','user-dropdown','bottom');
+
+        tooltipEvent('alarm-dropdown-toggle','alarm-dropdown','left');
+        tooltipEvent('user-info-dropdown-toggle','user-info-dropdown','left');
+        tooltipEvent('bookmark-dropdown-toggle','bookmark-dropdown','left');
+        tooltipEvent('cart-dropdown-toggle','cart-dropdown','left');
+        tooltipEvent('memo-dropdown-toggle','memo-dropdown','left');
+        await setupToggleButton('bookmark-delete-toggle', checkLogin, '삭제','삭제중');
+        alarmEvent('alarm', checkLogin);
+        readAllAlarm('alarm-read', checkLogin);
+        deleteAllAlarm('alarm-delete', checkLogin);
+        receiveAlarm(checkLogin);
+
+        resetEventListener('bookmark');
+        await deleteBookmark('bookmark','bookmark-delete-toggle',checkLogin); //이벤트 리스너 초기화
         await addBookmark('bookmark-save',checkLogin);
+
+        resetEventListener('cart');
+        cartEvent('cart', checkLogin);
+        updateCart('cart', checkLogin);
         logout('logout');
         if(document.body.dataset.level>=10){
             iherbCouponRefresh('iherb-dropdown-toggle');
         }
     }
-    hideHoverButton('guide-dropdown-toggle','guide-dropdown');
-    hideHoverButton('table-dropdown-toggle','table-dropdown');
-    hideHoverButton('setting-dropdown-toggle','setting-dropdown');
-    themeSelect('theme-select','icon');
+    tooltipEvent('guide-dropdown-toggle','guide-dropdown','bottom');
+    tooltipEvent('table-dropdown-toggle','table-dropdown','bottom');
+    tooltipEvent('setting-dropdown-toggle','setting-dropdown','bottom');
+    tooltipEvent('iherb-dropdown-toggle','iherb-dropdown','left');
+    tooltipEvent('theme-dropdown-toggle','theme-dropdown','left');
+    themeSelect('theme','icon');
+    alarmBoxEvent();
 }
 
 async function loadPage() {
-    const base = createPath();
+    const base = createPathWithParam();
     const res = await fetch(`/api/pages/current?link=/${encodeURIComponent(base)}`)
 
     if (res.ok) {
@@ -147,7 +169,7 @@ function loadTheme(localSave, iconId, selectId){
     if (savedTheme) {
 
       document.getElementById(iconId).src = `/image/icon-${savedTheme}.png`;
-      document.getElementById(selectId).value = savedTheme;
+      //document.getElementById(selectId).value = savedTheme;
     }
 }
 
@@ -176,7 +198,7 @@ async function loadButton(loadFn){
     if (level>=10){
         renderButton('button-box','toggle-change','수정','');
         renderButton('button-box','toggle-delete','삭제','');
-        setupPairToggleButton('toggle-delete', 'toggle-change', loadFn);
+        setupPairToggleButton(loadFn);
     }
     else if (level>=1){
         renderButton('button-box','toggle-change','수정','');

@@ -2,19 +2,12 @@ import {
     setupFoldToggle,
     setupSortTrigger,
     setupSearchForm,
-} from '/util/event.js';
-
-import {
     renderBrands,
-} from '/util/render.js';
+    loadButton,
+    brandEvent,
+    createNewAlarm
+} from '/util/index.js';
 
-import {
-    loadButton
-} from '/util/load.js';
-
-import {
-    brandEvent
-} from '/util/tableEvent.js';
 
 const brandMap = new Map();
 
@@ -54,7 +47,8 @@ document.getElementById('brand-insert-form').addEventListener('submit', async e 
     const form = e.target;
 
     const data = {
-        name: form.name.value,
+        korName: form.korName.value,
+        engName: form.engName.value,
         country: form.country.value,
         fei: form.fei.value || null,
         nai: form.nai.value ? parseInt(form.nai.value) : null,
@@ -70,7 +64,7 @@ document.getElementById('brand-insert-form').addEventListener('submit', async e 
         });
 
         if (res.ok) {
-            alert("브랜드가 추가되었습니다.");
+            createNewAlarm("브랜드가 추가되었습니다.");
             await loadBrands();
         } else {
             alert("브랜드 추가 실패");

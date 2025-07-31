@@ -4,24 +4,26 @@ import com.example.examine.controller.DetailController;
 import com.example.examine.dto.request.DetailRequest;
 import com.example.examine.dto.request.ProductRequest;
 import com.example.examine.dto.request.SupplementRequest;
+import com.example.examine.dto.request.TextSimilarityRequest;
 import com.example.examine.dto.response.*;
-import com.example.examine.dto.response.Crawler.IherbProductResponse;
+import com.example.examine.dto.response.Crawler.ProductCrawlerResponse;
 import com.example.examine.entity.*;
+import com.example.examine.entity.Tag.Brand;
 import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.entity.Tag.TypeTag;
 import com.example.examine.entity.detail.SupplementDetail;
-import com.example.examine.repository.BrandRepository;
+import com.example.examine.repository.PageRepository;
+import com.example.examine.repository.TagRepository.BrandRepository;
 import com.example.examine.repository.Detailrepository.SupplementDetailRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementEffectRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementSideEffectRepository;
 import com.example.examine.repository.ProductRepository;
-import com.example.examine.repository.SERepository.SupplementEffectRepository;
-import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
 import com.example.examine.repository.TagRepository.SupplementRepository;
 import com.example.examine.repository.TagRepository.TypeTagRepository;
 import com.example.examine.service.Crawler.ShopCrawler.IherbCrawler;
 import com.example.examine.service.LLM.LLMResponse;
 import com.example.examine.service.LLM.LLMService;
+import com.example.examine.service.similarity.TextSimilarity;
 import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +40,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.util.*;
+
+import static com.example.examine.service.util.EnumService.ProductSiteType.*;
 
 // 서비스
 @Service
@@ -52,9 +55,11 @@ public class SupplementService {
     private final SupplementDetailRepository supplementDetailRepo;
     private final BrandRepository brandRepo;
     private final ProductRepository productRepo;
+    private final PageRepository pageRepo;
     private final JournalSupplementEffectRepository jseRepo;
     private final JournalSupplementSideEffectRepository jsseRepo;
     private final JournalService journalService;
+    private final AlarmService alarmService;
 
     public ResponseEntity<String> create(SupplementRequest dto) {
         if (supplementRepo.findByKorNameAndEngName(dto.korName(), dto.engName()).isPresent()) {
@@ -92,6 +97,17 @@ public class SupplementService {
                 .dosage("")
                 .build();
         supplementDetailRepo.save(supplementDetail);
+
+        String link = "/detail/detail?id="  + supplement.getId().toString();
+        Page page = Page.builder()
+                .link(link)
+                .title(supplement.getKorName())
+                .level(0)
+                .viewCount(0L)
+                .bookmarkCount(0L)
+                .supplement(supplement)
+                .build();
+        pageRepo.save(page);
 
         return ResponseEntity.ok("성분 추가 완료");
     }
@@ -181,12 +197,10 @@ public class SupplementService {
         if (supplement.getDosageValue() == null) {
             supplement.setDosageValue(result.dosageValue());
         }
-        if (supplement.getDosageUnit() == null || supplement.getDosageUnit().isBlank()) {
-            supplement.setDosageUnit(result.dosageUnit());
+        if (supplement.getDosageUnit() == null) {
+            supplement.setDosageUnit(EnumService.DosageUnit.fromString(result.dosageUnit()));
         }
-
     }
-
 
     public ResponseEntity<String> update(Long id, SupplementRequest dto) {
 
@@ -197,7 +211,7 @@ public class SupplementService {
         supplement.setKorName(dto.korName());
         supplement.setEngName(dto.engName());
         supplement.setDosageValue(dto.dosageValue());
-        supplement.setDosageUnit(dto.dosageUnit());
+        supplement.setDosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()));
         supplement.setCost(dto.cost());
 
         List<TypeTag> newTypes = dto.typeIds()  != null
@@ -208,6 +222,11 @@ public class SupplementService {
         supplement.getTypes().addAll(newTypes); // 내부만 갱신
 
         supplementRepo.save(supplement);
+
+        Optional<Page> optionalPage = pageRepo.findBySupplementId(supplement.getId());
+        Page page = optionalPage.orElseThrow();
+        alarmService.createPageAlarm(page, "관심 성분(" + supplement.getKorName() + ")이 업데이트 되었습니다.");
+
         return ResponseEntity.ok("성분 업데이트 완료");
 
     }
@@ -255,11 +274,11 @@ public class SupplementService {
 
     @Transactional(readOnly = true)
     public List<JournalResponse> findJournals(Long id, Sort sort) {
-        Set<Long> journalIds = new HashSet<>();
-        journalIds.addAll(jseRepo.findJournalsBySupplementId(id));
-        journalIds.addAll(jsseRepo.findJournalsBySupplementId(id));
+        Set<Journal> journals = new HashSet<>();
+        journals.addAll(jseRepo.findJournalsBySupplementId(id));
+        journals.addAll(jsseRepo.findJournalsBySupplementId(id));
 
-        return journalService.toJournalResponses(journalIds.stream().toList(), sort);
+        return journalService.toJournalResponses(journals.stream().toList());
     }
 
     @Transactional(readOnly = true)
@@ -326,59 +345,78 @@ public class SupplementService {
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         SupplementDetail s = opt.get();
+
         s.setIntro(dto.intro());
         s.setPositive(dto.positive());
         s.setNegative(dto.negative());
         s.setMechanism(dto.mechanism());
         s.setDosage(dto.dosage());
 
-        s.getSupplement().setUpdatedAt(s.getUpdatedAt());
+        Supplement supplement = s.getSupplement();
+        supplement.setUpdatedAt(s.getUpdatedAt());
 
         supplementDetailRepo.save(s);
+        supplementRepo.save(supplement);
+
+        Optional<Page> optionalPage = pageRepo.findBySupplementId(s.getSupplementId());
+        Page page = optionalPage.orElseThrow();
+        alarmService.createPageAlarm(page, "관심 성분(" + supplement.getKorName() + ")이 업데이트 되었습니다.");
         return ResponseEntity.ok("성분 업데이트 완료");
     }
 
     @Transactional
     public ResponseEntity<String> createProduct(ProductRequest dto) {
         // ✅ 1. 크롤링으로 부족한 필드 채우기
-        IherbProductResponse crawled = null;
-        if (dto.link() != null && dto.link().contains("iherb.com")) {
-            crawled = IherbCrawler.productCrawl(dto.link());
+        ProductCrawlerResponse crawled = null;
+        String link = dto.link();
+
+        EnumService.ProductSiteType siteType = fromLink(link);
+
+        switch (siteType) {
+            case IHERB -> {
+                crawled = IherbCrawler.productCrawl(link);
+            }
+            case COUPANG -> {
+            }
+            case NAVER -> {
+            }
+            default -> {
+                throw new IllegalArgumentException("지원되지 않는 링크 형식입니다: " + link);
+            }
+        }
+            Brand brand = dto.brandId() != null
+                    ? brandRepo.findById(dto.brandId()).orElse(null)
+                    : null;
+
+        if (brand == null && crawled != null) {
+            List<TextSimilarityRequest> brandCandidate =
+                    TextSimilarity.findTopKSuggestions(crawled.brandName(), brandRepo, "brand", 1, 0.7);
+
+            if (!brandCandidate.isEmpty()) {
+                brand = brandRepo.findById(brandCandidate.get(0).id()).orElse(null);
+            }
         }
 
-        Brand brand = dto.brandId() != null
-                ? brandRepo.findById(dto.brandId()).orElse(null)
-                : null;
 
         SupplementDetail detail = supplementDetailRepo.findById(dto.supplementId()).orElse(null);
 
-        // ✅ 3. Product 빌드
-        Product product = Product.builder()
-                .name(dto.name() != null ? dto.name() : crawled != null ? crawled.name() : null)
-                .link(dto.link())
-                .imageUrl(crawled != null ? crawled.imageUrl() : "")
-                .dosageValue(dto.dosageValue())
-                .dosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()))
-                .price(dto.price() != null ? dto.price() : parsePrice(crawled != null ? crawled.price() : null))
-                .pricePerDose(dto.pricePerDose() != null ? dto.pricePerDose() : parsePrice(crawled != null ? crawled.pricePerDose() : null))
-                .brand(brand)
-                .supplementDetail(detail)
-                .build();
+            Product product = Product.builder()
+                    .name((dto.name() != null && !dto.name().isBlank())
+                            ? dto.name()
+                            : (crawled != null ? crawled.name() : null))
+                    .siteType(siteType)
+                    .siteProductId(crawled != null ? crawled.siteProductId() : null)
+                    .dosageValue(dto.dosageValue())
+                    .dosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()))
+                    .price(dto.price() != null ? dto.price() : (crawled != null ? crawled.price() : null))
+                    .pricePerDose(dto.pricePerDose() != null ? dto.pricePerDose() : (crawled != null ? crawled.pricePerDose() : null))
+                    .brand(brand)
+                    .supplementDetail(detail)
+                    .build();
 
-        productRepo.save(product);
-        return ResponseEntity.ok("✅ 제품 등록 완료");
-    }
+            productRepo.save(product);
+            return ResponseEntity.ok("✅ 제품 등록 완료");
 
-
-    private BigDecimal parsePrice(String text) {
-        if (text == null) return null;
-        try {
-            String number = text.replaceAll("[^\\d.]", ""); // ₩, /, 단위 등 제거
-            return new BigDecimal(number);
-        } catch (NumberFormatException e) {
-            log.warn("가격 파싱 실패: {}", text);
-            return null;
-        }
     }
 
     @Transactional
@@ -388,7 +426,7 @@ public class SupplementService {
 
         product.setName(dto.name());
         product.setDosageValue(dto.dosageValue());
-        product.setDosageUnit(dto.dosageUnit());
+        product.setDosageUnit(EnumService.DosageUnit.fromString(dto.dosageUnit()));
         product.setPrice(dto.price());
         product.setPricePerDose(dto.pricePerDose());
         return ResponseEntity.ok("✅ 제품 수정 완료");
@@ -400,6 +438,8 @@ public class SupplementService {
                .map(ProductResponse::fromEntity)
                .toList();
     }
+
+
     public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         productRepo.deleteById(id);
         return ResponseEntity.ok("제품 삭제 완료");
