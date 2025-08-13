@@ -41,4 +41,4 @@ Spring Security 커스터마이징
 
 📌 개발/운영 환경
 
-현재 로컬 환경에서 개발 중이며, 향후 Oracle Cloud 기반 배포 예정
+현재 로컬 환경(Intellij(MAVEN), Mysql Workbench, Docker) 에서 개발 중이며, 향후 Oracle Cloud 기반 배포 예정

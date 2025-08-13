@@ -2,6 +2,9 @@ package com.example.examine.controller;
 
 import com.example.examine.dto.request.UserProductRequest;
 import com.example.examine.dto.request.UserRequest;
+import com.example.examine.dto.response.TableRespose.Data;
+import com.example.examine.dto.response.TableRespose.DataList;
+import com.example.examine.dto.response.UserResponse.UserAlarmResponse;
 import com.example.examine.dto.response.UserResponse.UserResponse;
 import com.example.examine.service.EntityService.AlarmService;
 import com.example.examine.service.EntityService.UserService;
@@ -13,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -84,11 +88,11 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/cart")
-    public ResponseEntity<String> updateCart(
-            @RequestBody List<UserProductRequest> carts,
+    public Data<BigDecimal> updateCart(
+            @RequestBody UserProductRequest cart,
             Authentication authentication
     ) {
-        return userService.updateCart(authentication, carts);
+        return userService.updateCart(authentication, cart);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
@@ -117,6 +121,11 @@ public class UserController {
     public ResponseEntity<String> readALLAlarm(Authentication authentication) {
         alarmService.readAllAlarm(authentication);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/alarm")
+    public DataList<UserAlarmResponse> getAlarm(Authentication authentication) {
+        return alarmService.getAlarm(authentication);
     }
 
     @DeleteMapping("/alarm/{alarmId}")

@@ -123,3 +123,10 @@ dto 만들때 jpql로 직접 dto까지 만들지, 중간에 서비스로 조립�
     기본적으로 jpql 사용하되 부분적으로 native query 사용
 
     jpql내의 native query, queryDSL, mybatis 등 주
+
+    필터링 매서드에서 리미트를 어디다 걸지 고민(전체개수 기준은 성능, 필터링 기준은 사용자)
+
+    첫단추를 꿰는게 중요하다 나중에 리팩토링 할때 몇배는 고생한다
+
+
+    suggest 결과 map 형태로 캐싱해ㅓ api 호츌 최소화

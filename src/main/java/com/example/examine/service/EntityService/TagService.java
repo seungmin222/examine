@@ -4,6 +4,11 @@ import com.example.examine.controller.DetailController;
 import com.example.examine.dto.request.TagDetailRequest;
 import com.example.examine.dto.request.TagRequest;
 import com.example.examine.dto.response.*;
+import com.example.examine.dto.response.TableRespose.DataList;
+import com.example.examine.dto.response.TableRespose.DataListInMap;
+import com.example.examine.dto.response.TableRespose.DataStructure;
+import com.example.examine.dto.response.TableRespose.TableResponse;
+import com.example.examine.entity.Journal;
 import com.example.examine.entity.Page;
 import com.example.examine.entity.Tag.Effect.EffectTag;
 import com.example.examine.entity.Tag.Effect.SideEffectTag;
@@ -23,6 +28,9 @@ import com.example.examine.repository.PageRepository;
 import com.example.examine.repository.SERepository.SupplementEffectRepository;
 import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
 import com.example.examine.repository.TagRepository.*;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.core.types.dsl.PathBuilder;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -44,10 +52,16 @@ public class TagService {
     private final EffectTagRepository effectRepo;
     private final SideEffectTagRepository sideEffectRepo;
     private final TrialDesignRepository trialDesignRepo;
+    private final SupplementDslRepository supplementDslRepo;
+    private final TypeTagDslRepository typeDslRepo;
+    private final EffectTagDslRepository effectDslRepo;
+    private final SideEffectTagDslRepository sideEffectDslRepo;
+    private final TrialDesignDslRepository trialDesignDslRepo;
     private final EffectDetailRepository effectDetailRepo;
     private final SideEffectDetailRepository sideEffectDetailRepo;
     private final TypeDetailRepository typeDetailRepo;
     private final BrandRepository brandRepo;
+    private final BrandDslRepository brandDslRepo;
     private final PageRepository pageRepo;
     private final SupplementEffectRepository supplementEffectRepo;
     private final SupplementSideEffectRepository supplementSideEffectRepo;
@@ -56,6 +70,7 @@ public class TagService {
     private final JournalService journalService;
 
     private final Map<String, TagRepository<? extends Tag>> tagRepoMap = new HashMap<>();
+    private final Map<String, TagDslRepository<? extends Tag>> tagDslRepoMap = new HashMap<>();
     private final Map<String, DetailRepository<? extends Detail>> detailRepoMap = new HashMap<>();
 
     @PostConstruct
@@ -68,6 +83,16 @@ public class TagService {
         tagRepoMap.put("brand", brandRepo);
     }
 
+    @PostConstruct
+    private void initTagDslRepoMap() {
+        tagDslRepoMap.put("type", typeDslRepo);
+        tagDslRepoMap.put("effect", effectDslRepo);
+        tagDslRepoMap.put("sideEffect", sideEffectDslRepo);
+        tagDslRepoMap.put("trialDesign", trialDesignDslRepo);
+        tagDslRepoMap.put("supplement", supplementDslRepo);
+        tagDslRepoMap.put("brand", brandDslRepo);
+    }
+
 
     @PostConstruct
     private void initDetailRepoMap() {
@@ -75,6 +100,39 @@ public class TagService {
         detailRepoMap.put("effect", effectDetailRepo);
         detailRepoMap.put("sideEffect", sideEffectDetailRepo);
     }
+
+
+    public enum SortField {
+        id("id"),
+        korName("korName"),
+        engName("engName"),
+        tier("tier");
+
+        private final String field;
+
+        SortField(String field) {
+            this.field = field;
+        }
+
+        public OrderSpecifier<?> getOrderSpecifier(PathBuilder<?> path, boolean asc) {
+            return switch (field) {
+                case "id" -> asc ? path.getComparable("id", Long.class).asc()
+                        : path.getComparable("id", Long.class).desc();
+                case "korName", "engName", "tier" -> asc ? path.getString(field).asc()
+                        : path.getString(field).desc();
+                default -> throw new IllegalArgumentException("지원하지 않는 정렬 필드: " + field);
+            };
+        }
+
+        public static SortField fromString(String raw) {
+            return Arrays.stream(values())
+                    .filter(v -> v.name().equalsIgnoreCase(raw))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("잘못된 정렬 기준: " + raw));
+        }
+    }
+
+
 
     public ResponseEntity<String> create(TagRequest dto) {
             Tag tag = switch (dto.type()) {
@@ -148,74 +206,47 @@ public class TagService {
         return ResponseEntity.ok().build();
     }
 
-
-    public Map<String, List<TagResponse>> sort(List<String> types, Sort sort) {
+    public TableResponse<DataStructure> get(String keyword, List<String> type, String sort, Boolean asc, int limit, int offset) {
         Map<String, List<TagResponse>> tagMap = new HashMap<>();
-
-        for (String t : types) {
-            TagRepository<?> repo = tagRepoMap.get(t);
-            if (repo == null) throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
-
-            // trialDesign만 특별 정렬 처리
-            Sort appliedSort = t.equals("trialDesign")
-                    ? Sort.by(Sort.Direction.ASC, "id")
-                    : sort;
-
-            List<TagResponse> tags = repo.findAll(appliedSort)
-                    .stream()
-                    .map(TagResponse::fromEntity)
-                    .toList();
-
-            tagMap.put(t, tags);
-        }
-
-        return tagMap;
-    }
-
-    public Map<String, List<TagResponse>> search(String keyword, List<String> type, Sort sort) {
-        Map<String, List<TagResponse>> tagMap = new HashMap<>();
+        boolean hasMore = false;
 
         for (String t : type) {
-            TagRepository<?> repo = tagRepoMap.get(t);
+            TagDslRepository<?> repo = tagDslRepoMap.get(t);
             if (repo == null) throw new IllegalArgumentException("지원하지 않는 태그 타입: " + t);
 
-            // trialDesign만 특별 정렬 처리
-            Sort appliedSort = t.equals("trialDesign")
-                    ? Sort.by(Sort.Direction.ASC, "id")
-                    : sort;
+            List<? extends Tag> fetched = repo.get(keyword, SortField.fromString(sort), asc, limit + 1 , offset);
 
-            List<TagResponse> tags = repo.findByKeyword(keyword, appliedSort)
+            if (fetched.size() > limit) hasMore = true;
+
+            List<TagResponse> tags = fetched
                     .stream()
+                    .limit(limit)
                     .map(TagResponse::fromEntity)
                     .toList();
 
             tagMap.put(t, tags);
         }
 
-        return tagMap;
+        return new TableResponse<>(new DataListInMap<>(tagMap), hasMore, limit, offset, 0 );
     }
 
 
     public List<?> getTagTable(String type, Sort sort){
-        switch (type) {
-            case "effect":
-                return effectRepo.findAllWithRelation(sort)
-                        .stream()
-                        .map(EffectTableResponse::fromEntity)
-                        .toList();
-            case "sideEffect":
-                return sideEffectRepo.findAllWithRelation(sort)
-                        .stream()
-                        .map(EffectTableResponse::fromEntity)
-                        .toList();
-            case "type":
-                return typeRepo.findAllWithRelation(sort)
-                        .stream()
-                        .map(e->TagTableResponse.fromEntity(e,e.getSt().stream().map(st-> new TagResponse(st.getId().getSupplementId(), st.getSupplementKorName(), st.getSupplementEngName(), "")).toList()))
-                        .toList();
-            default:
-                throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
-        }
+        return switch (type) {
+            case "effect" -> effectRepo.findAllWithRelation(sort)
+                    .stream()
+                    .map(EffectTableResponse::fromEntity)
+                    .toList();
+            case "sideEffect" -> sideEffectRepo.findAllWithRelation(sort)
+                    .stream()
+                    .map(EffectTableResponse::fromEntity)
+                    .toList();
+            case "type" -> typeRepo.findAllWithRelation(sort)
+                    .stream()
+                    .map(e -> TagTableResponse.fromEntity(e, e.getSt().stream().map(st -> new TagResponse(st.getId().getSupplementId(), st.getSupplementKorName(), st.getSupplementEngName(), "")).toList()))
+                    .toList();
+            default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
+        };
     }
 
     public List<?> searchEffectTable(String type, String keyword, Sort sort){
@@ -269,12 +300,13 @@ public class TagService {
         };
     }
 
-    public List<JournalResponse> getJournals(String type, Long id){
-        return switch (type) {
-            case "effect" -> journalService.toJournalResponses(jseRepo.findJournalsByEffectId(id));
-            case "sideEffect" -> journalService.toJournalResponses(jsseRepo.findJournalsByEffectId(id));
+    public TableResponse<DataStructure> getJournals(String type, Long id) {
+        DataStructure data = switch (type) {
+            case "effect" -> journalService.toJournalResponses(jseRepo.findJournalsByEffectId(id).stream().map(Journal::getId).toList());
+            case "sideEffect" -> journalService.toJournalResponses(jsseRepo.findJournalsByEffectId(id).stream().map(Journal::getId).toList());
             default -> throw new IllegalArgumentException("지원하지 않는 태그 타입: " + type);
         };
+        return new TableResponse<>(data, false, 1000, 0, 0);
     }
 
     public ResponseEntity<String> delete(String type, Long id) {

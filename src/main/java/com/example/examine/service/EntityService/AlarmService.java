@@ -1,5 +1,8 @@
 package com.example.examine.service.EntityService;
 
+import com.example.examine.dto.response.AlarmResponse;
+import com.example.examine.dto.response.TableRespose.DataList;
+import com.example.examine.dto.response.UserResponse.UserAlarmResponse;
 import com.example.examine.entity.Alarm;
 import com.example.examine.entity.Page;
 import com.example.examine.entity.User.User;
@@ -9,7 +12,9 @@ import com.example.examine.repository.AlarmRepository;
 import com.example.examine.repository.UserRepository.UserAlarmRepository;
 import com.example.examine.repository.UserRepository.UserPageRepository;
 import com.example.examine.repository.UserRepository.UserRepository;
-import jakarta.transaction.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AlarmService {
     private static final Logger log = LoggerFactory.getLogger(AlarmService.class);
 
+    private final ObjectMapper objectMapper;
     private final RedisTemplate<String, String> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private static final Long TIMEOUT = 60L * 1000 * 60; // 60분
     private final UserAlarmRepository userAlarmRepo;
     private final AlarmRepository alarmRepo;
@@ -53,13 +61,13 @@ public class AlarmService {
         return emitter;
     }
 
-    public void sendToUser(Long userId, String alarmId) {
+    public void sendToUser(Long userId, AlarmResponse alarm) {
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("alarm")
-                        .data(alarmId));
+                        .data(alarm));
             } catch (IOException e) {
                 emitters.remove(userId);
             }
@@ -92,6 +100,22 @@ public class AlarmService {
         userAlarmRepo.readAllByUserId(userId); // ✅ 단일 UPDATE
 
         return ResponseEntity.ok().build();
+    }
+
+    @Transactional(readOnly = true)
+    public DataList<UserAlarmResponse> getAlarm(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        Long userId = ((User) auth.getPrincipal()).getId();
+
+        List<UserAlarm> alarms = userAlarmRepo.findAllByUserId(userId);
+
+        return new DataList<>(alarms.stream()
+                .map(UserAlarmResponse::fromEntity)
+                .toList()
+                );
     }
 
 
@@ -130,6 +154,7 @@ public class AlarmService {
         alarmRepo.save(alarm);
 
         // 북마크 유저 조회
+        AlarmResponse dto = AlarmResponse.fromEntity(alarm);
         List<Long> userIds = userPageRepo.findUserIdsByPageId(page.getId());
 
         for (Long userId : userIds) {
@@ -141,8 +166,15 @@ public class AlarmService {
 
             log.info("알림 생성 page: {}, message: {}", page.getLink(), message);
 
-            // Redis 채널로 알림 ID 전송
-            redisTemplate.convertAndSend("alarm:user:" + userId, alarm.getId().toString());
+            String json;
+            try {
+                json = objectMapper.writeValueAsString(dto);
+            } catch (Exception e) {
+                throw new RuntimeException("알림 직렬화 실패", e);
+            }
+
+            // 채널로 발행
+            stringRedisTemplate.convertAndSend("alarm:user:" + userId, json);
         }
     }
 
@@ -154,6 +186,8 @@ public class AlarmService {
                 .build();
 
         alarmRepo.save(alarm);
+
+        AlarmResponse dto = AlarmResponse.fromEntity(alarm);
         List<User> users = userRepo.findAll();
 
         for (User user : users) {
@@ -166,9 +200,15 @@ public class AlarmService {
             userAlarmRepo.save(userAlarm);
 
             log.info("공지 생성 message: {}", message);
+            String json;
 
-            // Redis 채널로 알림 ID 전송
-            redisTemplate.convertAndSend("alarm:user:" + user.getId(), alarm.getId().toString());
+            try {
+                json = objectMapper.writeValueAsString(dto);
+            } catch (Exception e) {
+                throw new RuntimeException("알림 직렬화 실패", e);
+            }
+            // 채널로 발행
+            stringRedisTemplate.convertAndSend("alarm:user:" + user.getId(), json);
         }
     }
 

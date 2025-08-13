@@ -21,7 +21,12 @@ import java.util.Set;
 @Entity
 @Table(
         name = "journal",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"site_type", "site_journal_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"site_type", "site_journal_id"}),
+        indexes = {
+                @Index(name = "idx_journal_title", columnList = "title"),
+                @Index(name = "idx_journal_date", columnList = "date"),
+                @Index(name = "idx_journal_score", columnList = "score")
+        }
 )
 @Getter
 @Setter

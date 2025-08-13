@@ -2,18 +2,21 @@ package com.example.examine.repository.UserRepository;
 
 import com.example.examine.entity.User.UserProduct;
 import com.example.examine.entity.User.UserProductId;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserProductRepository extends JpaRepository<UserProduct, UserProductId> {
 
-    // ✅ 유저가 장바구니에 담은 전체 상품
-    List<UserProduct> findByUserId(Long userId);
-
-    // ✅ 유저의 특정 상품 한 개 (optional로 반환 가능)
-    UserProduct findByUserIdAndProductId(Long userId, Long productId);
-
-    // ✅ 상품 기준으로 담은 유저들 (관리용)
-    List<UserProduct> findByProductId(Long productId);
+    @Query("""
+        select coalesce(sum(p.price * up.quantity), 0)
+        from UserProduct up
+        join up.product p
+        where up.id.userId = :userId
+          and up.checked = true
+    """)
+    BigDecimal sumCheckedTotal(@Param("userId") Long userId);
 }

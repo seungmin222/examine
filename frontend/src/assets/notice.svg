@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="absolute -top-1 -right-3">
+    <!-- 빨간 원 -->
+    <circle cx="12" cy="12" r="10" fill="#f87171" />
+
+    <!-- 흰색 느낌표 -->
+    <text x="12" y="16" text-anchor="middle" font-size="14" fill="white" font-weight="bold">!</text>
+</svg>

@@ -19,4 +19,7 @@ public interface UserAlarmRepository extends JpaRepository<UserAlarm, UserAlarmI
     @Modifying
     @Query("UPDATE UserAlarm ua SET ua.isRead = true WHERE ua.user.id = :userId")
     int readAllByUserId(@Param("userId") Long userId);
+
+    @Query("select a from UserAlarm a where a.user.id = :userId order by a.id.alarmId desc")
+    List<UserAlarm> findAllByUserId(@Param("userId") Long userId);
 }

@@ -7,6 +7,8 @@ import com.example.examine.dto.request.TagDetailRequest;
 import com.example.examine.dto.request.TagRequest;
 
 import com.example.examine.dto.response.*;
+import com.example.examine.dto.response.TableRespose.DataStructure;
+import com.example.examine.dto.response.TableRespose.TableResponse;
 import com.example.examine.service.EntityService.TagService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -47,24 +49,15 @@ public class TagController {
         return tagService.updateDetail(dto);
     }
 
-    @GetMapping
-    public Map<String, List<TagResponse>> getTags(
+    @GetMapping()
+    public TableResponse<DataStructure> get(
             @RequestParam List<String> type,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
-
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.sort(type, sorting);
-    }
-
-    @GetMapping("/search")
-    public Map<String, List<TagResponse>> searchTags(
-            @RequestParam String keyword,
-            @RequestParam List<String> type,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction) {
-        Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
-        return tagService.search(keyword, type, sorting);
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "korName") String sort,
+            @RequestParam(defaultValue = "true") Boolean asc,
+            @RequestParam(defaultValue = "30") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+        return tagService.get(keyword, type, sort, asc, limit, offset);
     }
 
     @GetMapping("/detail/supplements/{type}/{id}")
@@ -77,10 +70,10 @@ public class TagController {
     }
 
     @GetMapping("/detail/journals/{type}/{id}")
-    public List<JournalResponse> getJournal(@PathVariable String type,
-                                    @PathVariable Long id,
-                                    @RequestParam(defaultValue = "id") String sort,
-                                    @RequestParam(defaultValue = "asc") String direction) {
+    public TableResponse<DataStructure> getJournal(@PathVariable String type,
+                                                   @PathVariable Long id,
+                                                   @RequestParam(defaultValue = "id") String sort,
+                                                   @RequestParam(defaultValue = "asc") String direction) {
         Sort sorting = Sort.by(Sort.Direction.fromString(direction), sort);
         return tagService.getJournals(type, id);
     }

@@ -7,6 +7,7 @@ import com.example.examine.dto.request.SupplementRequest;
 import com.example.examine.dto.request.TextSimilarityRequest;
 import com.example.examine.dto.response.*;
 import com.example.examine.dto.response.Crawler.ProductCrawlerResponse;
+import com.example.examine.dto.response.TableRespose.DataList;
 import com.example.examine.entity.*;
 import com.example.examine.entity.Tag.Brand;
 import com.example.examine.entity.Tag.Supplement;
@@ -278,7 +279,7 @@ public class SupplementService {
         journals.addAll(jseRepo.findJournalsBySupplementId(id));
         journals.addAll(jsseRepo.findJournalsBySupplementId(id));
 
-        return journalService.toJournalResponses(journals.stream().toList());
+        return ((DataList)journalService.toJournalResponses(journals.stream().map(Journal::getId).toList())).list();
     }
 
     @Transactional(readOnly = true)

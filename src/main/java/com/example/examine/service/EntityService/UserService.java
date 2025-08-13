@@ -2,6 +2,7 @@ package com.example.examine.service.EntityService;
 
 import com.example.examine.dto.request.UserProductRequest;
 import com.example.examine.dto.request.UserRequest;
+import com.example.examine.dto.response.TableRespose.Data;
 import com.example.examine.dto.response.UserResponse.UserResponse;
 import com.example.examine.entity.Alarm;
 import com.example.examine.entity.Page;
@@ -33,11 +34,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -206,39 +205,35 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<String> updateCart(Authentication auth, List<UserProductRequest> cartItems) {
+    public Data<BigDecimal> updateCart(Authentication auth, UserProductRequest item) {
         if (auth == null || !auth.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
         }
 
         User user = (User) auth.getPrincipal();
+        Long UserId = user.getId();
+        UserProductId id = new UserProductId(UserId, item.id());
 
-        // Step 1: ID 추출
-        Set<UserProductId> ids = cartItems.stream()
-                .map(e -> new UserProductId(user.getId(), e.id()))
-                .collect(Collectors.toSet());
+        // 기존 엔티티 조회
+        Optional<UserProduct> opt = userProductRepo.findById(id);
 
-        // Step 2: 일괄 조회
-        List<UserProduct> userProducts = userProductRepo.findAllById(ids);
-        Map<Long, UserProduct> productMap = userProducts.stream()
-                .collect(Collectors.toMap(p -> p.getId().getProductId(), p -> p));
-
-        // Step 3: 수정 or 삭제
-        for (UserProductRequest req : cartItems) {
-            UserProduct product = productMap.get(req.id());
-            if (product == null) continue;
-
-            if (req.quantity() < 1) {
-                userProductRepo.delete(product);
-            } else {
-                product.setQuantity(req.quantity());
-                product.setChecked(req.isChecked());
-            }
+        // 수량 < 1이면 삭제
+        if (item.quantity() < 1) {
+            // 존재하면 삭제, 없어도 멱등하게 OK 응답 주고 싶다면 아래처럼 처리
+            opt.ifPresent(userProductRepo::delete);
         }
 
-        return ResponseEntity.ok("🛒 장바구니에 추가 완료");
-    }
+        // 존재해야만 수정 (없으면 404)
+        UserProduct userProduct = opt.orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "장바구니에 해당 상품이 없습니다.")
+        );
 
+        userProduct.setQuantity(item.quantity());
+        userProduct.setChecked(item.isChecked());
+
+        // @Transactional + JPA 더티체킹으로 자동 반영
+        return new Data(userProductRepo.sumCheckedTotal(UserId));
+    }
 
 
     @Transactional

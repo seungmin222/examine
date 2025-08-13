@@ -127,7 +127,7 @@ async function loadTags() {
 
 // 태그 필터링
 async function filterByTag() {
-    const limit = state.offset; //기존 랜더링 된 것들 중 필터링
+    const limit = state.offset + 1; //기존 랜더링 된 것들 중 필터링
     state.offset = 0;
     state.method = 'filter';
 

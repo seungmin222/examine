@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 40 60 30"
+     width="24" height="24">
+    <defs>
+        <clipPath id="diagonal-split">
+            <polygon points="0,100 0,0 100,0" />
+        </clipPath>
+    </defs>
+
+    <!-- 알약 외곽 -->
+    <g transform="rotate(-45 50 50)">
+        <rect x="20" y="40" width="60" height="30" rx="15"
+              fill="white" stroke="#c2185b" stroke-width="3    " />
+
+        <!-- 아래쪽 분홍색 반 (알약을 세로 중심선 기준으로 오른쪽만 분할) -->
+        <clipPath id="half-pill-clip">
+            <rect x="50" y="0" width="50" height="100" />
+        </clipPath>
+
+        <rect x="20" y="40" width="60" height="30" rx="15"
+              fill="#c2185b" fill-opacity="0.3"
+              clip-path="url(#half-pill-clip)"
+              transform="rotate(-180 50 55)" />
+
+        <!-- 십자선 세로 -->
+        <rect x="48" y="40" width="3" height="30" rx="2" fill="#c2185b" />
+
+        <!-- 십자선 가로 -->
+        <rect x="35" y="48" width="30" height="3" rx="2" fill="#c2185b" />
+    </g>
+</svg>

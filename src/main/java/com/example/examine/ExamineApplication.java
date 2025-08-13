@@ -15,14 +15,16 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ExamineApplication {
 	public static void main(String[] args) {
 		// ✅ .env 로드
-		Dotenv dotenv = Dotenv.load();
+		Dotenv dotenv = Dotenv.configure().filename(".env.local").load();
 
 		// ✅ Spring에 환경 변수로 주입
 		new SpringApplicationBuilder(ExamineApplication.class)
 				.properties(
 						"DB_URL=" + dotenv.get("DB_URL"),
 						"DB_USER=" + dotenv.get("DB_USER"),
-						"DB_PASSWORD=" + dotenv.get("DB_PASSWORD")
+						"DB_PASSWORD=" + dotenv.get("DB_PASSWORD"),
+						"REDIS_HOST=" + dotenv.get("REDIS_HOST"),
+						"REDIS_PORT=" + dotenv.get("REDIS_PORT")
 				)
 				.run(args);
 	}

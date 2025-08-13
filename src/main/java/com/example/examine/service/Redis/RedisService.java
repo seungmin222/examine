@@ -25,7 +25,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class RedisService {
-    private static final Logger log = LoggerFactory.getLogger(DetailController.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisService.class);
     private final UserRepository userRepo;
     private final PageRepository pageRepo;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -119,7 +119,7 @@ public class RedisService {
         String key = "page:views:" + pageId;
 
         // ✅ Redis에 키 없으면 DB에서 가져와 초기화
-        if (!Boolean.TRUE.equals(redisViewTemplate.hasKey(key))) {
+        if (!redisViewTemplate.hasKey(key)) {
             Page page = pageRepo.findById(pageId)
                     .orElseThrow(() -> new RuntimeException("Page not found"));
             redisViewTemplate.opsForValue().set(key, String.valueOf(page.getViewCount()));

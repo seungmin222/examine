@@ -8,3 +8,15 @@ npx tailwindcss -i src/input.css -o src/main/resources/static/dist/output.css --
 
 
 docker exec -it 86af032b8af2120333b4904c12e03a00d264b2059d554956ac4c6e8ae85c9691 redis-cli
+
+DB_URL=jdbc:mysql://localhost:3306/examine?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+
+docker rm -f examine-test
+docker build -t examine:local .
+docker run -d -p 8080:8080 --name examine-test examine:local
+docker logs -f examine-test
+
+
+cd frontend
+npm run dev
+npx tailwindcss -i frontend/src/input.css -o frontend/src/output.css --watch

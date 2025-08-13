@@ -991,6 +991,11 @@
       background-color: var(--color-scroll-button); /* 연보라, 50% 투명도 */
    }
 
+  svg{
+    width:24px;
+    height:24px;
+  }
+
   .scroll button svg {
     width: var(--svg-width);
     height: var(--svg-height);

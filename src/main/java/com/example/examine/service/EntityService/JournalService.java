@@ -9,7 +9,9 @@ import com.example.examine.dto.response.JournalResponse;
 import com.example.examine.dto.response.LLM.JournalAnalysisWithEffects;
 import com.example.examine.dto.response.LLM.LLMJSE;
 import com.example.examine.dto.response.LLM.LLMJSEId;
-import com.example.examine.dto.response.TableResponse;
+import com.example.examine.dto.response.TableRespose.DataList;
+import com.example.examine.dto.response.TableRespose.DataStructure;
+import com.example.examine.dto.response.TableRespose.TableResponse;
 import com.example.examine.entity.*;
 import com.example.examine.dto.request.JournalRequest;
 import com.example.examine.entity.SupplementEffect.*;
@@ -20,11 +22,11 @@ import com.example.examine.entity.JournalSupplementEffect.JournalSupplementSideE
 import com.example.examine.entity.Tag.Supplement;
 import com.example.examine.entity.Tag.TrialDesign;
 import com.example.examine.repository.*;
-import com.example.examine.repository.JSERepository.JournalSupplementEffectQueryRepository;
+import com.example.examine.repository.JSERepository.JournalSupplementEffectDslRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementEffectRepository;
-import com.example.examine.repository.JSERepository.JournalSupplementSideEffectQueryRepository;
+import com.example.examine.repository.JSERepository.JournalSupplementSideEffectDslRepository;
 import com.example.examine.repository.JSERepository.JournalSupplementSideEffectRepository;
-import com.example.examine.repository.JournalRepository.JournalQueryRepository;
+import com.example.examine.repository.JournalRepository.JournalDslRepository;
 import com.example.examine.repository.JournalRepository.JournalRepository;
 import com.example.examine.repository.SERepository.SupplementEffectRepository;
 import com.example.examine.repository.SERepository.SupplementSideEffectRepository;
@@ -40,11 +42,13 @@ import com.example.examine.service.util.EnumService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +57,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,7 +75,7 @@ public class JournalService {
     private static final Logger log = LoggerFactory.getLogger(JournalService.class);
 
     private final JournalRepository journalRepo;
-    private final JournalQueryRepository journalQueryRepo;
+    private final JournalDslRepository journalQueryRepo;
     private final TrialDesignRepository trialDesignRepo;
     private final SupplementRepository supplementRepo;
     private final EffectTagRepository effectRepo;
@@ -77,9 +83,9 @@ public class JournalService {
     private final SupplementEffectRepository seRepo;
     private final SupplementSideEffectRepository sseRepo;
     private final JournalSupplementEffectRepository jseRepo;
-    private final JournalSupplementEffectQueryRepository jseQueryRepo;
+    private final JournalSupplementEffectDslRepository jseDslRepo;
     private final JournalSupplementSideEffectRepository jsseRepo;
-    private final JournalSupplementSideEffectQueryRepository jsseQueryRepo;
+    private final JournalSupplementSideEffectDslRepository jsseDslRepo;
     private final PageRepository pageRepo;
     private final PubmedCrawler pubmedCrawler;
     private final ClinicalTrialsCrawler clinicalTrialsCrawler;
@@ -91,6 +97,62 @@ public class JournalService {
         EFFECT,
         SIDE_EFFECT
     }
+
+    public enum SortField {
+        title(QJournal.journal.title) {
+            @Override
+            public BooleanExpression between(QJournal journal, Journal left, Journal right, boolean asc) {
+                String min = left.getTitle();
+                String max = right.getTitle();
+                return asc
+                        ? journal.title.goe(min).and(journal.title.loe(max))
+                        : journal.title.loe(min).and(journal.title.goe(max));
+            }
+        },
+
+        date(QJournal.journal.date) {
+            @Override
+            public BooleanExpression between(QJournal journal, Journal left, Journal right, boolean asc) {
+                LocalDate min = left.getDate();
+                LocalDate max = right.getDate();
+                return asc
+                        ? journal.date.goe(min).and(journal.date.loe(max))
+                        : journal.date.loe(min).and(journal.date.goe(max));
+            }
+        },
+
+        score(QJournal.journal.score) {
+            @Override
+            public BooleanExpression between(QJournal journal, Journal left, Journal right, boolean asc) {
+                BigDecimal min = left.getScore();
+                BigDecimal max = right.getScore();
+                return asc
+                        ? journal.score.goe(min).and(journal.score.loe(max))
+                        : journal.score.loe(min).and(journal.score.goe(max));
+            }
+        };
+
+        private final ComparableExpressionBase<?> expression;
+
+        SortField(ComparableExpressionBase<?> expression) {
+            this.expression = expression;
+        }
+
+        public OrderSpecifier<?> getOrderSpecifier(boolean asc) {
+            return asc ? expression.asc() : expression.desc();
+        }
+
+        public abstract BooleanExpression between(QJournal journal, Journal left, Journal right, boolean asc);
+
+        public static SortField fromString(String raw) {
+            return Arrays.stream(values())
+                    .filter(v -> v.name().equalsIgnoreCase(raw))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid sort property: " + raw));
+        }
+    }
+
+
 
     @Transactional
     public ResponseEntity<String> createOne(JournalRequest dto) {
@@ -617,10 +679,10 @@ public class JournalService {
 
 
 
-    public List<JournalResponse> toJournalResponses(List<Journal> journals) {
-        if (journals.isEmpty()) return List.of();
+    public DataStructure toJournalResponses(List<Long> journalIds) {
+        if (journalIds.isEmpty()) return new DataList<>( List.of());
 
-        List<Long> journalIds = journals.stream().map(Journal::getId).toList();
+        List<Journal> journals = journalQueryRepo.findByIdsWithTrialDesign(journalIds);
 
         // 2. JSE/JSSE는 따로 불러서 맵으로 정리
         List<JournalSupplementEffect> jseList = jseRepo.fetchJSEWithSEByJournalIds(journalIds);
@@ -632,92 +694,35 @@ public class JournalService {
                 .collect(Collectors.groupingBy(jsse -> jsse.getId().getJournalId()));
 
         // 3. JournalResponse 조립
-        return journals.stream()
+        return new DataList<>(journals.stream()
                 .map(journal -> JournalResponse.fromEntity(
                         journal,
                         jseMap.getOrDefault(journal.getId(), List.of()).stream().map(JSEResponse::fromEntity).toList(),
                         jsseMap.getOrDefault(journal.getId(), List.of()).stream().map(JSEResponse::fromEntity).toList()
                 ))
-                .toList();
-    }
-
-    public TableResponse<JournalResponse> toTableResponse(List<Journal> journals, int limit) {
-        boolean hasMore = journals.size() > limit;
-
-        if (hasMore) {
-            journals = journals.subList(0, limit);
-        }
-
-        return new TableResponse<>(toJournalResponses(journals), hasMore);
-    }
-
-
-    @Transactional(readOnly = true)
-    public TableResponse<JournalResponse> sort(String sort, boolean asc, int limit, int offset) {
-        List<Journal> journals = journalQueryRepo.findAll(sort, asc, limit + 1, offset);
-        return toTableResponse(journals, limit);
-    }
-
-
-    @Transactional(readOnly = true)
-    public TableResponse<JournalResponse> search(String keyword, String sort, boolean asc, int limit, int offset) {
-        List<Journal> journals = journalQueryRepo.findByKeyword(keyword, sort, asc, limit + 1, offset);
-        return toTableResponse(journals, limit);
+                .toList());
     }
 
     @Transactional(readOnly = true)
-    public TableResponse<JournalResponse> findFiltered(
+    public TableResponse<DataStructure> get(
             List<Long> trialDesignIds,
             List<Integer> blinds,
             List<Boolean> parallels,
             List<Long> supplementIds,
             List<Long> effectIds,
             List<Long> sideEffectIds,
+            String keyword,
             String sort,
             Boolean asc,
             int limit,
             int offset
     ) {
-        // 1. 기준 정렬/페이징된 전체 ID
-        List<Long> baseIds = journalQueryRepo.findAllIds(sort, asc, limit + 1, offset);
-        if (baseIds.isEmpty()) return toTableResponse(List.of(), limit);
 
-        Set<Long> filtered = new HashSet<>(baseIds);
+        List<Long>journals = journalQueryRepo.get(trialDesignIds,blinds,parallels,supplementIds,effectIds,sideEffectIds,keyword,SortField.fromString(sort),asc, limit+1, offset);
+        boolean hasMore = journals.size() > limit;
+        if(hasMore) journals = journals.subList(0, limit);
 
-        // 2. filter 조건별 교집합
-        if (trialDesignIds != null || blinds != null || parallels != null) {
-            List<Long> byDesign = journalQueryRepo.filterByTag(trialDesignIds, blinds, parallels, sort, asc, limit + 1, offset);
-            filtered.retainAll(byDesign);
-        }
-
-        if (supplementIds != null && !supplementIds.isEmpty()) {
-            Set<Long> jseIds = new HashSet<>(jseQueryRepo.findJournalIdsBySupplementIds(supplementIds, sort, asc, limit + 1, offset));
-            Set<Long> jsseIds = new HashSet<>(jsseQueryRepo.findJournalIdsBySupplementIds(supplementIds, sort, asc, limit + 1, offset));
-            jseIds.addAll(jsseIds); // ∪ (OR 조건)
-            filtered.retainAll(jseIds);
-        }
-
-        if (effectIds != null && !effectIds.isEmpty()) {
-            filtered.retainAll(jseQueryRepo.findJournalIdsByEffectIds(effectIds, sort, asc, limit + 1, offset));
-        }
-
-        if (sideEffectIds != null && !sideEffectIds.isEmpty()) {
-            filtered.retainAll(jsseQueryRepo.findJournalIdsBySideEffectIds(sideEffectIds, sort, asc, limit + 1, offset));
-        }
-
-        // 3. 최종 ID 리스트 (정렬 순서 유지)
-        List<Long> finalSortedIds = baseIds.stream()
-                .filter(filtered::contains)
-                .toList();
-
-        if (finalSortedIds.isEmpty()) return toTableResponse(List.of(), limit);
-
-        // 4. 정렬 객체 생성
-        Sort sortObj = Sort.by(asc ? Sort.Direction.ASC : Sort.Direction.DESC, sort);
-
-        // 5. 실제 Journal 조회
-        List<Journal> journals = journalRepo.fetchTrialDesignByIds(finalSortedIds, sortObj);
-        return toTableResponse(journals, limit);
+        return new TableResponse<>(toJournalResponses(journals), hasMore, limit, offset, 0);
     }
 
     @Transactional

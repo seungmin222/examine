@@ -1,0 +1,2223 @@
+/*
+! tailwindcss v3.4.1 | MIT License | https://tailwindcss.com
+*/
+
+/*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  /* 1 */
+  border-width: 0;
+  /* 2 */
+  border-style: solid;
+  /* 2 */
+  border-color: #e5e7eb;
+  /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5;
+  /* 1 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+  -moz-tab-size: 4;
+  /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4;
+  /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* 4 */
+  font-feature-settings: normal;
+  /* 5 */
+  font-variation-settings: normal;
+  /* 6 */
+  -webkit-tap-highlight-color: transparent;
+  /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0;
+  /* 1 */
+  line-height: inherit;
+  /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0;
+  /* 1 */
+  color: inherit;
+  /* 2 */
+  border-top-width: 1px;
+  /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* 1 */
+  font-feature-settings: normal;
+  /* 2 */
+  font-variation-settings: normal;
+  /* 3 */
+  font-size: 1em;
+  /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0;
+  /* 1 */
+  border-color: inherit;
+  /* 2 */
+  border-collapse: collapse;
+  /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  /* 1 */
+  font-feature-settings: inherit;
+  /* 1 */
+  font-variation-settings: inherit;
+  /* 1 */
+  font-size: 100%;
+  /* 1 */
+  font-weight: inherit;
+  /* 1 */
+  line-height: inherit;
+  /* 1 */
+  color: inherit;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+  padding: 0;
+  /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+  /* 1 */
+  background-color: transparent;
+  /* 2 */
+  background-image: none;
+  /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  outline-offset: -2px;
+  /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  /* 1 */
+  color: #9ca3af;
+  /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  /* 1 */
+  vertical-align: middle;
+  /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+
+[hidden] {
+  display: none;
+}
+
+:root {
+  --navbar-height: 60px;
+  --sidebar-min-width: var(--svg-width)+16px;
+  --sidebar-max-width: 20%;
+  --svg-height: 24px;
+  --svg-width: 24px;
+  --z-index-base: 0;
+  --z-index-navbar: 1000;
+  --z-index-sidebar: 600;
+  --z-index-dropdown: 200;
+  --z-index-tooltip: 1000;
+  --z-index-tooltip-body: 800;
+  --z-index-tooltip-tail: 900;
+  --z-index-tooltip-tail-border: 700;
+  --z-index-modal: 400;
+  --z-index-modal-content: 300;
+  --z-index-scroll: 9000;
+  --z-index-alarm: 10000;
+  /*  */
+  --color-background: white;
+  --color-1: #f8e0f0;
+  /* #ffcfea;*/
+  --color-2: #ffe4ec;
+  --color-text: #c2185b;
+  --color-bold-text: #880e4f;
+  --color-button: hotpink;
+  --color-button-text: white;
+  --color-scroll-button: rgba(186, 104, 200, 0.3);
+  --color-scroll-circle: rgba(126, 44, 140, 0.9);
+  --color-scroll-circle-bg: var(--color-scroll-button);
+  --color-arrow: var(--color-scroll-circle);
+  --color-border: #ff6a9c;
+  --color-focus: #fff0f5;
+  --color-focus-button: #ff6a9c;
+  --color-toggle-button: red;
+  --color-selected: #ffcfea;
+  --color-checked: #ff6a9c;
+  --color-tier-s: magenta;
+  --color-tier-a: blue;
+  --color-tier-b: red;
+  --color-tier-c: #B8860B;
+  --color-tier-d: green;
+  --color-tier-f: gray;
+  --color-tier-null: gray;
+  --color-table-header: var(--color-2);
+  --color-table-hover: #ffcfea;
+  /* #ffcfea;*/
+  --color-tooltip: var(--color-sidebar);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-sidebar);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #c2185b;
+  --color-link: #c2185b;
+  --color-link-hover: #ff1493;
+  --color-menu-border: rgba(206, 212, 218, 1);
+  --color-scroll-line: #777;
+  --color-sidebar: #fef0f5;
+  --color-sidebar-border: #ddd;
+}
+
+:root.theme-lavender {
+  --color-background: white;
+  --color-1: #ecd7ef;
+  /*#e1bee7;*/
+  --color-2: #f8eafa;
+  --color-text: #6a1b9a;
+  --color-bold-text: #4a148c;
+  --color-button: #ba68c8;
+  --color-button-text: white;
+  --color-scroll-button: rgba(186, 104, 200, 0.3);
+  --color-scroll-circle: rgba(126, 44, 140, 0.9);
+  --color-scroll-circle-bg: var(--color-scroll-button);
+  --color-arrow: var(--color-scroll-circle);
+  --color-border: #ab47bc;
+  --color-focus: #f3e5f5;
+  --color-focus-button: #ab47bc;
+  --color-toggle-button: #8e24aa;
+  --color-selected: #ce93d8;
+  --color-checked: #ab47bc;
+  --color-tier-s: magenta;
+  --color-tier-a: blue;
+  --color-tier-b: red;
+  --color-tier-c: #B8860B;
+  --color-tier-d: green;
+  --color-tier-f: gray;
+  --color-tier-null: gray;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-sidebar);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-sidebar);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #4a148c;
+  --color-link: #6a1b9a;
+  --color-link-hover: #4a148c;
+  --color-menu-border: rgba(186, 104, 200, 0.5);
+  --color-scroll-line: #ab47bc;
+  --color-sidebar: #f9f0ff;
+  --color-sidebar-border: #d1c4e9;
+}
+
+:root.theme-blue {
+  --color-background: white;
+  --color-1: 	#d6f1fd;
+  /*#c2e9fb;*/
+  --color-2: #e0f7fa;
+  /*#e0f7fa;연한 민트 계열로 살짝 그린 느낌 섞음 */
+  --color-text: #1565c0;
+  --color-bold-text: #0d47a1;
+  --color-button: #4fc3f7;
+  /* 스카이블루 */
+  --color-button-text: white;
+  --color-scroll-button: rgba(129, 212, 212, 0.5);
+  /* 파랑 느낌 살짝 넣음 */
+  --color-scroll-circle: rgba(69, 152, 152, 1.0);
+  --color-scroll-circle-bg: var(--color-scroll-button);
+  --color-arrow: var(--color-scroll-circle);
+  --color-border: #4fc3f7;
+  --color-focus: #e1f5fe;
+  --color-focus-button: #4fc3f7;
+  --color-toggle-button: #0288d1;
+  --color-selected: #b2ebf2;
+  --color-checked: #4fc3f7;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-sidebar);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-sidebar);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #01579b;
+  --color-link: #0288d1;
+  --color-link-hover: #01579b;
+  --color-menu-border: rgba(129, 212, 250, 0.5);
+  --color-scroll-line: #4fc3f7;
+  --color-sidebar: #eaf8fe;
+  --color-sidebar-border: #b3e5fc;
+}
+
+:root.theme-green {
+  --color-background: white;
+  --color-1: #d0f4de;
+  /* 연한 민트 계열 섞음 */
+  --color-2: #e6f9e5;
+  --color-text: #2e7d32;
+  --color-bold-text: #1b5e20;
+  --color-button: #03c75a;
+  /* 기존보다 밝고 부드럽게 */
+  --color-button-text: white;
+  --color-scroll-button: rgba(77, 182, 172, 0.3);
+  /* 청록 계열 */
+  --color-scroll-circle: rgba(17, 122, 92, 0.9);
+  --color-scroll-circle-bg: var(--color-scroll-button);
+  --color-arrow: var(--color-scroll-circle);
+  --color-border: #03c75a;
+  --color-focus: #e8f5e9;
+  --color-focus-button: #66bb6a;
+  --color-toggle-button: #388e3c;
+  --color-selected: #c8e6c9;
+  --color-checked: #66bb6a;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-sidebar);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-sidebar);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #1b5e20;
+  --color-link: #2e7d32;
+  --color-link-hover: #1b5e20;
+  --color-menu-border: rgba(165, 214, 167, 0.5);
+  --color-scroll-line: #81c784;
+  --color-sidebar: #ecfef4;
+  --color-sidebar-border: #c8e6c9;
+}
+
+:root.theme-gray {
+  --color-background: white;
+  --color-1: #e0e0e0;
+  --color-2: #f0f0f0;
+  --color-text: #333;
+  --color-bold-text: #000;
+  --color-button: #888;
+  --color-button-text: white;
+  --color-scroll-button: rgba(100, 181, 246, 0.3);
+  --color-scroll-circle: rgba(40, 121, 186, 0.9);
+  --color-scroll-circle-bg: var(--color-scroll-button);
+  --color-arrow: var(--color-scroll-circle);
+  --color-border: #999;
+  --color-focus: #ddd;
+  --color-focus-button: #999;
+  --color-toggle-button: #666;
+  --color-selected: #bbb;
+  --color-checked: #666;
+  --color-tier-s: magenta;
+  --color-tier-a: blue;
+  --color-tier-b: red;
+  --color-tier-c: #B8860B;
+  --color-tier-d: green;
+  --color-tier-f: gray;
+  --color-tier-null: gray;
+  --color-table-header: var(--color-2);
+  --color-table-hover: var(--color-2);
+  --color-tooltip: var(--color-sidebar);
+  --color-tooltip-border: var(--color-border);
+  --color-tooltip-tail: var(--color-sidebar);
+  --color-tooltip-tail-border: var(--color-border);
+  --color-header: #111;
+  --color-link: #333;
+  --color-link-hover: #000;
+  --color-menu-border: #ccc;
+  --color-scroll-line: #888;
+  --color-sidebar: #efefef;
+  --color-sidebar-border: #ccc;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: var(--navbar-height) +10px 0 0;
+}
+
+h1 {
+  font-size: 2em;
+  /* 약 32px (보통 브라우저 기본) */
+  font-weight: bold;
+  margin: 0.67em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+h2 {
+  font-size: 1.5em;
+  /* 약 24px */
+  font-weight: bold;
+  margin: 0.75em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+h3 {
+  font-size: 1.17em;
+  /* 약 18.72px */
+  font-weight: bold;
+  margin: 0.83em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+h4 {
+  font-size: 1em;
+  /* 16px */
+  font-weight: bold;
+  margin: 1.12em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+h5 {
+  font-size: 0.83em;
+  /* 약 13.28px */
+  font-weight: bold;
+  margin: 1.5em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+h6 {
+  font-size: 0.67em;
+  /* 약 10.72px */
+  font-weight: bold;
+  margin: 1.67em 0;
+  color: var(--color-header);
+  scroll-margin-top:70px;
+  border-bottom: 2px solid #ccc;
+  white-space: nowrap;
+}
+
+li,
+  input,
+  select,
+  button,
+  textarea
+   {
+  white-space: nowrap;
+  width: 80px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+li,
+  button {
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+}
+
+select {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+label{
+  text-align:center;
+}
+
+span.border{
+  height: 36px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+li {
+  cursor: pointer;
+  list-style: none;
+}
+
+.modal-content {
+  width: 100%;
+  height: 100%;
+  color: var(--color-text);
+  padding: 2rem;
+  gap: 0rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.modal-inner {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-direction: row-reverse;
+  /* ✅ 순서 반전 */
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  padding: 8px;
+  text-align: left;
+  background-color:var(--color-background);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.modal-inner select {
+  position: static;
+  width: 26px;
+  appearance: none;
+  -webkit-appearance: none;
+  /* Safari */
+  -moz-appearance: none;
+  /* Firefox */
+  padding-top: 0;
+  line-height: 2.0;
+  height: 30px;
+  display: inline-block;
+  vertical-align: middle;
+  margin:0;
+  top:auto;
+  /* .modal top이 덮어씌워짐*/
+  left:auto;
+}
+
+.\!modal {
+  position: fixed !important;
+  top: var(--navbar-height) !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: calc(100vh - var(--navbar-height)) !important;
+  z-index: var(--z-index-modal) !important;
+  background-color:var(--color-1) !important;
+}
+
+.modal {
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  width: 100%;
+  height: calc(100vh - var(--navbar-height));
+  z-index: var(--z-index-modal);
+  background-color:var(--color-1);
+}
+
+.checkbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width:100%;
+  overflow: hidden;
+}
+
+.checkbox label{
+  width : 200px;
+}
+
+table {
+  width: 100%;
+  border: 2px solid var(--color-border);
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  background-color:var(--color-background);
+}
+
+th, td {
+  position: relative;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  white-space: nowrap;
+  background-color: var(--color-2);
+}
+
+tbody tr:hover td, tr:hover td span {
+  background-color: var(--color-2);
+}
+
+input[type="checkbox"]{
+  -moz-appearance: none;
+       appearance: none;
+  /* 브라우저 기본 스타일 제거 */
+  -webkit-appearance: none;
+  /* Safari용 */
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  /* ✅ 분홍색 테두리 */
+  border-radius: 4px;
+  background-color: var(--color-background);
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  margin: 0 6px 0 0;
+}
+
+input[type="checkbox"]:checked,
+  input[type="radio"]:checked
+  {
+  background-color: var(--color-checked);
+}
+
+label input[type="checkbox"]:checked + span,
+  label input[type="radio"]:checked + span
+  {
+  color: var(--color-bold-text);
+}
+
+.modal-inner span {
+  flex: 1;
+  /* 남은 공간 차지 */
+  text-align: center;
+  /* 가운데 정렬 */
+}
+
+input:focus,textarea:focus {
+  outline: none;
+  border: 2px solid var(--color-border);
+  background-color: var(--color-focus);
+}
+
+textarea{
+  width: 200px;
+  height: 300px;
+}
+
+button,
+  [type='button'],
+  [type='submit'],
+  [type='reset'] {
+  background-color: var(--color-button);
+  color: var(--color-button-text);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  line-height: 1.2;
+}
+
+button:hover {
+  background-color: var(--color-focus-button);
+}
+
+button.execute {
+  background-color: var(--color-toggle-button);
+}
+
+button.dropdown {
+  color: var(--color-button);
+  width: 100%;
+  height:40px;
+  text-align: left;
+  background-color:var(--color-background);
+  box-shadow: none;
+  font-size: 1.3rem;
+  font-weight: bold;
+  display: flex;
+  line-height:1.1;
+}
+
+button.dropdown.big {
+  padding: 14px;
+  line-height:0.6;
+}
+
+button.dropdown:hover{
+  background-color: var(--color-table-hover);
+}
+
+ul {
+  display: grid;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* 간격 */
+}
+
+li{
+  width : 160px;
+  background-color: var(--color-background);
+  text-align: center;
+  padding : 0.4rem;
+  margin-bottom: 0;
+}
+
+li:hover {
+  background-color: var(--color-focus);
+}
+
+li.selected {
+  background-color: var(--color-selected);
+  font-weight: bold;
+}
+
+li.detail{
+  width:auto;
+}
+
+span {
+  position : relative;
+  scroll-margin-top:70px;
+  background-color: inherit;
+  width: auto;
+  height: auto;
+}
+
+p {
+  display: block;
+  background-color: inherit;
+  padding: 8px 12px;
+  border-radius: 12px;
+  line-height: 1.6;
+  word-break: break-word;
+  text-align:left;
+  margin: 0 auto;
+}
+
+p.editing {
+  border: 2px solid var(--color-border);
+}
+
+a {
+  text-decoration: none;
+  /* 밑줄 제거 */
+  color: var(--color-link);
+  /* 분홍색 (HotPink) */
+  font-weight: bold;
+  /* 선택 사항: 강조 */
+}
+
+.note{
+  font-size: 0.7em;
+  /* 작게 */
+  vertical-align: super;
+  /* 위첨자 위치로 */
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  /* 더 진한 분홍 (DeepPink) */
+  text-decoration: underline;
+  /* 마우스 오버 시 밑줄 다시 표시하고 싶다면 */
+}
+
+a.index {
+  display: flex;
+  /* ✅ 핵심 */
+  align-items: center;
+  /* 세로 가운데 */
+  height: 40px;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: none;
+  gap: 4px;
+}
+
+a.logo {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 8px;
+}
+
+a.logo:hover{
+  background-color: var(--color-table-hover);
+}
+
+/* 툴팁 박스 */
+
+.tooltip-box {
+  display: inline-block;
+  min-height: 40px;
+  max-width: 800px;
+  /* 최대 너비 제한 */
+  max-height: 400px;
+  /*  최대 높이 제한 */
+  position: absolute;
+  top: 100%;
+  /* 아래로 붙임 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-tooltip);
+  border: 1px solid var(--color-tooltip-border);
+  border-radius: 4px;
+  z-index: var(--z-index-tooltip);
+}
+
+.tooltip-box.bg{
+  background-color: var(--color-background);
+}
+
+.tooltip-body{
+  display: inline-block;
+  max-height: 400px;
+  position: relative;
+  overflow: auto;
+  padding: 6px;
+  z-index: var(--z-index-tooltip-body);
+}
+
+.tooltip-tail {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: var(--z-index-tooltip-tail);
+}
+
+.tooltip-tail-border {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: var(--z-index-tooltip-tail-border);
+}
+
+.tooltip-box[data-popper-placement="top"].stop {
+  top: -50%;
+  left: 50%;
+  transform: translateY(-100%) translateX(-50%);
+}
+
+.tooltip-box[data-popper-placement="top"] .tooltip-tail {
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 11px 10px 0 10px;
+  border-style: solid;
+  border-color: var(--color-tooltip-tail) transparent transparent transparent;
+}
+
+.tooltip-box.stop[data-popper-placement="top"] .tooltip-tail{
+  bottom: -10.5px;
+  left: 50%;
+}
+
+.tooltip-box[data-popper-placement="top"] .tooltip-tail-border {
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 11px 11px 0 11px;
+  border-style: solid;
+  border-color: var(--color-tooltip-border) transparent transparent transparent;
+}
+
+.tooltip-box.stop[data-popper-placement="top"] .tooltip-tail-border{
+  bottom: -11.5px;
+  left: 50%;
+}
+
+.tooltip-box[data-popper-placement="bottom"].stop {
+  top: 100%;
+  left: 50%;
+  transform: translateY(0) translateX(-50%);
+}
+
+.tooltip-box[data-popper-placement="bottom"] .tooltip-tail {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 10px 11px 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--color-tooltip-tail) transparent;
+}
+
+.tooltip-box[data-popper-placement="bottom"].stop .tooltip-tail {
+  top: -9.5px;
+  left: 50%;
+}
+
+.tooltip-box[data-popper-placement="bottom"] .tooltip-tail-border {
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 11px 11px 11px;
+  border-style: solid;
+  border-color: transparent transparent var(--color-tooltip-border) transparent;
+}
+
+.tooltip-box[data-popper-placement="bottom"].stop .tooltip-tail-border {
+  top: -10.5px;
+  left: 50%;
+}
+
+.tooltip-box[data-popper-placement="left"].stop {
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%) translateX(-100%);
+}
+
+.tooltip-box[data-popper-placement="left"].stop.notail {
+  top: 0;
+  left: 0;
+  transform: translateY(0%) translateX(-100%);
+}
+
+.tooltip-box[data-popper-placement="left"] .tooltip-tail {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 0 10px 11px;
+  border-style: solid;
+  border-color: transparent transparent transparent var(--color-tooltip-tail);
+}
+
+.tooltip-box[data-popper-placement="left"].stop .tooltip-tail {
+  left: calc(100% - 1px);
+  top: 50%;
+}
+
+.tooltip-box[data-popper-placement="left"] .tooltip-tail-border {
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 11px 0 11px 11px;
+  border-style: solid;
+  border-color: transparent transparent transparent var(--color-tooltip-border);
+}
+
+.tooltip-box[data-popper-placement="left"].stop .tooltip-tail-border {
+  left: 100%;
+  top: 50%;
+}
+
+.tooltip-box[data-popper-placement="right"].stop {
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%) translateX(0);
+}
+
+.tooltip-box[data-popper-placement="right"] .tooltip-tail {
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 11px 10px 0;
+  border-style: solid;
+  border-color: transparent var(--color-tooltip-tail) transparent transparent;
+}
+
+.tooltip-box.stop[data-popper-placement="right"] .tooltip-tail {
+  left: -9.5px;
+  top: 50%;
+}
+
+.tooltip-box[data-popper-placement="right"] .tooltip-tail-border {
+  left: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 11px 11px 11px 0;
+  border-style: solid;
+  border-color: transparent var(--color-tooltip-border) transparent transparent;
+}
+
+.tooltip-box.stop[data-popper-placement="right"] .tooltip-tail-border {
+  left: -10.5px;
+  top: 50%;
+}
+
+.tooltip-box[data-popper-placement="top"] .tooltip-tail-wrapper {
+  bottom: 0px;
+  /* 툴팁 아래에 꼬리 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-box[data-popper-placement="bottom"] .tooltip-tail-wrapper {
+  top: -10px;
+  /* 툴팁 위에 꼬리 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-box[data-popper-placement="left"] .tooltip-tail-wrapper {
+  right: -10px;
+  /* 툴팁 오른쪽에 꼬리 */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-box[data-popper-placement="right"] .tooltip-tail-wrapper {
+  left: -10px;
+  /* 툴팁 왼쪽에 꼬리 */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-box[data-popper-placement="top"] .tooltip-tail.bg{
+  border-color: transparent var(--color-background) transparent transparent;
+}
+
+.tooltip-box[data-popper-placement="bottom"] .tooltip-tail.bg{
+  border-color: transparent transparent var(--color-background) transparent;
+}
+
+.tooltip-box[data-popper-placement="left"] .tooltip-tail.bg{
+  border-color: transparent transparent transparent var(--color-background);
+}
+
+.tooltip-box[data-popper-placement="right"] .tooltip-tail.bg{
+  border-color: transparent var(--color-background) transparent transparent;
+}
+
+/* 마우스 올릴 때 둘 다 보이게 */
+
+.\!tooltip:hover::after,
+  .\!tooltip:hover::before {
+  display: block !important;
+}
+
+.tooltip:hover::after,
+  .tooltip:hover::before {
+  display: block;
+}
+
+.\!tooltip:hover::after,
+  .\!tooltip:hover::before {
+  display: block !important;
+}
+
+nav {
+  display: flex;
+  position: fixed;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+nav.navbar {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--navbar-height);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.5rem;
+  z-index: var(--z-index-navbar);
+}
+
+aside {
+  position: sticky;
+  top: var(--navbar-height);
+  align-self: flex-start;
+  height: calc(100vh - var(--navbar-height));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: -moz-fit-content;
+  width: fit-content;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+  background-color: var(--color-sidebar);
+  border-right: 1px solid var(--color-sidebar-border);
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 8px;
+}
+
+aside.closed {
+  min-width: var(--sidebar-min-width);
+  width: var(--sidebar-min-width);
+  overflow: hidden;
+}
+
+aside.closed *:not(#sidebar-toggle):not(#sidebar-toggle *) {
+  display: none;
+}
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.copy-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  fill: var(--color-arrow);
+  cursor: pointer;
+}
+
+.copy-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+  transition: all 0.15s ease-in-out;
+}
+
+.text{
+  background-color: var(--color-background);
+  width:100%;
+  height: auto;
+  border-radius:12px;
+  margin: 0 auto;
+  padding: 3rem;
+  box-sizing: border-box;
+}
+
+.S{
+  color: var(--color-tier-s);
+  font-weight: bold;
+}
+
+.A {
+  color : var(--color-tier-a);
+}
+
+.B{
+  color :var(--color-tier-b);
+}
+
+.C{
+  color :var(--color-tier-c);
+}
+
+.D{
+  color :var(--color-tier-d);
+}
+
+.F, .null {
+  color :var(--color-tier-f);
+}
+
+.scroll {
+  position: fixed;
+  /* 화면 우측 하단 고정 */
+  bottom: 2rem;
+  right: 2%;
+  z-index: var(--z-index-scroll);
+  display: flex;
+  flex-direction: column;
+  /* ✅ 수직 정렬 */
+  gap: 0.5rem;
+  /* 버튼 사이 간격 */
+}
+
+.scroll button{
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-scroll-button);
+  /* 연보라, 50% 투명도 */
+}
+
+svg {
+  width: var(--svg-width);
+  height: var(--svg-height);
+}
+
+.scroll button svg {
+  vertical-align: middle;
+  stroke: var(--color-1);
+}
+
+.scroll button .icon-wrapper {
+  position: relative;
+  /* ✅ 내부 SVG용 기준 */
+}
+
+.scroll-progress {
+  transform: rotate(-90deg);
+  /* 시작점을 위쪽으로 회전 */
+  transform-origin: center;
+}
+
+.scroll-circle {
+  stroke-dasharray: 283;
+  /* 약 2 * π * r (r=45) */
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 0.2s linear;
+  stroke: var(--color-scroll-circle);
+}
+
+.scroll-circle-bg {
+  stroke: var(--color-scroll-circle-bg);
+}
+
+.scroll-progress path {
+  stroke: var(--color-arrow);
+}
+
+svg.arrow {
+  stroke: var(--color-arrow);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: inline-block;
+  vertical-align: middle;
+  width: var(--svg-width);
+  height: var(--svg-height);
+  cursor: pointer;
+}
+
+.search-dropdown {
+  padding: 0.5rem 0.75rem;
+  /* py-2 px-3 */
+  cursor: pointer;
+  z-index: var(--z-index-navbar);
+  position: relative;
+  /* z-index 적용되도록 */
+}
+
+.search-dropdown:hover {
+  background-color: #f3f4f6;
+  /* gray-100 */
+}
+
+div.line{
+  border-top: 1px solid #777;
+  margin: 1.5em 0;
+  padding: 0.5em 0;
+}
+
+img{
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alarm-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: var(--z-index-alarm);
+  display: flex;
+  flex-direction: column;
+  justify-items: start;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.alarm-toast {
+  background-color: var(--color-tooltip);
+  color: var(--color-text);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease;
+  pointer-events: auto;
+}
+
+.alarm-toast.hide {
+  opacity: 0;
+}
+
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+}
+
+.\!container {
+  width: 100% !important;
+}
+
+.container {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .\!container {
+    max-width: 640px !important;
+  }
+
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .\!container {
+    max-width: 768px !important;
+  }
+
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .\!container {
+    max-width: 1024px !important;
+  }
+
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .\!container {
+    max-width: 1280px !important;
+  }
+
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .\!container {
+    max-width: 1536px !important;
+  }
+
+  .container {
+    max-width: 1536px;
+  }
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.-right-2 {
+  right: -0.5rem;
+}
+
+.-right-3 {
+  right: -0.75rem;
+}
+
+.-top-1 {
+  top: -0.25rem;
+}
+
+.left-16 {
+  left: 4rem;
+}
+
+.top-1 {
+  top: 0.25rem;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+.m-0 {
+  margin: 0px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.mr-0 {
+  margin-right: 0px;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.table {
+  display: table;
+}
+
+.grid {
+  display: grid;
+}
+
+.\!hidden {
+  display: none !important;
+}
+
+.hidden {
+  display: none;
+}
+
+.size-4 {
+  width: 1rem;
+  height: 1rem;
+}
+
+.h-20 {
+  height: 5rem;
+}
+
+.h-fit {
+  height: -moz-fit-content;
+  height: fit-content;
+}
+
+.w-1\/3 {
+  width: 33.333333%;
+}
+
+.w-12 {
+  width: 3rem;
+}
+
+.w-16 {
+  width: 4rem;
+}
+
+.w-20 {
+  width: 5rem;
+}
+
+.w-24 {
+  width: 6rem;
+}
+
+.w-28 {
+  width: 7rem;
+}
+
+.w-32 {
+  width: 8rem;
+}
+
+.w-40 {
+  width: 10rem;
+}
+
+.w-48 {
+  width: 12rem;
+}
+
+.w-64 {
+  width: 16rem;
+}
+
+.w-72 {
+  width: 18rem;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.w-96 {
+  width: 24rem;
+}
+
+.w-\[90\%\] {
+  width: 90%;
+}
+
+.w-\[95\%\] {
+  width: 95%;
+}
+
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.rotate-180 {
+  --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.cursor-default {
+  cursor: default;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-5 {
+  gap: 1.25rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.space-y-1 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-visible {
+  overflow: visible;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+
+.\!whitespace-nowrap {
+  white-space: nowrap !important;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.break-normal {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.rounded-b-none {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.rounded-l-none {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.rounded-r-none {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.rounded-t-none {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-b {
+  border-bottom-width: 1px;
+}
+
+.border-gray-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
+}
+
+.border-transparent {
+  border-color: transparent;
+}
+
+.bg-gray-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.fill-white {
+  fill: #fff;
+}
+
+.object-cover {
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.p-0 {
+  padding: 0px;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-2\.5 {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
+.pr-12 {
+  padding-right: 3rem;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
+
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity));
+}
+
+.text-gray-500 {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity));
+}
+
+.text-green-600 {
+  --tw-text-opacity: 1;
+  color: rgb(22 163 74 / var(--tw-text-opacity));
+}
+
+.text-pink-600 {
+  --tw-text-opacity: 1;
+  color: rgb(219 39 119 / var(--tw-text-opacity));
+}
+
+.text-purple-500 {
+  --tw-text-opacity: 1;
+  color: rgb(168 85 247 / var(--tw-text-opacity));
+}
+
+.text-red-500 {
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity));
+}
+
+.shadow-none {
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.\[grid-template-columns\:repeat\(2\2c auto\)\] {
+  grid-template-columns: repeat(2,auto);
+}
+
+.hover\:bg-blue-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(219 234 254 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-gray-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-green-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 252 231 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-pink-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(252 231 243 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-purple-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 232 255 / var(--tw-bg-opacity));
+}
+
+.hover\:no-underline:hover {
+  text-decoration-line: none;
+}
+
+.focus\:shadow-sm:focus {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus\:ring-0:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+@media (min-width: 1024px) {
+  .lg\:px-5 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .lg\:py-\[15px\] {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .lg\:pr-20 {
+    padding-right: 5rem;
+  }
+}
+
+
