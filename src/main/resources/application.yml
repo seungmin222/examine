@@ -16,4 +16,4 @@ spring:
 jwt:
   access-expiration: 15m
   refresh-expiration: 1h
-  secret: c2Rmc2Rhc2RzZnNmc2Rhc2Rhc2RzYWRhc2Rkc2FkYXNmYXNmZGZhZmRhZmZk
+  secret: ${JWT_SECRET}

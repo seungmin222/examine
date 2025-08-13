@@ -20,6 +20,9 @@ import {getTotalSuggests} from "@/functions/api/search.js";
 
 export default function Navbar() {
 
+    const redirect = typeof window !== 'undefined'
+        ? encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)
+        : '';
     const [user, setUser] = useState(null);
     const [page, setPage] = useState(null);
     const [iherbCoupons, setIherbCoupons] = useState([]);
@@ -390,7 +393,7 @@ export default function Navbar() {
                     trigger={
                         <a
                             id="user"
-                            href={user ? undefined : "/login"}
+                            href={user ? undefined : `/login?redirect=${redirect}`}
                             className="hover:no-underline"
                         >
                             <button id="user-dropdown-toggle" className="dropdown relative">
